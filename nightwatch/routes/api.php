@@ -19,4 +19,6 @@ Route::middleware('guardian')
         Route::post('commands', [IngestController::class, 'commands'])->name('ingest.commands');
         Route::post('scheduled-tasks', [IngestController::class, 'scheduledTasks'])->name('ingest.scheduledTasks');
         Route::post('health', [IngestController::class, 'health'])->name('ingest.health');
+        Route::post('composer-audit', [IngestController::class, 'composerAudit'])->name('ingest.composerAudit');
+        Route::post('npm-audit', [IngestController::class, 'npmAudit'])->name('ingest.npmAudit');
     });

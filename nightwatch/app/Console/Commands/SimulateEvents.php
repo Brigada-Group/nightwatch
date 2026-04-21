@@ -24,10 +24,12 @@ class SimulateEvents extends Command
         'outgoing-http',
         'command',
         'scheduled-task',
+        'composer-audit',
+        'npm-audit',
     ];
 
     protected $signature = 'nightwatch:simulate
-                            {--type=all : Event type (all, exception, request, log, job, heartbeat, query, health, cache, mail, notification, outgoing-http, command, scheduled-task)}
+                            {--type=all : Event type (all, exception, request, log, job, heartbeat, query, health, cache, mail, notification, outgoing-http, command, scheduled-task, composer-audit, npm-audit)}
                             {--count=3 : Number of simulation rounds}
                             {--interval=1 : Seconds between rounds}';
 
@@ -50,7 +52,7 @@ class SimulateEvents extends Command
         $this->info("Using project: {$project->name} (ID: {$project->id})");
         $this->info("Running {$count} round(s); type={$type}; {$interval}s between rounds.");
         if ($type === 'all') {
-            $this->comment('Each "all" round ingests heartbeats, HTTP traffic, exceptions, queries, jobs, logs, outgoing calls, mail, notifications, cache stats, artisan commands, scheduled tasks, and health probes.');
+            $this->comment('Each "all" round ingests heartbeats, HTTP traffic, exceptions, queries, jobs, logs, outgoing calls, mail, notifications, cache stats, artisan commands, scheduled tasks, health probes, and dependency audits.');
         }
         $this->newLine();
 
@@ -395,6 +397,11 @@ class SimulateEvents extends Command
             'sent_at' => $this->randomSentAt(180),
             'checks' => $checks,
         ]);
+
+        for ($audit = 0; $audit < random_int(1, 3); $audit++) {
+            $this->recordComposerAudit($ingest, $project, $env, $this->pickServer(), $this->randomSentAt(120), $round, $audit);
+            $this->recordNpmAudit($ingest, $project, $env, $this->pickServer(), $this->randomSentAt(120), $round, $audit);
+        }
     }
 
     private function simulateTypedBurst(IngestService $ingest, Project $project, string $type, int $round): void
@@ -550,7 +557,178 @@ class SimulateEvents extends Command
                         'metadata' => [],
                     ])->all(),
                 ]),
+                'composer-audit' => $this->recordComposerAudit(
+                    $ingest,
+                    $project,
+                    $env,
+                    $this->pickServer(),
+                    $now,
+                    $round,
+                    $n,
+                ),
+                'npm-audit' => $this->recordNpmAudit(
+                    $ingest,
+                    $project,
+                    $env,
+                    $this->pickServer(),
+                    $now,
+                    $round,
+                    $n,
+                ),
             };
         }
+    }
+
+    private function recordComposerAudit(
+        IngestService $ingest,
+        Project $project,
+        string $environment,
+        string $server,
+        string $sentAt,
+        int $round,
+        int $iteration,
+    ): void {
+        $advisoryTemplates = [
+            [
+                'package' => 'laravel/framework',
+                'severity' => 'high',
+                'title' => 'Potential XSS in debug helper path rendering',
+                'cve' => 'CVE-2026-1024',
+                'affected_versions' => '<13.4.2',
+                'recommendation' => 'Upgrade to 13.4.2 or newer',
+            ],
+            [
+                'package' => 'guzzlehttp/guzzle',
+                'severity' => 'moderate',
+                'title' => 'Header normalization bypass',
+                'cve' => 'CVE-2026-2041',
+                'affected_versions' => '<7.10.0',
+                'recommendation' => 'Upgrade to 7.10.0 or newer',
+            ],
+            [
+                'package' => 'symfony/http-foundation',
+                'severity' => 'low',
+                'title' => 'Cookie parsing edge case',
+                'cve' => null,
+                'affected_versions' => '<8.0.8',
+                'recommendation' => 'Upgrade to 8.0.8 or newer',
+            ],
+        ];
+
+        $advisories = collect($advisoryTemplates)
+            ->shuffle()
+            ->take(random_int(0, 2))
+            ->values()
+            ->map(fn (array $entry) => [
+                ...$entry,
+                'source' => 'composer-audit',
+                'reported_at' => $sentAt,
+                'id' => Str::uuid()->toString(),
+            ])
+            ->all();
+
+        $abandonedPool = [
+            ['package' => 'swiftmailer/swiftmailer', 'replacement' => 'symfony/mailer'],
+            ['package' => 'fzaninotto/faker', 'replacement' => 'fakerphp/faker'],
+            ['package' => 'laravelcollective/html', 'replacement' => null],
+        ];
+
+        $abandoned = collect($abandonedPool)
+            ->shuffle()
+            ->take(random_int(0, 2))
+            ->values()
+            ->map(fn (array $entry) => [
+                ...$entry,
+                'detected_at' => $sentAt,
+                'note' => "Simulated composer audit r{$round}#{$iteration}",
+            ])
+            ->all();
+
+        $ingest->recordComposerAudit($project, [
+            'environment' => $environment,
+            'server' => $server,
+            'advisories_count' => count($advisories),
+            'abandoned_count' => count($abandoned),
+            'advisories' => $advisories,
+            'abandoned' => $abandoned,
+            'sent_at' => $sentAt,
+        ]);
+    }
+
+    private function recordNpmAudit(
+        IngestService $ingest,
+        Project $project,
+        string $environment,
+        string $server,
+        string $sentAt,
+        int $round,
+        int $iteration,
+    ): void {
+        $info = random_int(0, 2);
+        $low = random_int(0, 3);
+        $moderate = random_int(0, 2);
+        $high = random_int(0, 2);
+        $critical = random_int(0, 1);
+        $total = $info + $low + $moderate + $high + $critical;
+
+        $vulnerabilityTemplates = [
+            [
+                'package' => 'vite',
+                'severity' => 'moderate',
+                'title' => 'Dev server directory traversal',
+                'cve' => 'CVE-2026-3100',
+                'range' => '<7.1.4',
+                'fix' => '>=7.1.4',
+            ],
+            [
+                'package' => 'axios',
+                'severity' => 'high',
+                'title' => 'SSRF via malformed URL parsing',
+                'cve' => 'CVE-2025-4818',
+                'range' => '<1.11.0',
+                'fix' => '>=1.11.0',
+            ],
+            [
+                'package' => 'esbuild',
+                'severity' => 'low',
+                'title' => 'Source map information leak',
+                'cve' => null,
+                'range' => '<0.25.8',
+                'fix' => '>=0.25.8',
+            ],
+        ];
+
+        $vulnerabilities = collect($vulnerabilityTemplates)
+            ->shuffle()
+            ->take(max(1, min($total, 3)))
+            ->values()
+            ->map(fn (array $entry) => [
+                ...$entry,
+                'source' => 'npm-audit',
+                'reported_at' => $sentAt,
+                'id' => Str::uuid()->toString(),
+            ])
+            ->all();
+
+        $ingest->recordNpmAudit($project, [
+            'environment' => $environment,
+            'server' => $server,
+            'total_vulnerabilities' => $total,
+            'info_count' => $info,
+            'low_count' => $low,
+            'moderate_count' => $moderate,
+            'high_count' => $high,
+            'critical_count' => $critical,
+            'vulnerabilities' => $vulnerabilities,
+            'audit_metadata' => [
+                'simulated' => true,
+                'package_manager' => 'npm',
+                'dependency_count' => random_int(120, 320),
+                'dev_dependency_count' => random_int(30, 120),
+                'round' => $round,
+                'iteration' => $iteration,
+            ],
+            'sent_at' => $sentAt,
+        ]);
     }
 }

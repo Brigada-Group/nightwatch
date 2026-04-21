@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CacheRequest;
 use App\Http\Requests\CommandRequest;
+use App\Http\Requests\ComposerAuditRequest;
 use App\Http\Requests\ExceptionRequest;
 use App\Http\Requests\HeartbeatRequest;
 use App\Http\Requests\HealthCheckRequest;
@@ -12,6 +13,7 @@ use App\Http\Requests\JobRequest;
 use App\Http\Requests\LogRequest;
 use App\Http\Requests\MailRequest;
 use App\Http\Requests\NotificationRequest;
+use App\Http\Requests\NpmAuditRequest;
 use App\Http\Requests\OutgoingHttpRequest;
 use App\Http\Requests\QueryRequest;
 use App\Http\Requests\ScheduledTaskRequest;
@@ -147,6 +149,26 @@ class IngestController extends Controller
     public function health(HealthCheckRequest $request): JsonResponse
     {
         $this->ingestService->recordHealthChecks(
+            $request->input('_project'),
+            $request->validated(),
+        );
+
+        return response()->json(['status' => 'ok']);
+    }
+
+    public function composerAudit(ComposerAuditRequest $request): JsonResponse
+    {
+        $this->ingestService->recordComposerAudit(
+            $request->input('_project'),
+            $request->validated(),
+        );
+
+        return response()->json(['status' => 'ok']);
+    }
+
+    public function npmAudit(NpmAuditRequest $request): JsonResponse
+    {
+        $this->ingestService->recordNpmAudit(
             $request->input('_project'),
             $request->validated(),
         );

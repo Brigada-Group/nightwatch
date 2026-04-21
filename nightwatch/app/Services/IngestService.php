@@ -18,12 +18,14 @@ use App\Events\ScheduledTaskReceived;
 use App\Jobs\RecalculateProjectStatus;
 use App\Models\HubCache;
 use App\Models\HubCommand;
+use App\Models\HubComposerAudit;
 use App\Models\HubException;
 use App\Models\HubHealthCheck;
 use App\Models\HubJob;
 use App\Models\HubLog;
 use App\Models\HubMail;
 use App\Models\HubNotification;
+use App\Models\HubNpmAudit;
 use App\Models\HubOutgoingHttp;
 use App\Models\HubQuery;
 use App\Models\HubRequest;
@@ -411,6 +413,38 @@ class IngestService
         ]));
 
         $this->recalculateStatus($project);
+    }
+
+    public function recordComposerAudit(Project $project, array $data): void
+    {
+        HubComposerAudit::create([
+            'project_id' => $project->id,
+            'environment' => $data['environment'],
+            'server' => $data['server'],
+            'advisories_count' => $data['advisories_count'] ?? count($data['advisories'] ?? []),
+            'abandoned_count' => $data['abandoned_count'] ?? count($data['abandoned'] ?? []),
+            'advisories' => $data['advisories'] ?? null,
+            'abandoned' => $data['abandoned'] ?? null,
+            'sent_at' => $data['sent_at'],
+        ]);
+    }
+
+    public function recordNpmAudit(Project $project, array $data): void
+    {
+        HubNpmAudit::create([
+            'project_id' => $project->id,
+            'environment' => $data['environment'],
+            'server' => $data['server'],
+            'total_vulnerabilities' => $data['total_vulnerabilities'] ?? 0,
+            'info_count' => $data['info_count'] ?? 0,
+            'low_count' => $data['low_count'] ?? 0,
+            'moderate_count' => $data['moderate_count'] ?? 0,
+            'high_count' => $data['high_count'] ?? 0,
+            'critical_count' => $data['critical_count'] ?? 0,
+            'vulnerabilities' => $data['vulnerabilities'] ?? null,
+            'audit_metadata' => $data['audit_metadata'] ?? null,
+            'sent_at' => $data['sent_at'],
+        ]);
     }
 
     private function recalculateStatus(Project $project): void

@@ -11,6 +11,18 @@ export type { HubCache } from './cache';
 export type { HubCommand } from './command';
 export type { HubScheduledTask, ScheduledTaskStatus } from './scheduled-task';
 export type { HubHealthCheck, HealthCheckStatus } from './health-check';
+export type {
+    HubComposerAudit,
+    ComposerAdvisory,
+    ComposerAdvisorySeverity,
+    ComposerAbandonedPackage,
+} from './composer-audit';
+export type {
+    HubNpmAudit,
+    NpmVulnerability,
+    NpmVulnerabilitySeverity,
+    NpmAuditMetadata,
+} from './npm-audit';
 
 export type PaginatedResponse<T> = {
     data: T[];

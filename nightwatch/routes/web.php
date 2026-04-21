@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardOverviewController;
 use App\Http\Controllers\ExceptionsController;
+use App\Http\Controllers\HubAuditsController;
 use App\Http\Controllers\HubCacheController;
 use App\Http\Controllers\HubCommandsController;
 use App\Http\Controllers\HubHealthChecksController;
@@ -61,6 +62,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('commands', [HubCommandsController::class, 'index'])->name('commands.index');
     Route::get('scheduled-tasks', [HubScheduledTasksController::class, 'index'])->name('scheduled-tasks.index');
     Route::get('health-checks', [HubHealthChecksController::class, 'index'])->name('health-checks.index');
+    Route::get('audits', [HubAuditsController::class, 'index'])->name('audits.index');
+    Route::get('audits/{type}/{audit}', [HubAuditsController::class, 'show'])
+        ->where('type', 'composer|npm')
+        ->where('audit', '[0-9]+')
+        ->name('audits.show');
 });
 
 require __DIR__.'/settings.php';

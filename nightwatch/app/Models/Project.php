@@ -113,4 +113,14 @@ class Project extends Model
     {
         return $this->hasMany(HubHealthCheck::class);
     }
+
+    public function composerAudits(): HasMany
+    {
+        return $this->hasMany(HubComposerAudit::class);
+    }
+
+    public function npmAudits(): HasMany
+    {
+        return $this->hasMany(HubNpmAudit::class);
+    }
 }

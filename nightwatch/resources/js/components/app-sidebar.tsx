@@ -15,6 +15,7 @@ import {
     ScrollText,
     Server,
     Settings,
+    ShieldCheck,
     Terminal,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
@@ -110,6 +111,11 @@ const systemItems: NavItem[] = [
         title: 'Health Checks',
         href: '/health-checks',
         icon: HeartPulse,
+    },
+    {
+        title: 'Audits',
+        href: '/audits',
+        icon: ShieldCheck,
     },
 ];
 
