@@ -1,0 +1,27 @@
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class MailRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    public function rules(): array
+    {
+        return [
+            'environment' => ['required', 'string', 'max:50'],
+            'server' => ['required', 'string', 'max:255'],
+            'mailable' => ['nullable', 'string', 'max:255'],
+            'subject' => ['nullable', 'string', 'max:255'],
+            'to' => ['nullable', 'string', 'max:255'],
+            'status' => ['required', 'string', 'in:sent,failed'],
+            'error_message' => ['nullable', 'string'],
+            'sent_at' => ['required', 'date'],
+        ];
+    }
+}

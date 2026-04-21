@@ -1,0 +1,20 @@
+export type HubException = {
+    id: number;
+    project_id: number;
+    environment: string;
+    server: string;
+    exception_class: string;
+    message: string;
+    file: string | null;
+    line: number | null;
+    url: string | null;
+    status_code: number | null;
+    user: string | null;
+    ip: string | null;
+    headers: string | null;
+    stack_trace: string | null;
+    severity: 'error' | 'warning' | 'info' | 'debug' | 'critical';
+    sent_at: string;
+    created_at: string;
+    updated_at: string;
+};

@@ -1,0 +1,41 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Support\InertiaPaginator;
+use App\Http\Support\ProjectFilterOptions;
+use App\Models\HubCache;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class HubCacheController extends Controller
+{
+    public function index(Request $request): Response
+    {
+        $perPage = (int) min(50, max(5, $request->integer('per_page', 15)));
+
+        $query = HubCache::query()
+            ->with(['project:id,name'])
+            ->orderByDesc('sent_at');
+
+        if ($request->filled('project_id')) {
+            $query->where('project_id', $request->integer('project_id'));
+        }
+
+        if ($request->filled('store')) {
+            $query->where('store', (string) $request->query('store'));
+        }
+
+        $paginator = $query->paginate($perPage)->withQueryString();
+
+        return Inertia::render('cache/index', [
+            'cache' => InertiaPaginator::props($paginator),
+            'filters' => [
+                'project_id' => $request->filled('project_id') ? $request->integer('project_id') : null,
+                'store' => $request->filled('store') ? (string) $request->query('store') : null,
+            ],
+            'projectOptions' => ProjectFilterOptions::all(),
+        ]);
+    }
+}
