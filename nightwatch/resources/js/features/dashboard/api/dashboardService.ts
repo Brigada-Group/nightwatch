@@ -19,6 +19,7 @@ export type ProjectSummary = {
     last_heartbeat_at: string | null;
     exceptions_24h: number;
     requests_24h: number;
+    logs_24h?: number;
 };
 
 export type IncidentFlowPoint = {
@@ -43,7 +44,28 @@ export type DashboardOverview = {
     throughput_chart: ChartBarPoint[];
     bugs_chart: ChartBarPoint[];
     running_checks_chart: ChartBarPoint[];
+    filter_active: boolean;
 };
+
+export type DashboardFilters = {
+    search: string;
+    statuses: string[];
+    environments: string[];
+};
+
+export const EMPTY_FILTERS: DashboardFilters = {
+    search: '',
+    statuses: [],
+    environments: [],
+};
+
+export function filtersAreActive(filters: DashboardFilters): boolean {
+    return (
+        filters.search.trim() !== '' ||
+        filters.statuses.length > 0 ||
+        filters.environments.length > 0
+    );
+}
 
 export function emptyDashboardOverview(): DashboardOverview {
     return {
@@ -65,6 +87,7 @@ export function emptyDashboardOverview(): DashboardOverview {
         running_checks_chart: Array.from({ length: 24 }, () => ({
             value: 0,
         })),
+        filter_active: false,
     };
 }
 
@@ -83,10 +106,25 @@ export function mergeDashboardOverview(
         bugs_chart: partial.bugs_chart ?? base.bugs_chart,
         running_checks_chart:
             partial.running_checks_chart ?? base.running_checks_chart,
+        filter_active: partial.filter_active ?? base.filter_active,
     };
 }
 
-export async function getDashboardOverview(): Promise<DashboardOverview> {
-    const { data } = await api.get<DashboardOverview>('/dashboard');
+export async function getDashboardOverview(
+    filters?: DashboardFilters,
+): Promise<DashboardOverview> {
+    const params: Record<string, string> = {};
+    if (filters) {
+        const trimmed = filters.search.trim();
+        if (trimmed !== '') params.search = trimmed;
+        if (filters.statuses.length > 0) {
+            params.statuses = filters.statuses.join(',');
+        }
+        if (filters.environments.length > 0) {
+            params.environments = filters.environments.join(',');
+        }
+    }
+
+    const { data } = await api.get<DashboardOverview>('/dashboard', { params });
     return data;
 }

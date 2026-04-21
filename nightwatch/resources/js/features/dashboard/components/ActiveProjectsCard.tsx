@@ -22,6 +22,7 @@ type ProjectSummary = {
     last_heartbeat_at: string | null;
     exceptions_24h: number;
     requests_24h: number;
+    logs_24h?: number;
 };
 
 type Props = {
@@ -33,12 +34,50 @@ type Props = {
     activityData?: { value: number }[];
 };
 
-const statusLabel: Record<ProjectStatus, string> = {
-    normal: 'Running',
-    warning: 'Warning',
-    critical: 'Critical',
-    unknown: 'Inactive',
-};
+const MS_24H = 24 * 60 * 60 * 1000;
+
+function projectHasRecentTelemetry(project: ProjectSummary): boolean {
+    if (project.requests_24h > 0 || project.exceptions_24h > 0) {
+        return true;
+    }
+    if ((project.logs_24h ?? 0) > 0) {
+        return true;
+    }
+    if (!project.last_heartbeat_at) {
+        return false;
+    }
+    const t = new Date(project.last_heartbeat_at).getTime();
+
+    return Number.isFinite(t) && Date.now() - t <= MS_24H;
+}
+
+function rowBadgeLabel(project: ProjectSummary): string {
+    if (!projectHasRecentTelemetry(project)) {
+        return 'Inactive';
+    }
+    if (project.status === 'critical') {
+        return 'Critical';
+    }
+    if (project.status === 'warning') {
+        return 'Warning';
+    }
+
+    return 'Running';
+}
+
+function rowStatusDot(project: ProjectSummary): ProjectStatus {
+    if (!projectHasRecentTelemetry(project)) {
+        return 'unknown';
+    }
+    if (project.status === 'critical') {
+        return 'critical';
+    }
+    if (project.status === 'warning') {
+        return 'warning';
+    }
+
+    return 'normal';
+}
 
 export function ActiveProjectsCard({
     projects,
@@ -117,7 +156,7 @@ export function ActiveProjectsCard({
                             >
                                 <div className="flex items-center gap-2.5">
                                     <StatusIndicator
-                                        status={project.status}
+                                        status={rowStatusDot(project)}
                                         showLabel={false}
                                     />
                                     <span className="text-sm font-medium">
@@ -128,7 +167,7 @@ export function ActiveProjectsCard({
                                     variant="secondary"
                                     className="text-[10px] font-medium"
                                 >
-                                    {statusLabel[project.status]}
+                                    {rowBadgeLabel(project)}
                                 </Badge>
                             </div>
                         ))}

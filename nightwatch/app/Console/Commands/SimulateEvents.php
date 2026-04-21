@@ -43,7 +43,7 @@ class SimulateEvents extends Command
             return self::FAILURE;
         }
 
-        $project = $this->ensureProjectExists();
+        $project = $this->resolveTargetProject();
         $count = max(1, (int) $this->option('count'));
         $interval = max(0, (int) $this->option('interval'));
 
@@ -73,26 +73,35 @@ class SimulateEvents extends Command
         return self::SUCCESS;
     }
 
-    private function ensureProjectExists(): Project
+    private function resolveTargetProject(): Project
     {
-        $project = Project::first();
+        $existingCount = Project::count();
 
-        if (! $project) {
-            $project = Project::create([
-                'project_uuid' => Str::uuid()->toString(),
-                'name' => 'Demo App',
-                'api_token' => Str::random(40),
-                'environment' => 'production',
-                'status' => 'normal',
-                'last_heartbeat_at' => now(),
-                'metadata' => [
-                    'php_version' => '8.5.1',
-                    'laravel_version' => '13.5.0',
-                ],
-            ]);
+        if ($existingCount > 0) {
+            $project = Project::query()->inRandomOrder()->first();
+            if ($project !== null) {
+                if ($existingCount > 1) {
+                    $this->comment("Selected at random from {$existingCount} projects.");
+                }
 
-            $this->warn("Created test project: {$project->name}");
+                return $project;
+            }
         }
+
+        $project = Project::create([
+            'project_uuid' => Str::uuid()->toString(),
+            'name' => 'Demo App',
+            'api_token' => Str::random(40),
+            'environment' => 'production',
+            'status' => 'normal',
+            'last_heartbeat_at' => now(),
+            'metadata' => [
+                'php_version' => '8.5.1',
+                'laravel_version' => '13.5.0',
+            ],
+        ]);
+
+        $this->warn("No projects found — created test project: {$project->name}");
 
         return $project;
     }

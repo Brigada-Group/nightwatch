@@ -15,7 +15,9 @@ use App\Http\Controllers\HubRequestsController;
 use App\Http\Controllers\HubScheduledTasksController;
 use App\Http\Controllers\ProjectsController;
 use App\Models\Project;
+use App\Services\DashboardFilters;
 use App\Services\DashboardMetricsService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -35,8 +37,10 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('api/dashboard', DashboardOverviewController::class)->name('api.dashboard');
 
-    Route::get('dashboard', function (DashboardMetricsService $metrics) {
-        return Inertia::render('dashboard', $metrics->overview());
+    Route::get('dashboard', function (Request $request, DashboardMetricsService $metrics) {
+        $filters = DashboardFilters::fromRequest($request);
+
+        return Inertia::render('dashboard', $metrics->overview($filters));
     })->name('dashboard');
 
     Route::get('projects', [ProjectsController::class, 'index'])->name('projects.index');
