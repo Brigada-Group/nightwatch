@@ -34,13 +34,13 @@ export function AuditSectionCard({
 }: Props) {
     return (
         <Card className={cn(monitoringCardClass, 'gap-0 py-0')}>
-            <CardHeader className="border-b border-white/[0.06] pb-3 pt-5">
-                <CardTitle className="flex items-center gap-2 text-base text-white">
+            <CardHeader className="border-b border-border pb-3 pt-5">
+                <CardTitle className="flex items-center gap-2 text-base text-foreground">
                     <Icon className={cn('size-4', iconClassName)} />
                     {title}
                     <Badge
                         variant="outline"
-                        className="ml-1 border-white/15 bg-white/[0.04]"
+                        className="ml-1 border-border bg-muted/50"
                     >
                         {count}
                     </Badge>

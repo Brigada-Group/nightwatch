@@ -1,20 +1,21 @@
 import { Head } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 import type { ProjectStatus } from '@/entities';
+import {
+    EMPTY_FILTERS,
+    filtersAreActive,
+    mergeDashboardOverview
+    
+    
+    
+} from '@/features/dashboard/api/dashboardService';
+import type {DashboardFilters, DashboardOverview, ProjectSummary} from '@/features/dashboard/api/dashboardService';
 import { ActiveProjectsCard } from '@/features/dashboard/components/ActiveProjectsCard';
 import { DashboardToolbar } from '@/features/dashboard/components/DashboardToolbar';
 import { ErrorTrendChart } from '@/features/dashboard/components/ErrorTrendChart';
 import { FilteredProjectsGrid } from '@/features/dashboard/components/FilteredProjectsGrid';
 import { SeverityBreakdownChart } from '@/features/dashboard/components/SeverityBreakdownChart';
 import { StatCard } from '@/features/dashboard/components/StatCard';
-import {
-    EMPTY_FILTERS,
-    filtersAreActive,
-    mergeDashboardOverview,
-    type DashboardFilters,
-    type DashboardOverview,
-    type ProjectSummary,
-} from '@/features/dashboard/api/dashboardService';
 import { useDashboardOverview } from '@/features/dashboard/hooks/useDashboardOverview';
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue';
 
@@ -51,9 +52,13 @@ export default function Dashboard(raw: DashboardPageProps) {
 
     const availableEnvironments = useMemo(() => {
         const set = new Set<string>();
+
         for (const p of projects) {
-            if (p.environment) set.add(p.environment);
+            if (p.environment) {
+set.add(p.environment);
+}
         }
+
         return [...set];
     }, [projects]);
 
@@ -73,6 +78,7 @@ export default function Dashboard(raw: DashboardPageProps) {
                     filters={filters}
                     onFiltersChange={(next) => {
                         setFilters(next);
+
                         if (next.search !== searchQuery) {
                             setSearchQuery(next.search);
                         }

@@ -114,17 +114,24 @@ export async function getDashboardOverview(
     filters?: DashboardFilters,
 ): Promise<DashboardOverview> {
     const params: Record<string, string> = {};
+
     if (filters) {
         const trimmed = filters.search.trim();
-        if (trimmed !== '') params.search = trimmed;
+
+        if (trimmed !== '') {
+params.search = trimmed;
+}
+
         if (filters.statuses.length > 0) {
             params.statuses = filters.statuses.join(',');
         }
+
         if (filters.environments.length > 0) {
             params.environments = filters.environments.join(',');
         }
     }
 
     const { data } = await api.get<DashboardOverview>('/dashboard', { params });
+
     return data;
 }

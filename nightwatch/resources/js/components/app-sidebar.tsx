@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 import {
     Activity,
     AlertTriangle,
+    BarChart3,
     BookOpen,
     Clock,
     Database,
@@ -10,6 +11,7 @@ import {
     HeartPulse,
     LayoutGrid,
     Mail,
+    MailPlus,
     MessageSquare,
     PackageCheck,
     ScrollText,
@@ -49,6 +51,11 @@ const overviewItems: NavItem[] = [
 ];
 
 const monitoringItems: NavItem[] = [
+    {
+        title: 'Insights',
+        href: '/insights',
+        icon: BarChart3,
+    },
     {
         title: 'Exceptions',
         href: '/exceptions',
@@ -116,6 +123,11 @@ const systemItems: NavItem[] = [
         title: 'Audits',
         href: '/audits',
         icon: ShieldCheck,
+    },
+    {
+        title: 'Email Reports',
+        href: '/email-reports',
+        icon: MailPlus,
     },
 ];
 

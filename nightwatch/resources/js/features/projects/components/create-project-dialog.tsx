@@ -46,6 +46,7 @@ export function CreateProjectDialog() {
             open={open}
             onOpenChange={(next) => {
                 setOpen(next);
+
                 if (!next) {
                     form.clearErrors();
                 }
@@ -60,11 +61,9 @@ export function CreateProjectDialog() {
                     New project
                 </Button>
             </DialogTrigger>
-            <DialogContent className="border-white/[0.08] bg-zinc-950/95 text-zinc-100 backdrop-blur-md">
+            <DialogContent>
                 <DialogHeader>
-                    <DialogTitle className="text-white">
-                        Register a new project
-                    </DialogTitle>
+                    <DialogTitle>Register a new project</DialogTitle>
                     <DialogDescription>
                         We will generate a{' '}
                         <span className="text-foreground font-medium">

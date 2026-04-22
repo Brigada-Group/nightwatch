@@ -13,5 +13,6 @@ export const getMails = async (
     filters: MailFilters = {},
 ): Promise<PaginatedResponse<HubMail>> => {
     const { data } = await api.get('/mail', { params: filters });
+
     return data;
 };

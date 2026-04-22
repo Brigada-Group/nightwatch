@@ -8,8 +8,8 @@ type Props = {
 
 export function MetaPill({ icon: Icon, label, value }: Props) {
     return (
-        <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-black/30 px-3 py-1.5 backdrop-blur-sm">
-            <Icon className="size-3.5 text-zinc-400" />
+        <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-3 py-1.5 dark:backdrop-blur-sm">
+            <Icon className="size-3.5 text-muted-foreground" />
             <span className="text-muted-foreground text-[11px] uppercase tracking-wider">
                 {label}
             </span>

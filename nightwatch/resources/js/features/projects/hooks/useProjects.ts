@@ -8,10 +8,10 @@ export function useProjects() {
     });
 }
 
-export function useProject(id: number) {
+export function useProject(uuid: string) {
     return useQuery({
-        queryKey: ['projects', id],
-        queryFn: () => getProject(id),
-        enabled: id > 0,
+        queryKey: ['projects', uuid],
+        queryFn: () => getProject(uuid),
+        enabled: Boolean(uuid),
     });
 }

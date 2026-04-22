@@ -13,5 +13,6 @@ export const getNotifications = async (
     filters: NotificationFilters = {},
 ): Promise<PaginatedResponse<HubNotification>> => {
     const { data } = await api.get('/notifications', { params: filters });
+
     return data;
 };

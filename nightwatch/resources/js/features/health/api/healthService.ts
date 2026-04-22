@@ -13,5 +13,6 @@ export const getHealthChecks = async (
     filters: HealthFilters = {},
 ): Promise<PaginatedResponse<HubHealthCheck>> => {
     const { data } = await api.get('/health-checks', { params: filters });
+
     return data;
 };

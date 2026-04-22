@@ -39,7 +39,11 @@ export function DashboardToolbar({
 }: Props) {
     const environments = useMemo(() => {
         const unique = new Set<string>(availableEnvironments ?? DEFAULT_ENVIRONMENTS);
-        for (const env of filters.environments) unique.add(env);
+
+        for (const env of filters.environments) {
+unique.add(env);
+}
+
         return [...unique].sort();
     }, [availableEnvironments, filters.environments]);
 
@@ -53,6 +57,7 @@ export function DashboardToolbar({
         if (list.includes(value)) {
             return list.filter((v) => v !== value);
         }
+
         return [...list, value];
     };
 
@@ -113,6 +118,7 @@ export function DashboardToolbar({
                                     const checked = filters.statuses.includes(
                                         opt.value,
                                     );
+
                                     return (
                                         <div
                                             key={opt.value}
@@ -156,6 +162,7 @@ export function DashboardToolbar({
                                     const checked = filters.environments.includes(
                                         env,
                                     );
+
                                     return (
                                         <div
                                             key={env}

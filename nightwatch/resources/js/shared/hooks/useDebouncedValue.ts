@@ -10,6 +10,7 @@ export function useDebouncedValue<T>(value: T, delayMs: number = 300): T {
 
     useEffect(() => {
         const handle = setTimeout(() => setDebounced(value), delayMs);
+
         return () => clearTimeout(handle);
     }, [value, delayMs]);
 

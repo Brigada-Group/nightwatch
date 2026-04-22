@@ -39,18 +39,18 @@ export function ConnectGuideCard({
 
     return (
         <Card className={cn(monitoringCardClass, 'gap-0 py-0')}>
-            <CardHeader className="gap-1 border-b border-white/[0.06] pb-4 pt-5">
+            <CardHeader className="gap-1 border-b border-border pb-4 pt-5">
                 <div className="flex items-center gap-2">
-                    <div className="rounded-lg border border-white/10 bg-violet-500/15 p-2 text-violet-200">
+                    <div className="rounded-lg border border-border bg-violet-500/15 p-2 text-violet-700 dark:text-violet-200">
                         <Plug className="size-4" />
                     </div>
-                    <CardTitle className="text-base text-white">
+                    <CardTitle className="text-base text-foreground">
                         Connect Guardian
                     </CardTitle>
                 </div>
-                <CardDescription className="text-zinc-400">
+                <CardDescription className="text-muted-foreground">
                     Install the{' '}
-                    <code className="rounded bg-white/[0.06] px-1 py-0.5 text-[11px] text-zinc-200">
+                    <code className="rounded bg-accent px-1 py-0.5 text-[11px] text-foreground">
                         guardian
                     </code>{' '}
                     package in your Laravel app, then add these variables to
@@ -84,7 +84,7 @@ export function ConnectGuideCard({
                             {rotating ? 'Rotating…' : 'Rotate token'}
                         </Button>
                     </div>
-                    <code className="block break-all rounded-md border border-white/[0.08] bg-black/40 px-3 py-2 font-mono text-xs text-zinc-400">
+                    <code className="block break-all rounded-md border border-border bg-muted/60 dark:bg-black/40 px-3 py-2 font-mono text-xs text-muted-foreground">
                         {maskedToken}
                     </code>
                     <p className="text-muted-foreground text-xs">
@@ -93,14 +93,14 @@ export function ConnectGuideCard({
                     </p>
                 </div>
 
-                <div className="rounded-lg border border-white/[0.08] bg-black/40">
-                    <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-2.5">
+                <div className="rounded-lg border border-border bg-muted/60 dark:bg-black/40">
+                    <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
                         <span className="text-muted-foreground text-[11px] font-semibold uppercase tracking-wider">
                             .env template
                         </span>
                         <CopyIconButton value={envSnippet} label=".env template" />
                     </div>
-                    <pre className="scrollbar-slim-dark overflow-x-auto p-4 font-mono text-xs text-zinc-200">
+                    <pre className="scrollbar-slim overflow-x-auto p-4 font-mono text-xs text-foreground">
                         {envSnippet}
                     </pre>
                 </div>
@@ -128,7 +128,7 @@ function InfoField({
                 </span>
                 {copyable ? <CopyIconButton value={value} label={label} /> : null}
             </div>
-            <code className="block break-all rounded-md border border-white/[0.08] bg-black/40 px-3 py-2 font-mono text-xs text-zinc-100">
+            <code className="block break-all rounded-md border border-border bg-muted/60 dark:bg-black/40 px-3 py-2 font-mono text-xs text-foreground">
                 {value}
             </code>
             {description ? (
@@ -158,11 +158,11 @@ function CopyIconButton({ value, label }: { value: string; label: string }) {
             variant="ghost"
             size="sm"
             onClick={onCopy}
-            className="h-7 gap-1.5 px-2 text-xs text-zinc-300 hover:bg-white/[0.06] hover:text-white"
+            className="h-7 gap-1.5 px-2 text-xs text-foreground hover:bg-accent hover:text-foreground"
         >
             {copied ? (
                 <>
-                    <Check className="size-3.5 text-emerald-300" />
+                    <Check className="size-3.5 text-emerald-600 dark:text-emerald-300" />
                     Copied
                 </>
             ) : (

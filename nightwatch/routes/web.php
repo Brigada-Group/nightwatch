@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\DashboardOverviewController;
+use App\Http\Controllers\EmailReportsController;
 use App\Http\Controllers\ExceptionsController;
 use App\Http\Controllers\HubAuditsController;
+use App\Http\Controllers\InsightsController;
 use App\Http\Controllers\HubCacheController;
 use App\Http\Controllers\HubCommandsController;
 use App\Http\Controllers\HubHealthChecksController;
@@ -62,11 +64,17 @@ Route::middleware(['auth'])->group(function () {
     Route::get('commands', [HubCommandsController::class, 'index'])->name('commands.index');
     Route::get('scheduled-tasks', [HubScheduledTasksController::class, 'index'])->name('scheduled-tasks.index');
     Route::get('health-checks', [HubHealthChecksController::class, 'index'])->name('health-checks.index');
+    Route::get('insights', [InsightsController::class, 'index'])->name('insights.index');
     Route::get('audits', [HubAuditsController::class, 'index'])->name('audits.index');
     Route::get('audits/{type}/{audit}', [HubAuditsController::class, 'show'])
         ->where('type', 'composer|npm')
         ->where('audit', '[0-9]+')
         ->name('audits.show');
+
+    Route::get('email-reports', [EmailReportsController::class, 'index'])->name('email-reports.index');
+    Route::post('email-reports', [EmailReportsController::class, 'store'])->name('email-reports.store');
+    Route::patch('email-reports/{emailReport}', [EmailReportsController::class, 'update'])->name('email-reports.update');
+    Route::delete('email-reports/{emailReport}', [EmailReportsController::class, 'destroy'])->name('email-reports.destroy');
 });
 
 require __DIR__.'/settings.php';

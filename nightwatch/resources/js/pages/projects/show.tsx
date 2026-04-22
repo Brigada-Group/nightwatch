@@ -1,7 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import * as React from 'react';
+import type {
+    Activity} from 'lucide-react';
 import {
-    Activity,
     ArrowLeft,
     Binary,
     Boxes,
@@ -19,17 +19,10 @@ import {
     Webhook,
     Zap,
 } from 'lucide-react';
+import * as React from 'react';
 import { toast } from 'sonner';
-import { ToneChip } from '@/components/monitoring/tone-chip';
 import { monitoringCardClass } from '@/components/monitoring/monitoring-surface';
-import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { ToneChip } from '@/components/monitoring/tone-chip';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -41,10 +34,14 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { pathWithQuery } from '@/lib/inertia-query';
-import { cn } from '@/lib/utils';
-import { ConnectGuideCard } from '@/features/projects/components/connect-guide-card';
-import { CredentialsRevealDialog } from '@/features/projects/components/credentials-reveal-dialog';
+import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import type {
     HubCache,
     HubCommand,
@@ -62,6 +59,10 @@ import type {
     ProjectCredentials,
     ProjectStatus,
 } from '@/entities';
+import { ConnectGuideCard } from '@/features/projects/components/connect-guide-card';
+import { CredentialsRevealDialog } from '@/features/projects/components/credentials-reveal-dialog';
+import { pathWithQuery } from '@/lib/inertia-query';
+import { cn } from '@/lib/utils';
 
 type Counts = {
     exceptions: number;
@@ -127,6 +128,7 @@ function fmt(dt: string | null): string {
     if (!dt) {
         return '—';
     }
+
     return new Date(dt).toLocaleString();
 }
 
@@ -143,7 +145,7 @@ export default function ProjectShow() {
 
     const rotateToken = () => {
         router.post(
-            `/projects/${project.id}/rotate-token`,
+            `/projects/${project.project_uuid}/rotate-token`,
             {},
             {
                 preserveScroll: true,
@@ -154,7 +156,7 @@ export default function ProjectShow() {
     };
 
     const deleteProject = () => {
-        router.delete(`/projects/${project.id}`, {
+        router.delete(`/projects/${project.project_uuid}`, {
             onStart: () => setDeleting(true),
             onError: () => {
                 setDeleting(false);
@@ -183,16 +185,16 @@ export default function ProjectShow() {
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                className="gap-2 text-rose-300 hover:bg-rose-500/10 hover:text-rose-200"
+                                className="gap-2 text-rose-600 hover:bg-rose-500/10 hover:text-rose-700 dark:text-rose-300 dark:hover:text-rose-200"
                                 disabled={deleting}
                             >
                                 <Trash2 className="size-4" />
                                 Delete project
                             </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent className="border-white/[0.08] bg-zinc-950/95 text-zinc-100 backdrop-blur-md">
+                        <AlertDialogContent>
                             <AlertDialogHeader>
-                                <AlertDialogTitle className="text-white">
+                                <AlertDialogTitle>
                                     Delete “{project.name}”?
                                 </AlertDialogTitle>
                                 <AlertDialogDescription>
@@ -217,7 +219,7 @@ export default function ProjectShow() {
 
                 <div
                     className={cn(
-                        'relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-violet-600/20 via-zinc-950/90 to-cyan-600/15 p-6 shadow-[0_32px_80px_-32px_rgba(0,0,0,0.9)] md:p-8',
+                        'relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-violet-500/10 via-background/95 to-cyan-500/10 p-6 shadow-sm dark:from-violet-600/20 dark:via-background/90 dark:to-cyan-600/15 dark:shadow-[0_32px_80px_-32px_rgba(0,0,0,0.9)] md:p-8',
                     )}
                 >
                     <div className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-violet-500/20 blur-3xl" />
@@ -225,7 +227,7 @@ export default function ProjectShow() {
                     <div className="relative flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                         <div className="space-y-2">
                             <div className="flex flex-wrap items-center gap-2">
-                                <Server className="size-5 text-zinc-300" />
+                                <Server className="size-5 text-muted-foreground" />
                                 <span className="text-muted-foreground font-mono text-xs">
                                     #{project.id}
                                 </span>
@@ -234,11 +236,11 @@ export default function ProjectShow() {
                                     value={project.status as ProjectStatus}
                                 />
                             </div>
-                            <h1 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
+                            <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
                                 {project.name}
                             </h1>
                             {project.description ? (
-                                <p className="max-w-2xl text-sm text-zinc-300">
+                                <p className="text-muted-foreground max-w-2xl text-sm">
                                     {project.description}
                                 </p>
                             ) : null}
@@ -246,11 +248,6 @@ export default function ProjectShow() {
                                 Environment{' '}
                                 <span className="text-foreground font-medium">
                                     {project.environment}
-                                </span>
-                                {' · '}
-                                UUID{' '}
-                                <span className="font-mono text-xs text-zinc-400">
-                                    {project.project_uuid}
                                 </span>
                             </p>
                         </div>
@@ -265,12 +262,12 @@ export default function ProjectShow() {
                     (project.metadata.php_version || project.metadata.laravel_version) ? (
                         <div className="relative mt-6 flex flex-wrap gap-3">
                             {project.metadata.php_version ? (
-                                <span className="rounded-lg border border-white/10 bg-black/30 px-3 py-1.5 font-mono text-xs text-zinc-200 backdrop-blur-sm">
+                                <span className="rounded-lg border border-border bg-muted/50 px-3 py-1.5 font-mono text-xs text-foreground dark:bg-black/30 dark:backdrop-blur-sm">
                                     PHP {project.metadata.php_version}
                                 </span>
                             ) : null}
                             {project.metadata.laravel_version ? (
-                                <span className="rounded-lg border border-white/10 bg-black/30 px-3 py-1.5 font-mono text-xs text-zinc-200 backdrop-blur-sm">
+                                <span className="rounded-lg border border-border bg-muted/50 px-3 py-1.5 font-mono text-xs text-foreground dark:bg-black/30 dark:backdrop-blur-sm">
                                     Laravel {project.metadata.laravel_version}
                                 </span>
                             ) : null}
@@ -305,14 +302,14 @@ export default function ProjectShow() {
                                 >
                                     <CardHeader className="flex flex-row items-start justify-between gap-2 pb-2 pt-5">
                                         <div>
-                                            <CardDescription className="text-zinc-400">
+                                            <CardDescription>
                                                 {label}
                                             </CardDescription>
-                                            <CardTitle className="mt-1 text-2xl tabular-nums text-white">
+                                            <CardTitle className="mt-1 text-2xl tabular-nums text-foreground">
                                                 {counts[key].toLocaleString()}
                                             </CardTitle>
                                         </div>
-                                        <div className="rounded-xl border border-white/10 bg-white/[0.06] p-2.5 text-violet-200 transition-colors group-hover:bg-violet-500/15 group-hover:text-violet-100">
+                                        <div className="rounded-xl border border-border bg-accent p-2.5 text-violet-700 transition-colors group-hover:bg-violet-500/15 group-hover:text-violet-900 dark:text-violet-200 dark:group-hover:text-violet-100">
                                             <Icon className="size-5" />
                                         </div>
                                     </CardHeader>
@@ -327,7 +324,7 @@ export default function ProjectShow() {
 
                 <div>
                     <h2 className="text-foreground mb-3 flex items-center gap-2 text-lg font-semibold tracking-tight">
-                        <Binary className="size-5 text-cyan-300/80" />
+                        <Binary className="size-5 text-cyan-600 dark:text-cyan-300/80" />
                         Recent activity
                     </h2>
                     <div className="grid gap-4 lg:grid-cols-2">
@@ -335,10 +332,10 @@ export default function ProjectShow() {
                             {recent.exceptions.map((row) => (
                                 <div
                                     key={row.id}
-                                    className="border-border/40 flex flex-col gap-1 border-b py-3 last:border-0"
+                                    className="border-border/60 flex flex-col gap-1 border-b py-3 last:border-0"
                                 >
                                     <div className="flex flex-wrap items-center justify-between gap-2">
-                                        <span className="truncate font-mono text-xs text-zinc-200">
+                                        <span className="truncate font-mono text-xs text-foreground">
                                             {row.exception_class}
                                         </span>
                                         <ToneChip kind="severity" value={row.severity} />
@@ -357,11 +354,11 @@ export default function ProjectShow() {
                             {recent.requests.map((row) => (
                                 <div
                                     key={row.id}
-                                    className="border-border/40 flex flex-wrap items-center justify-between gap-2 border-b py-3 last:border-0"
+                                    className="border-border/60 flex flex-wrap items-center justify-between gap-2 border-b py-3 last:border-0"
                                 >
                                     <div className="flex min-w-0 flex-1 items-center gap-2">
                                         <ToneChip kind="httpMethod" value={row.method} />
-                                        <span className="truncate font-mono text-xs text-zinc-300">
+                                        <span className="truncate font-mono text-xs text-foreground">
                                             {row.uri}
                                         </span>
                                     </div>
@@ -374,9 +371,9 @@ export default function ProjectShow() {
                             {recent.queries.map((row) => (
                                 <div
                                     key={row.id}
-                                    className="border-border/40 space-y-1 border-b py-3 last:border-0"
+                                    className="border-border/60 space-y-1 border-b py-3 last:border-0"
                                 >
-                                    <p className="truncate font-mono text-xs text-zinc-300">
+                                    <p className="truncate font-mono text-xs text-foreground">
                                         {row.sql}
                                     </p>
                                     <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-[10px]">
@@ -396,9 +393,9 @@ export default function ProjectShow() {
                             {recent.jobs.map((row) => (
                                 <div
                                     key={row.id}
-                                    className="border-border/40 flex flex-wrap items-center justify-between gap-2 border-b py-3 last:border-0"
+                                    className="border-border/60 flex flex-wrap items-center justify-between gap-2 border-b py-3 last:border-0"
                                 >
-                                    <span className="truncate font-mono text-xs text-zinc-300">
+                                    <span className="truncate font-mono text-xs text-foreground">
                                         {row.job_class}
                                     </span>
                                     <ToneChip kind="jobStatus" value={row.status} />
@@ -410,7 +407,7 @@ export default function ProjectShow() {
                             {recent.logs.map((row) => (
                                 <div
                                     key={row.id}
-                                    className="border-border/40 space-y-1 border-b py-3 last:border-0"
+                                    className="border-border/60 space-y-1 border-b py-3 last:border-0"
                                 >
                                     <ToneChip kind="logLevel" value={row.level} />
                                     <p className="text-muted-foreground line-clamp-2 text-xs">
@@ -424,9 +421,9 @@ export default function ProjectShow() {
                             {recent.outgoing_http.map((row) => (
                                 <div
                                     key={row.id}
-                                    className="border-border/40 flex flex-wrap items-center justify-between gap-2 border-b py-3 last:border-0"
+                                    className="border-border/60 flex flex-wrap items-center justify-between gap-2 border-b py-3 last:border-0"
                                 >
-                                    <span className="truncate text-xs text-zinc-300">
+                                    <span className="truncate text-xs text-foreground">
                                         {row.host}
                                     </span>
                                     <div className="flex items-center gap-2">
@@ -452,9 +449,9 @@ export default function ProjectShow() {
                             {recent.mails.map((row) => (
                                 <div
                                     key={row.id}
-                                    className="border-border/40 flex flex-wrap items-center justify-between gap-2 border-b py-3 last:border-0"
+                                    className="border-border/60 flex flex-wrap items-center justify-between gap-2 border-b py-3 last:border-0"
                                 >
-                                    <span className="truncate text-xs text-zinc-300">
+                                    <span className="truncate text-xs text-foreground">
                                         {row.subject ?? row.mailable ?? '—'}
                                     </span>
                                     <ToneChip kind="delivery" value={row.status} />
@@ -466,9 +463,9 @@ export default function ProjectShow() {
                             {recent.notifications.map((row) => (
                                 <div
                                     key={row.id}
-                                    className="border-border/40 flex flex-wrap items-center justify-between gap-2 border-b py-3 last:border-0"
+                                    className="border-border/60 flex flex-wrap items-center justify-between gap-2 border-b py-3 last:border-0"
                                 >
-                                    <span className="truncate font-mono text-xs text-zinc-300">
+                                    <span className="truncate font-mono text-xs text-foreground">
                                         {row.notification_class}
                                     </span>
                                     <ToneChip kind="delivery" value={row.status} />
@@ -480,9 +477,9 @@ export default function ProjectShow() {
                             {recent.caches.map((row) => (
                                 <div
                                     key={row.id}
-                                    className="border-border/40 flex flex-wrap items-center justify-between gap-2 border-b py-3 last:border-0"
+                                    className="border-border/60 flex flex-wrap items-center justify-between gap-2 border-b py-3 last:border-0"
                                 >
-                                    <span className="font-mono text-xs text-zinc-300">
+                                    <span className="font-mono text-xs text-foreground">
                                         {row.store}
                                     </span>
                                     <span className="text-muted-foreground text-[10px]">
@@ -499,9 +496,9 @@ export default function ProjectShow() {
                             {recent.commands.map((row) => (
                                 <div
                                     key={row.id}
-                                    className="border-border/40 flex flex-wrap items-center justify-between gap-2 border-b py-3 last:border-0"
+                                    className="border-border/60 flex flex-wrap items-center justify-between gap-2 border-b py-3 last:border-0"
                                 >
-                                    <span className="truncate font-mono text-xs text-zinc-300">
+                                    <span className="truncate font-mono text-xs text-foreground">
                                         {row.command}
                                     </span>
                                     <ToneChip kind="exitCode" value={row.exit_code} />
@@ -513,9 +510,9 @@ export default function ProjectShow() {
                             {recent.scheduled_tasks.map((row) => (
                                 <div
                                     key={row.id}
-                                    className="border-border/40 flex flex-wrap items-center justify-between gap-2 border-b py-3 last:border-0"
+                                    className="border-border/60 flex flex-wrap items-center justify-between gap-2 border-b py-3 last:border-0"
                                 >
-                                    <span className="truncate font-mono text-xs text-zinc-300">
+                                    <span className="truncate font-mono text-xs text-foreground">
                                         {row.task}
                                     </span>
                                     <ToneChip kind="taskStatus" value={row.status} />
@@ -527,9 +524,9 @@ export default function ProjectShow() {
                             {recent.health_checks.map((row) => (
                                 <div
                                     key={row.id}
-                                    className="border-border/40 flex flex-wrap items-center justify-between gap-2 border-b py-3 last:border-0"
+                                    className="border-border/60 flex flex-wrap items-center justify-between gap-2 border-b py-3 last:border-0"
                                 >
-                                    <span className="font-mono text-xs text-zinc-300">
+                                    <span className="font-mono text-xs text-foreground">
                                         {row.check_name}
                                     </span>
                                     <ToneChip kind="health" value={row.status} />
@@ -557,15 +554,15 @@ function RecentCard({
 
     return (
         <Card className={cn(monitoringCardClass, 'gap-0 py-0')}>
-            <CardHeader className="border-b border-white/[0.06] pb-3 pt-5">
-                <CardTitle className="text-base text-white">{title}</CardTitle>
+            <CardHeader className="border-b border-border pb-3 pt-5">
+                <CardTitle className="text-base text-foreground">{title}</CardTitle>
             </CardHeader>
 
             <CardContent className="px-6 pb-4 pt-0">
                 {isEmpty ? (
                     <p className="text-muted-foreground py-6 text-center text-sm">{empty}</p>
                 ) : (
-                    <div className="scrollbar-slim-dark max-h-[280px] overflow-y-auto pr-1">
+                    <div className="scrollbar-slim max-h-[280px] overflow-y-auto pr-1">
                         {children}
                     </div>
                 )}

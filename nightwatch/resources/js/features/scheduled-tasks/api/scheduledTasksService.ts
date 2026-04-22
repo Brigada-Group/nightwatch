@@ -13,5 +13,6 @@ export const getScheduledTasks = async (
     filters: ScheduledTaskFilters = {},
 ): Promise<PaginatedResponse<HubScheduledTask>> => {
     const { data } = await api.get('/scheduled-tasks', { params: filters });
+
     return data;
 };

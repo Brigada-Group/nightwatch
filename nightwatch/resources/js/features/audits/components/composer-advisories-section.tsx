@@ -50,7 +50,7 @@ export function ComposerAdvisoriesSection({ advisories }: Props) {
                 <TableBody>
                     {sorted.map((advisory, idx) => (
                         <TableRow key={advisory.id ?? idx}>
-                            <TableCell className="font-mono text-xs text-zinc-200">
+                            <TableCell className="font-mono text-xs text-foreground">
                                 {advisory.package}
                             </TableCell>
                             <TableCell>
@@ -59,10 +59,10 @@ export function ComposerAdvisoriesSection({ advisories }: Props) {
                             <TableCell className="max-w-md text-sm">
                                 {advisory.title}
                             </TableCell>
-                            <TableCell className="font-mono text-xs text-zinc-400">
+                            <TableCell className="font-mono text-xs text-muted-foreground">
                                 {advisory.cve ?? '—'}
                             </TableCell>
-                            <TableCell className="font-mono text-xs text-zinc-400">
+                            <TableCell className="font-mono text-xs text-muted-foreground">
                                 {advisory.affected_versions ?? '—'}
                             </TableCell>
                             <TableCell className="text-muted-foreground text-xs">

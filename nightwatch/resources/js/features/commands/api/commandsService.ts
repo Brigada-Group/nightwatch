@@ -12,5 +12,6 @@ export const getCommands = async (
     filters: CommandFilters = {},
 ): Promise<PaginatedResponse<HubCommand>> => {
     const { data } = await api.get('/commands', { params: filters });
+
     return data;
 };

@@ -50,7 +50,7 @@ export function NpmVulnerabilitiesSection({ vulnerabilities }: Props) {
                 <TableBody>
                     {sorted.map((vuln, idx) => (
                         <TableRow key={vuln.id ?? idx}>
-                            <TableCell className="font-mono text-xs text-zinc-200">
+                            <TableCell className="font-mono text-xs text-foreground">
                                 {vuln.package}
                             </TableCell>
                             <TableCell>
@@ -59,13 +59,13 @@ export function NpmVulnerabilitiesSection({ vulnerabilities }: Props) {
                             <TableCell className="max-w-md text-sm">
                                 {vuln.title}
                             </TableCell>
-                            <TableCell className="font-mono text-xs text-zinc-400">
+                            <TableCell className="font-mono text-xs text-muted-foreground">
                                 {vuln.cve ?? '—'}
                             </TableCell>
-                            <TableCell className="font-mono text-xs text-zinc-400">
+                            <TableCell className="font-mono text-xs text-muted-foreground">
                                 {vuln.range ?? '—'}
                             </TableCell>
-                            <TableCell className="font-mono text-xs text-emerald-300/80">
+                            <TableCell className="font-mono text-xs text-emerald-600 dark:text-emerald-300/80">
                                 {vuln.fix ?? '—'}
                             </TableCell>
                         </TableRow>

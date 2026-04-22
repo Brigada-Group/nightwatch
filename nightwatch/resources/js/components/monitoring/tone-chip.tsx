@@ -12,92 +12,90 @@ export type ToneChipKind =
     | 'exitCode'
     | 'projectStatus';
 
+/**
+ * Each tone pairs a light-mode style (solid pastel) with a dark-mode gradient.
+ * Using `dark:` prefixes keeps the existing rich dark look while giving light
+ * mode legible, high-contrast chips against white surfaces.
+ */
+
+const TONE = {
+    rose: 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-400/25 dark:bg-gradient-to-br dark:from-rose-500/20 dark:to-rose-950/30 dark:text-rose-100 dark:ring-1 dark:ring-rose-400/15',
+    red: 'border-red-200 bg-red-50 text-red-700 dark:border-red-400/20 dark:bg-gradient-to-br dark:from-red-500/18 dark:to-red-950/25 dark:text-red-100 dark:ring-1 dark:ring-red-400/12',
+    orange: 'border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-400/22 dark:bg-gradient-to-br dark:from-orange-500/18 dark:to-orange-950/25 dark:text-orange-100 dark:ring-1 dark:ring-orange-400/10',
+    amber: 'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-400/25 dark:bg-gradient-to-br dark:from-amber-500/16 dark:to-amber-950/22 dark:text-amber-100 dark:ring-1 dark:ring-amber-400/10',
+    emerald:
+        'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-400/22 dark:bg-gradient-to-br dark:from-emerald-500/16 dark:to-emerald-950/25 dark:text-emerald-100 dark:ring-1 dark:ring-emerald-400/10',
+    sky: 'border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-400/20 dark:bg-gradient-to-br dark:from-sky-500/15 dark:to-sky-950/25 dark:text-sky-100 dark:ring-1 dark:ring-sky-400/10',
+    cyan: 'border-cyan-200 bg-cyan-50 text-cyan-700 dark:border-cyan-400/20 dark:bg-gradient-to-br dark:from-cyan-500/14 dark:to-cyan-950/30 dark:text-cyan-100 dark:ring-1 dark:ring-cyan-400/10',
+    teal: 'border-teal-200 bg-teal-50 text-teal-700 dark:border-teal-400/22 dark:bg-gradient-to-br dark:from-teal-500/14 dark:to-teal-950/25 dark:text-teal-100 dark:ring-1 dark:ring-teal-400/10',
+    violet: 'border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-400/22 dark:bg-gradient-to-br dark:from-violet-500/16 dark:to-violet-950/30 dark:text-violet-100 dark:ring-1 dark:ring-violet-400/10',
+    fuchsia:
+        'border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700 dark:border-fuchsia-400/30 dark:bg-gradient-to-br dark:from-fuchsia-600/25 dark:to-purple-950/35 dark:text-fuchsia-100 dark:ring-1 dark:ring-fuchsia-400/15',
+    slate: 'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-500/25 dark:bg-gradient-to-br dark:from-slate-500/12 dark:to-slate-900/35 dark:text-slate-200 dark:ring-1 dark:ring-slate-400/10',
+    zinc: 'border-border bg-muted text-muted-foreground dark:border-zinc-500/25 dark:bg-gradient-to-br dark:from-zinc-500/12 dark:to-zinc-900/40 dark:text-zinc-200 dark:ring-1 dark:ring-zinc-400/10',
+} as const;
+
 const SEVERITY: Record<string, string> = {
-    critical:
-        'border-rose-400/25 bg-gradient-to-br from-rose-500/20 to-rose-950/30 text-rose-100 ring-1 ring-rose-400/15',
-    error:
-        'border-red-400/20 bg-gradient-to-br from-red-500/18 to-red-950/25 text-red-100 ring-1 ring-red-400/12',
-    warning:
-        'border-amber-400/25 bg-gradient-to-br from-amber-500/16 to-amber-950/20 text-amber-100 ring-1 ring-amber-400/12',
-    info: 'border-sky-400/20 bg-gradient-to-br from-sky-500/15 to-sky-950/25 text-sky-100 ring-1 ring-sky-400/10',
-    debug:
-        'border-zinc-500/25 bg-gradient-to-br from-zinc-500/12 to-zinc-900/40 text-zinc-200 ring-1 ring-zinc-400/10',
+    critical: TONE.rose,
+    error: TONE.red,
+    warning: TONE.amber,
+    info: TONE.sky,
+    debug: TONE.zinc,
 };
 
 const LOG_LEVEL: Record<string, string> = {
-    emergency:
-        'border-fuchsia-400/30 bg-gradient-to-br from-fuchsia-600/25 to-purple-950/35 text-fuchsia-100 ring-1 ring-fuchsia-400/15',
-    alert:
-        'border-rose-400/28 bg-gradient-to-br from-rose-600/22 to-rose-950/30 text-rose-100 ring-1 ring-rose-400/12',
-    critical:
-        'border-red-400/28 bg-gradient-to-br from-red-600/22 to-red-950/30 text-red-100 ring-1 ring-red-400/12',
-    error:
-        'border-orange-400/22 bg-gradient-to-br from-orange-500/18 to-orange-950/25 text-orange-100 ring-1 ring-orange-400/10',
-    warning:
-        'border-amber-400/25 bg-gradient-to-br from-amber-500/16 to-amber-950/22 text-amber-100 ring-1 ring-amber-400/10',
-    notice:
-        'border-teal-400/22 bg-gradient-to-br from-teal-500/14 to-teal-950/25 text-teal-100 ring-1 ring-teal-400/10',
-    info: 'border-cyan-400/20 bg-gradient-to-br from-cyan-500/14 to-cyan-950/30 text-cyan-100 ring-1 ring-cyan-400/10',
-    debug:
-        'border-slate-500/25 bg-gradient-to-br from-slate-500/12 to-slate-900/35 text-slate-200 ring-1 ring-slate-400/10',
+    emergency: TONE.fuchsia,
+    alert: TONE.rose,
+    critical: TONE.red,
+    error: TONE.orange,
+    warning: TONE.amber,
+    notice: TONE.teal,
+    info: TONE.cyan,
+    debug: TONE.slate,
 };
 
 const JOB_STATUS: Record<string, string> = {
-    completed:
-        'border-emerald-400/22 bg-gradient-to-br from-emerald-500/16 to-emerald-950/25 text-emerald-100 ring-1 ring-emerald-400/10',
-    failed:
-        'border-rose-400/25 bg-gradient-to-br from-rose-500/18 to-rose-950/30 text-rose-100 ring-1 ring-rose-400/12',
-    processing:
-        'border-violet-400/22 bg-gradient-to-br from-violet-500/16 to-violet-950/30 text-violet-100 ring-1 ring-violet-400/10',
-    pending:
-        'border-zinc-500/22 bg-gradient-to-br from-zinc-500/12 to-zinc-900/35 text-zinc-200 ring-1 ring-zinc-400/10',
+    completed: TONE.emerald,
+    failed: TONE.rose,
+    processing: TONE.violet,
+    pending: TONE.zinc,
 };
 
 const HEALTH: Record<string, string> = {
-    ok: 'border-emerald-400/22 bg-gradient-to-br from-emerald-500/14 to-emerald-950/25 text-emerald-100 ring-1 ring-emerald-400/10',
-    warning:
-        'border-amber-400/25 bg-gradient-to-br from-amber-500/16 to-amber-950/22 text-amber-100 ring-1 ring-amber-400/10',
-    critical:
-        'border-rose-400/28 bg-gradient-to-br from-rose-600/22 to-rose-950/30 text-rose-100 ring-1 ring-rose-400/12',
-    error:
-        'border-red-400/25 bg-gradient-to-br from-red-500/18 to-red-950/28 text-red-100 ring-1 ring-red-400/12',
+    ok: TONE.emerald,
+    warning: TONE.amber,
+    critical: TONE.rose,
+    error: TONE.red,
 };
 
 const DELIVERY: Record<string, string> = {
-    sent: 'border-emerald-400/22 bg-gradient-to-br from-emerald-500/14 to-emerald-950/25 text-emerald-100 ring-1 ring-emerald-400/10',
-    failed:
-        'border-rose-400/25 bg-gradient-to-br from-rose-500/18 to-rose-950/30 text-rose-100 ring-1 ring-rose-400/12',
+    sent: TONE.emerald,
+    failed: TONE.rose,
 };
 
 const TASK_STATUS: Record<string, string> = {
-    completed: JOB_STATUS.completed,
-    failed: JOB_STATUS.failed,
-    skipped:
-        'border-slate-400/22 bg-gradient-to-br from-slate-500/12 to-slate-900/35 text-slate-200 ring-1 ring-slate-400/10',
+    completed: TONE.emerald,
+    failed: TONE.rose,
+    skipped: TONE.slate,
 };
 
 const PROJECT_STATUS: Record<string, string> = {
-    normal:
-        'border-emerald-400/20 bg-gradient-to-br from-emerald-500/12 to-emerald-950/22 text-emerald-100 ring-1 ring-emerald-400/10',
-    warning: SEVERITY.warning,
-    critical: SEVERITY.critical,
+    normal: TONE.emerald,
+    warning: TONE.amber,
+    critical: TONE.rose,
 };
 
 const METHOD: Record<string, string> = {
-    GET: 'border-sky-400/20 bg-gradient-to-br from-sky-500/14 to-sky-950/30 text-sky-100 ring-1 ring-sky-400/10',
-    POST: 'border-violet-400/22 bg-gradient-to-br from-violet-500/14 to-violet-950/30 text-violet-100 ring-1 ring-violet-400/10',
-    PUT: 'border-amber-400/22 bg-gradient-to-br from-amber-500/14 to-amber-950/25 text-amber-100 ring-1 ring-amber-400/10',
-    PATCH:
-        'border-orange-400/20 bg-gradient-to-br from-orange-500/12 to-orange-950/25 text-orange-100 ring-1 ring-orange-400/10',
-    DELETE:
-        'border-rose-400/22 bg-gradient-to-br from-rose-500/14 to-rose-950/28 text-rose-100 ring-1 ring-rose-400/10',
-    HEAD: 'border-zinc-500/22 bg-gradient-to-br from-zinc-500/12 to-zinc-900/35 text-zinc-200 ring-1 ring-zinc-400/10',
-    OPTIONS:
-        'border-teal-400/20 bg-gradient-to-br from-teal-500/12 to-teal-950/28 text-teal-100 ring-1 ring-teal-400/10',
+    GET: TONE.sky,
+    POST: TONE.violet,
+    PUT: TONE.amber,
+    PATCH: TONE.orange,
+    DELETE: TONE.rose,
+    HEAD: TONE.zinc,
+    OPTIONS: TONE.teal,
 };
 
-const NEUTRAL =
-    'border-white/10 bg-white/[0.06] text-zinc-200 ring-1 ring-white/5';
+const NEUTRAL = TONE.zinc;
 
 function pick(
     map: Record<string, string>,
@@ -110,21 +108,18 @@ function pick(
 function httpStatusClass(code: number): string {
     switch (true) {
         case code >= 500:
-            return 'border-rose-400/25 bg-gradient-to-br from-rose-500/18 to-rose-950/30 text-rose-100 ring-1 ring-rose-400/12';
+            return TONE.rose;
         case code >= 400:
-            return 'border-orange-400/22 bg-gradient-to-br from-orange-500/16 to-orange-950/25 text-orange-100 ring-1 ring-orange-400/10';
+            return TONE.orange;
         case code >= 300:
-            return 'border-amber-400/20 bg-gradient-to-br from-amber-500/12 to-amber-950/22 text-amber-100 ring-1 ring-amber-400/10';
+            return TONE.amber;
         default:
-            return 'border-emerald-400/20 bg-gradient-to-br from-emerald-500/14 to-emerald-950/25 text-emerald-100 ring-1 ring-emerald-400/10';
+            return TONE.emerald;
     }
 }
 
 function exitCodeClass(code: number): string {
-    if (code === 0) {
-        return 'border-emerald-400/20 bg-gradient-to-br from-emerald-500/12 to-emerald-950/22 text-emerald-100 ring-1 ring-emerald-400/10';
-    }
-    return 'border-rose-400/22 bg-gradient-to-br from-rose-500/14 to-rose-950/28 text-rose-100 ring-1 ring-rose-400/10';
+    return code === 0 ? TONE.emerald : TONE.rose;
 }
 
 function resolveTone(
@@ -151,13 +146,16 @@ function resolveTone(
             return pick(METHOD, key.toUpperCase(), NEUTRAL);
         case 'httpStatus': {
             const n = typeof value === 'number' ? value : Number(value);
+
             return Number.isFinite(n) ? httpStatusClass(n) : NEUTRAL;
         }
         case 'exitCode': {
             if (value === null || value === undefined || value === '') {
                 return NEUTRAL;
             }
+
             const code = Number(value);
+
             return Number.isFinite(code) ? exitCodeClass(code) : NEUTRAL;
         }
         default:
@@ -176,13 +174,16 @@ function formatLabel(
             if (raw === null || raw === undefined || raw === '') {
                 return '—';
             }
+
             return String(raw);
         case 'httpMethod': {
             const s = String(raw ?? '');
+
             return s ? s.toUpperCase() : '—';
         }
         default: {
             const s = String(raw ?? '');
+
             return s
                 ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()
                 : '—';
@@ -209,7 +210,7 @@ export function ToneChip({ kind, value, label, className }: Props) {
     return (
         <span
             className={cn(
-                'inline-flex min-h-[1.5rem] items-center rounded-full border px-2.5 py-0.5 text-[11px] font-medium tracking-wide backdrop-blur-sm',
+                'inline-flex min-h-[1.5rem] items-center rounded-full border px-2.5 py-0.5 text-[11px] font-medium tracking-wide dark:backdrop-blur-sm',
                 tone,
                 className,
             )}

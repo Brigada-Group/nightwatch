@@ -32,8 +32,8 @@ export function NpmMetadataSection({ metadata }: Props) {
 
     return (
         <Card className={cn(monitoringCardClass, 'gap-0 py-0')}>
-            <CardHeader className="border-b border-white/[0.06] pb-3 pt-5">
-                <CardTitle className="text-base text-white">
+            <CardHeader className="border-b border-border pb-3 pt-5">
+                <CardTitle className="text-base text-foreground">
                     Audit metadata
                 </CardTitle>
                 <CardDescription>
@@ -45,12 +45,12 @@ export function NpmMetadataSection({ metadata }: Props) {
                     {entries.map(([key, value]) => (
                         <div
                             key={key}
-                            className="rounded-lg border border-white/10 bg-black/30 p-3"
+                            className="rounded-lg border border-border bg-muted/50 p-3"
                         >
                             <dt className="text-muted-foreground text-[11px] uppercase tracking-wider">
                                 {key.replace(/_/g, ' ')}
                             </dt>
-                            <dd className="mt-1 break-all font-mono text-xs text-zinc-200">
+                            <dd className="mt-1 break-all font-mono text-xs text-foreground">
                                 {renderValue(value)}
                             </dd>
                         </div>

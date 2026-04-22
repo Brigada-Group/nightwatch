@@ -15,8 +15,9 @@ import { formatDateTime } from '../lib/format';
 import { MetaPill } from './meta-pill';
 
 const ACCENT: Record<AuditKind, string> = {
-    composer: 'from-violet-600/20 via-zinc-950/90 to-indigo-600/15',
-    npm: 'from-emerald-600/18 via-zinc-950/90 to-cyan-600/18',
+    composer:
+        'from-violet-500/10 via-background/95 to-indigo-500/10 dark:from-violet-600/20 dark:via-background/90 dark:to-indigo-600/15',
+    npm: 'from-emerald-500/10 via-background/95 to-cyan-500/10 dark:from-emerald-600/18 dark:via-background/90 dark:to-cyan-600/18',
 };
 
 type Props = {
@@ -44,13 +45,15 @@ export function AuditHero({
 }: Props) {
     const KindIcon = kind === 'composer' ? ShieldCheck : ShieldAlert;
     const kindIconColor =
-        kind === 'composer' ? 'text-violet-300' : 'text-emerald-300';
+        kind === 'composer'
+            ? 'text-violet-600 dark:text-violet-300'
+            : 'text-emerald-600 dark:text-emerald-300';
     const kindLabel = kind === 'composer' ? 'Composer audit' : 'npm audit';
 
     return (
         <div
             className={cn(
-                'relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br p-6 shadow-[0_32px_80px_-32px_rgba(0,0,0,0.9)] md:p-8',
+                'relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br p-6 shadow-sm dark:shadow-[0_32px_80px_-32px_rgba(0,0,0,0.9)] md:p-8',
                 ACCENT[kind],
             )}
         >
@@ -63,13 +66,13 @@ export function AuditHero({
                         <KindIcon className={cn('size-5', kindIconColor)} />
                         <Badge
                             variant="outline"
-                            className="border-white/15 bg-white/[0.04] uppercase tracking-wider"
+                            className="border-border bg-muted/50 uppercase tracking-wider"
                         >
                             {kindLabel}
                         </Badge>
                         {badge}
                     </div>
-                    <h1 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
+                    <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
                         {title}
                     </h1>
                     <p className="text-muted-foreground max-w-2xl text-sm">

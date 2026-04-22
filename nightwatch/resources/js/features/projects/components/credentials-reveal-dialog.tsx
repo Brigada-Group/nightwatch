@@ -10,8 +10,8 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { cn } from '@/lib/utils';
 import type { ProjectCredentials } from '@/entities';
+import { cn } from '@/lib/utils';
 
 type Props = {
     credentials: ProjectCredentials | null;
@@ -48,13 +48,13 @@ export function CredentialsRevealDialog({ credentials, hubUrl }: Props) {
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent className="min-w-0 overflow-hidden border-white/[0.08] bg-zinc-950/95 text-zinc-100 backdrop-blur-md sm:max-w-xl [&>*]:min-w-0">
+            <DialogContent className="min-w-0 overflow-hidden sm:max-w-xl [&>*]:min-w-0">
                 <DialogHeader>
                     <div className="flex items-center gap-2">
-                        <div className="rounded-lg border border-amber-400/30 bg-amber-500/15 p-2 text-amber-200">
+                        <div className="rounded-lg border border-amber-300/60 bg-amber-100 p-2 text-amber-700 dark:border-amber-400/30 dark:bg-amber-500/15 dark:text-amber-200">
                             <ShieldAlert className="size-5" />
                         </div>
-                        <DialogTitle className="text-white">{title}</DialogTitle>
+                        <DialogTitle>{title}</DialogTitle>
                     </div>
                     <DialogDescription>{description}</DialogDescription>
                 </DialogHeader>
@@ -72,8 +72,8 @@ export function CredentialsRevealDialog({ credentials, hubUrl }: Props) {
                         isSecret
                     />
 
-                    <div className="min-w-0 rounded-lg border border-white/[0.08] bg-black/40">
-                        <div className="flex min-w-0 items-center justify-between gap-2 border-b border-white/[0.06] px-4 py-2.5">
+                    <div className="min-w-0 rounded-lg border border-border bg-muted/40 dark:bg-black/40">
+                        <div className="flex min-w-0 items-center justify-between gap-2 border-b border-border px-4 py-2.5">
                             <span className="text-muted-foreground min-w-0 truncate text-[11px] font-semibold uppercase tracking-wider">
                                 .env snippet
                             </span>
@@ -82,7 +82,7 @@ export function CredentialsRevealDialog({ credentials, hubUrl }: Props) {
                                 label=".env snippet"
                             />
                         </div>
-                        <pre className="scrollbar-slim-dark overflow-x-auto p-4 font-mono text-xs text-zinc-200">
+                        <pre className="scrollbar-slim overflow-x-auto p-4 font-mono text-xs text-foreground">
                             {envSnippet}
                         </pre>
                     </div>
@@ -167,8 +167,10 @@ function CredentialRow({
             </div>
             <code
                 className={cn(
-                    'block break-all rounded-md border border-white/[0.08] bg-black/40 px-3 py-2 font-mono text-xs',
-                    isSecret ? 'text-amber-200' : 'text-zinc-100',
+                    'block break-all rounded-md border border-border bg-muted/40 px-3 py-2 font-mono text-xs dark:bg-black/40',
+                    isSecret
+                        ? 'text-amber-700 dark:text-amber-200'
+                        : 'text-foreground',
                 )}
             >
                 {value}
@@ -198,11 +200,11 @@ function CopyButton({ value, label }: { value: string; label: string }) {
             variant="ghost"
             size="sm"
             onClick={onCopy}
-            className="h-7 shrink-0 gap-1.5 px-2 text-xs text-zinc-300 hover:bg-white/[0.06] hover:text-white"
+            className="h-7 shrink-0 gap-1.5 px-2 text-xs"
         >
             {copied ? (
                 <>
-                    <Check className="size-3.5 text-emerald-300" />
+                    <Check className="size-3.5 text-emerald-600 dark:text-emerald-300" />
                     Copied
                 </>
             ) : (

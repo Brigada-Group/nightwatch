@@ -13,5 +13,6 @@ export const getJobs = async (
     filters: JobFilters = {},
 ): Promise<PaginatedResponse<HubJob>> => {
     const { data } = await api.get('/jobs', { params: filters });
+
     return data;
 };

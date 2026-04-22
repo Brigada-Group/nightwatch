@@ -22,22 +22,42 @@ const statusLabel: Record<ProjectStatus, string> = {
 };
 
 function formatRelativeTime(iso: string | null): string {
-    if (!iso) return 'never';
+    if (!iso) {
+return 'never';
+}
+
     const then = new Date(iso).getTime();
-    if (Number.isNaN(then)) return 'never';
+
+    if (Number.isNaN(then)) {
+return 'never';
+}
 
     const diffSec = Math.max(0, Math.round((Date.now() - then) / 1000));
-    if (diffSec < 60) return `${diffSec}s ago`;
+
+    if (diffSec < 60) {
+return `${diffSec}s ago`;
+}
+
     const diffMin = Math.round(diffSec / 60);
-    if (diffMin < 60) return `${diffMin}m ago`;
+
+    if (diffMin < 60) {
+return `${diffMin}m ago`;
+}
+
     const diffHr = Math.round(diffMin / 60);
-    if (diffHr < 24) return `${diffHr}h ago`;
+
+    if (diffHr < 24) {
+return `${diffHr}h ago`;
+}
+
     const diffDay = Math.round(diffHr / 24);
+
     return `${diffDay}d ago`;
 }
 
 function ProjectCard({ project }: { project: ProjectSummary }) {
     const status = project.status as ProjectStatus;
+
     return (
         <Card className="flex flex-col">
             <CardHeader className="flex flex-row items-start justify-between pb-2">

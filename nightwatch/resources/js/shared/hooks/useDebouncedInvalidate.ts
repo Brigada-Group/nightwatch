@@ -14,7 +14,10 @@ function scheduleInvalidate(
 ) {
     const id = JSON.stringify(key);
     const existing = timers.get(id);
-    if (existing) clearTimeout(existing);
+
+    if (existing) {
+clearTimeout(existing);
+}
 
     timers.set(
         id,
@@ -37,8 +40,12 @@ export function useDebouncedInvalidate(delayMs: number = DEFAULT_DEBOUNCE_MS) {
 
     useEffect(() => {
         const timers = timersRef.current;
+
         return () => {
-            for (const t of timers.values()) clearTimeout(t);
+            for (const t of timers.values()) {
+clearTimeout(t);
+}
+
             timers.clear();
         };
     }, []);

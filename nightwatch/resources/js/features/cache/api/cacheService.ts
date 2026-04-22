@@ -12,5 +12,6 @@ export const getCacheStats = async (
     filters: CacheFilters = {},
 ): Promise<PaginatedResponse<HubCache>> => {
     const { data } = await api.get('/cache', { params: filters });
+
     return data;
 };

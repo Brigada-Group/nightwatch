@@ -5,11 +5,12 @@ export type StatTileTone = 'critical' | 'warning' | 'info' | 'neutral';
 
 const TONE_CLASS: Record<StatTileTone, string> = {
     critical:
-        'from-rose-500/25 to-rose-950/30 border-rose-400/25 text-rose-100',
+        'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-400/25 dark:bg-gradient-to-br dark:from-rose-500/25 dark:to-rose-950/30 dark:text-rose-100',
     warning:
-        'from-amber-500/20 to-amber-950/25 border-amber-400/22 text-amber-100',
-    info: 'from-sky-500/16 to-sky-950/25 border-sky-400/18 text-sky-100',
-    neutral: 'from-zinc-500/14 to-zinc-900/30 border-white/10 text-zinc-100',
+        'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-400/22 dark:bg-gradient-to-br dark:from-amber-500/20 dark:to-amber-950/25 dark:text-amber-100',
+    info: 'border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-400/18 dark:bg-gradient-to-br dark:from-sky-500/16 dark:to-sky-950/25 dark:text-sky-100',
+    neutral:
+        'border-border bg-muted/40 text-foreground dark:bg-gradient-to-br dark:from-zinc-500/14 dark:to-zinc-900/30',
 };
 
 type Props = {
@@ -23,7 +24,7 @@ export function StatTile({ label, value, tone, icon: Icon }: Props) {
     return (
         <div
             className={cn(
-                'relative overflow-hidden rounded-xl border bg-gradient-to-br p-4 backdrop-blur-md',
+                'relative overflow-hidden rounded-xl border p-4 dark:backdrop-blur-md',
                 TONE_CLASS[tone],
             )}
         >
@@ -36,7 +37,7 @@ export function StatTile({ label, value, tone, icon: Icon }: Props) {
                         {value.toLocaleString()}
                     </p>
                 </div>
-                <div className="rounded-lg border border-white/10 bg-black/30 p-2">
+                <div className="rounded-lg border border-border bg-background/60 p-2 dark:bg-black/30">
                     <Icon className="size-4" />
                 </div>
             </div>

@@ -13,5 +13,6 @@ export const getLogs = async (
     filters: LogFilters = {},
 ): Promise<PaginatedResponse<HubLog>> => {
     const { data } = await api.get('/logs', { params: filters });
+
     return data;
 };

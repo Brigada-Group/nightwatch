@@ -1,5 +1,8 @@
 import { Head, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
+import { InertiaPagination } from '@/components/monitoring/inertia-pagination';
+import { ProjectFilter } from '@/components/monitoring/project-filter';
+import { ResourcePageHeader } from '@/components/monitoring/resource-page-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,9 +15,6 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { InertiaPagination } from '@/components/monitoring/inertia-pagination';
-import { ProjectFilter } from '@/components/monitoring/project-filter';
-import { ResourcePageHeader } from '@/components/monitoring/resource-page-header';
 import type { HubCache, PaginatedResponse } from '@/entities';
 import type { ProjectOption, WithProjectRelation } from '@/types/monitoring';
 

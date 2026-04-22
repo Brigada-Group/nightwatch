@@ -1,6 +1,8 @@
 import { Head, router, usePage } from '@inertiajs/react';
 import { ExternalLink } from 'lucide-react';
+import { InertiaPagination } from '@/components/monitoring/inertia-pagination';
 import { monitoringCardClass } from '@/components/monitoring/monitoring-surface';
+import { ResourcePageHeader } from '@/components/monitoring/resource-page-header';
 import { ToneChip } from '@/components/monitoring/tone-chip';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,17 +14,15 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { cn } from '@/lib/utils';
-import { InertiaPagination } from '@/components/monitoring/inertia-pagination';
-import { ResourcePageHeader } from '@/components/monitoring/resource-page-header';
-import { CreateProjectDialog } from '@/features/projects/components/create-project-dialog';
-import { CredentialsRevealDialog } from '@/features/projects/components/credentials-reveal-dialog';
 import type {
     PaginatedResponse,
     Project,
     ProjectCredentials,
     ProjectStatus,
 } from '@/entities';
+import { CreateProjectDialog } from '@/features/projects/components/create-project-dialog';
+import { CredentialsRevealDialog } from '@/features/projects/components/credentials-reveal-dialog';
+import { cn } from '@/lib/utils';
 
 type PageProps = {
     projects: PaginatedResponse<Project>;
@@ -91,16 +91,16 @@ export default function ProjectsIndex() {
                                             tabIndex={0}
                                             className="cursor-pointer"
                                             onClick={() =>
-                                                router.visit(`/projects/${p.id}`)
+                                                router.visit(`/projects/${p.project_uuid}`)
                                             }
                                             onKeyDown={(e) => {
                                                 if (e.key === 'Enter' || e.key === ' ') {
                                                     e.preventDefault();
-                                                    router.visit(`/projects/${p.id}`);
+                                                    router.visit(`/projects/${p.project_uuid}`);
                                                 }
                                             }}
                                         >
-                                            <TableCell className="font-medium text-zinc-100">
+                                            <TableCell className="font-medium text-foreground">
                                                 {p.name}
                                             </TableCell>
                                             <TableCell className="text-muted-foreground">
@@ -127,7 +127,7 @@ export default function ProjectsIndex() {
                                                     className="gap-1"
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        router.visit(`/projects/${p.id}`);
+                                                        router.visit(`/projects/${p.project_uuid}`);
                                                     }}
                                                 >
                                                     Open

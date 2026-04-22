@@ -13,5 +13,6 @@ export const getOutgoingHttp = async (
     filters: OutgoingHttpFilters = {},
 ): Promise<PaginatedResponse<HubOutgoingHttp>> => {
     const { data } = await api.get('/outgoing-http', { params: filters });
+
     return data;
 };

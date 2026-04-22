@@ -40,12 +40,15 @@ function projectHasRecentTelemetry(project: ProjectSummary): boolean {
     if (project.requests_24h > 0 || project.exceptions_24h > 0) {
         return true;
     }
+
     if ((project.logs_24h ?? 0) > 0) {
         return true;
     }
+
     if (!project.last_heartbeat_at) {
         return false;
     }
+
     const t = new Date(project.last_heartbeat_at).getTime();
 
     return Number.isFinite(t) && Date.now() - t <= MS_24H;
@@ -55,9 +58,11 @@ function rowBadgeLabel(project: ProjectSummary): string {
     if (!projectHasRecentTelemetry(project)) {
         return 'Inactive';
     }
+
     if (project.status === 'critical') {
         return 'Critical';
     }
+
     if (project.status === 'warning') {
         return 'Warning';
     }
@@ -69,9 +74,11 @@ function rowStatusDot(project: ProjectSummary): ProjectStatus {
     if (!projectHasRecentTelemetry(project)) {
         return 'unknown';
     }
+
     if (project.status === 'critical') {
         return 'critical';
     }
+
     if (project.status === 'warning') {
         return 'warning';
     }
@@ -90,6 +97,7 @@ export function ActiveProjectsCard({
         if (activityDataProp && activityDataProp.length > 0) {
             return activityDataProp;
         }
+
         return Array.from({ length: 24 }, () => ({ value: 0 }));
     }, [activityDataProp]);
     const inactivePercent =

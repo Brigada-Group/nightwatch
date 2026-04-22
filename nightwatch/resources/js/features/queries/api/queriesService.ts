@@ -14,5 +14,6 @@ export const getQueries = async (
     filters: QueryFilters = {},
 ): Promise<PaginatedResponse<HubQuery>> => {
     const { data } = await api.get('/queries', { params: filters });
+
     return data;
 };

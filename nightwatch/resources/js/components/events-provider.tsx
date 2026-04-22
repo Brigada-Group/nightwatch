@@ -181,6 +181,7 @@ function useProjectChannel(projectId: number | null) {
 
 function ProjectChannelSubscriber({ projectId }: { projectId: number }) {
     useProjectChannel(projectId);
+
     return null;
 }
 

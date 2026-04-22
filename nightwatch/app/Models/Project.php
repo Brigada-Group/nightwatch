@@ -41,6 +41,11 @@ class Project extends Model
         ];
     }
 
+    public function getRouteKeyName(): string
+    {
+        return 'project_uuid';
+    }
+
     protected function apiTokenLastFour(): Attribute
     {
         return Attribute::get(function (): ?string {

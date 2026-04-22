@@ -34,6 +34,7 @@ function emptyHourlyVolume(): VolumePoint[] {
     return Array.from({ length: 24 }, (_, i) => {
         const d = new Date(start.getTime() + i * 60 * 60 * 1000);
         const label = `${d.getHours().toString().padStart(2, '0')}:00`;
+
         return { time: label, errors: 0, warnings: 0 };
     });
 }
@@ -54,7 +55,9 @@ function CustomTooltip({
     payload?: Array<{ value: number; dataKey: string; color: string }>;
     label?: string;
 }) {
-    if (!active || !payload?.length) return null;
+    if (!active || !payload?.length) {
+return null;
+}
 
     return (
         <div className="bg-popover border-border rounded-lg border px-3 py-2 text-xs shadow-xl">

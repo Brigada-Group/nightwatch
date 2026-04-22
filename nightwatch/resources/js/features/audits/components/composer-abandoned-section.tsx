@@ -45,12 +45,12 @@ export function ComposerAbandonedSection({ abandoned }: Props) {
                 <TableBody>
                     {abandoned.map((item, idx) => (
                         <TableRow key={`${item.package}-${idx}`}>
-                            <TableCell className="font-mono text-xs text-zinc-200">
+                            <TableCell className="font-mono text-xs text-foreground">
                                 {item.package}
                             </TableCell>
-                            <TableCell className="font-mono text-xs text-zinc-400">
+                            <TableCell className="font-mono text-xs text-muted-foreground">
                                 {item.replacement ?? (
-                                    <span className="text-zinc-500">
+                                    <span className="text-muted-foreground">
                                         No replacement
                                     </span>
                                 )}

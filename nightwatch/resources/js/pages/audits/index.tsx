@@ -144,7 +144,7 @@ export default function AuditsIndex() {
                                                     <TableCell className="text-sm">
                                                         <Link
                                                             href={`/audits/composer/${row.id}`}
-                                                            className="hover:text-violet-300 hover:underline"
+                                                            className="hover:text-violet-600 dark:hover:text-violet-300 hover:underline"
                                                             onClick={(e) =>
                                                                 e.stopPropagation()
                                                             }
@@ -183,7 +183,7 @@ export default function AuditsIndex() {
                                                             {new Date(
                                                                 row.sent_at,
                                                             ).toLocaleString()}
-                                                            <ChevronRight className="size-3.5 text-zinc-600 opacity-0 transition-opacity group-hover:opacity-100" />
+                                                            <ChevronRight className="size-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
                                                         </div>
                                                     </TableCell>
                                                 </TableRow>
@@ -244,7 +244,7 @@ export default function AuditsIndex() {
                                                     <TableCell className="text-sm">
                                                         <Link
                                                             href={`/audits/npm/${row.id}`}
-                                                            className="hover:text-violet-300 hover:underline"
+                                                            className="hover:text-violet-600 dark:hover:text-violet-300 hover:underline"
                                                             onClick={(e) =>
                                                                 e.stopPropagation()
                                                             }
@@ -310,7 +310,7 @@ export default function AuditsIndex() {
                                                             {new Date(
                                                                 row.sent_at,
                                                             ).toLocaleString()}
-                                                            <ChevronRight className="size-3.5 text-zinc-600 opacity-0 transition-opacity group-hover:opacity-100" />
+                                                            <ChevronRight className="size-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
                                                         </div>
                                                     </TableCell>
                                                 </TableRow>

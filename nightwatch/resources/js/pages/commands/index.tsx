@@ -1,4 +1,7 @@
 import { Head, usePage } from '@inertiajs/react';
+import { InertiaPagination } from '@/components/monitoring/inertia-pagination';
+import { ProjectFilter } from '@/components/monitoring/project-filter';
+import { ResourcePageHeader } from '@/components/monitoring/resource-page-header';
 import { Card, CardContent } from '@/components/ui/card';
 import {
     Table,
@@ -8,9 +11,6 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { InertiaPagination } from '@/components/monitoring/inertia-pagination';
-import { ProjectFilter } from '@/components/monitoring/project-filter';
-import { ResourcePageHeader } from '@/components/monitoring/resource-page-header';
 import type { HubCommand, PaginatedResponse } from '@/entities';
 import type { ProjectOption, WithProjectRelation } from '@/types/monitoring';
 

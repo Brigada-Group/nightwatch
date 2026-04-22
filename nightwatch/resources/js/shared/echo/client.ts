@@ -1,4 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 type EchoInstance = any;
 
 let echo: EchoInstance = null;
@@ -56,8 +56,10 @@ if (typeof window !== 'undefined') {
                             }),
                         })
                             .then((r) => {
-                                if (!r.ok)
-                                    throw new Error(`Auth ${r.status}`);
+                                if (!r.ok) {
+throw new Error(`Auth ${r.status}`);
+}
+
                                 return r.json();
                             })
                             .then((data) => callback(null, data))
