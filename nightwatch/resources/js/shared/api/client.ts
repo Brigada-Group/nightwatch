@@ -8,33 +8,45 @@ const api = axios.create({
     },
 });
 
-api.interceptors.request.use((config) => {
-    const token = document.querySelector<HTMLMetaElement>(
-        'meta[name="csrf-token"]',
-    );
-
-    if (token) {
-        config.headers['X-CSRF-TOKEN'] = token.content;
-    }
-
-    return config;
+const webApi = axios.create({
+    headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+    },
 });
 
-api.interceptors.response.use(
-    (response) => response,
-    (error) => {
-        const status = error.response?.status;
+function attachInterceptors(instance: typeof api) {
+    instance.interceptors.request.use((config) => {
+        const token = document.querySelector<HTMLMetaElement>(
+            'meta[name="csrf-token"]',
+        );
 
-        if (status === 401) {
-            window.location.href = '/login';
+        if (token) {
+            config.headers['X-CSRF-TOKEN'] = token.content;
         }
 
-        if (status === 419) {
-            window.location.reload();
-        }
+        return config;
+    });
 
-        return Promise.reject(error);
-    },
-);
+    instance.interceptors.response.use(
+        (response) => response,
+        (error) => {
+            const status = error.response?.status;
 
-export { api };
+            if (status === 401) {
+                window.location.href = '/login';
+            }
+
+            if (status === 419) {
+                window.location.reload();
+            }
+
+            return Promise.reject(error);
+        },
+    );
+}
+
+attachInterceptors(api);
+attachInterceptors(webApi);
+
+export { api, webApi };

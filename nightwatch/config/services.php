@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'paddle' => [
+        'api_key' => env('PADDLE_API_KEY'),
+        'base_url' => env('PADDLE_BASE_URL', env('PADDLE_TESTING', 'https://sandbox-api.paddle.com')),
+        'success_url' => env('PADDLE_SUCCESS_URL', rtrim(env('APP_URL', 'http://localhost'), '/').'/billing/success?tx={transaction_id}'),
+        'cancel_url' => env('PADDLE_CANCEL_URL', rtrim(env('APP_URL', 'http://localhost'), '/').'/#pricing'),
+    ],
+
 ];

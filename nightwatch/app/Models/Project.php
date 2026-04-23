@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Project extends Model
@@ -23,6 +24,7 @@ class Project extends Model
     ];
 
     protected $fillable = [
+        'team_id',
         'project_uuid',
         'name',
         'description',
@@ -52,6 +54,11 @@ class Project extends Model
 
             return substr($token, -4);
         });
+    }
+
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
     }
 
     public function exceptions(): HasMany

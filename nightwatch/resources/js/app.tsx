@@ -1,4 +1,5 @@
 import { createInertiaApp } from '@inertiajs/react';
+import type { ReactNode } from 'react';
 import { AppProviders } from '@/app/providers';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -13,11 +14,15 @@ configureEcho({
 });
 
 const appName = import.meta.env.VITE_APP_NAME || 'Nightwatch';
+const PlainLayout = ({ children }: { children: ReactNode }) => children;
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     layout: (name) => {
         switch (true) {
+            case name === 'welcome':
+            case name.startsWith('paddle/'):
+                return PlainLayout;
             case name.startsWith('auth/'):
             case name === 'teams/create':
                 return AuthLayout;
@@ -27,7 +32,7 @@ createInertiaApp({
                 return AppLayout;
         }
     },
-    strictMode: true,
+    strictMode: false,
     withApp(app) {
         return (
             <AppProviders>

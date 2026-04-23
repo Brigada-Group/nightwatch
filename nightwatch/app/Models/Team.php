@@ -61,4 +61,9 @@ class Team extends Model
             ->withPivot(['role_id', 'status'])
             ->withTimestamps();
     }
+
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class);
+    }
 }

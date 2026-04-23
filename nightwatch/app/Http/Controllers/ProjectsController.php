@@ -6,6 +6,7 @@ use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Http\Support\InertiaPaginator;
 use App\Models\Project;
+use App\Services\CurrentTeam;
 use App\Services\ProjectService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,13 +17,18 @@ class ProjectsController extends Controller
 {
     public function __construct(
         private readonly ProjectService $projectService,
+        private readonly CurrentTeam $currentTeam,
     ) {}
 
     public function index(Request $request): Response
     {
+        $team = $this->currentTeam->for($request->user());
+
+        abort_unless($team !== null, 403);
+
         $perPage = (int) min(50, max(5, $request->integer('per_page', 15)));
 
-        $paginator = Project::query()
+        $paginator = $team->projects()
             ->orderByDesc('last_heartbeat_at')
             ->orderByDesc('id')
             ->paginate($perPage)
@@ -30,12 +36,19 @@ class ProjectsController extends Controller
 
         return Inertia::render('projects/index', [
             'projects' => InertiaPaginator::props($paginator),
+            'canCreateProject' => $request->user()->can('create', Project::class),
         ]);
     }
 
     public function store(StoreProjectRequest $request): RedirectResponse
     {
-        $result = $this->projectService->create($request->validated());
+        $this->authorize('create', Project::class);
+
+        $team = $this->currentTeam->for($request->user());
+
+        abort_unless($team !== null, 403);
+
+        $result = $this->projectService->create($team, $request->validated());
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Project created.')]);
 
@@ -49,6 +62,8 @@ class ProjectsController extends Controller
 
     public function show(Project $project): Response
     {
+        $this->authorize('view', $project);
+
         $project->loadCount([
             'exceptions',
             'requests',
@@ -99,6 +114,8 @@ class ProjectsController extends Controller
 
     public function update(UpdateProjectRequest $request, Project $project): RedirectResponse
     {
+        $this->authorize('update', $project);
+
         $this->projectService->update($project, $request->validated());
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Project updated.')]);
@@ -108,6 +125,8 @@ class ProjectsController extends Controller
 
     public function rotateToken(Project $project): RedirectResponse
     {
+        $this->authorize('update', $project);
+
         $plainToken = $this->projectService->rotateToken($project);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('API token regenerated.')]);
@@ -122,6 +141,8 @@ class ProjectsController extends Controller
 
     public function destroy(Project $project): RedirectResponse
     {
+        $this->authorize('delete', $project);
+
         $this->projectService->delete($project);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Project removed.')]);
