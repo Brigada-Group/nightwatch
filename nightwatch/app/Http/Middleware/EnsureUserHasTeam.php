@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\TeamMember;
+use App\Models\Team;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,6 +27,12 @@ class EnsureUserHasTeam
         $hasTeam = $user->teamMemberships()
             ->where('status', TeamMember::STATUS_ACCEPTED)
             ->exists();
+
+        if (! $hasTeam) {
+            $hasTeam = Team::query()
+                ->where('admin_id', $user->id)
+                ->exists();
+        }
 
         if (! $hasTeam) {
             return redirect()->route('teams.create');

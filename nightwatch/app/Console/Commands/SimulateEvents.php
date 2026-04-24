@@ -3,8 +3,11 @@
 namespace App\Console\Commands;
 
 use App\Models\Project;
+use App\Models\Team;
+use App\Models\User;
 use App\Services\IngestService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class SimulateEvents extends Command
@@ -90,7 +93,10 @@ class SimulateEvents extends Command
             }
         }
 
+        $team = $this->resolveTargetTeam();
+
         $project = Project::create([
+            'team_id' => $team->id,
             'project_uuid' => Str::uuid()->toString(),
             'name' => 'Demo App',
             'api_token' => Str::random(40),
@@ -106,6 +112,32 @@ class SimulateEvents extends Command
         $this->warn("No projects found — created test project: {$project->name}");
 
         return $project;
+    }
+
+    private function resolveTargetTeam(): Team
+    {
+        $team = Team::query()->inRandomOrder()->first();
+
+        if ($team !== null) {
+            return $team;
+        }
+
+        $admin = User::query()->first();
+
+        if ($admin === null) {
+            $admin = User::query()->create([
+                'name' => 'Demo User',
+                'email' => 'demo+'.Str::lower(Str::random(8)).'@nightwatch.local',
+                'password' => Hash::make(Str::random(40)),
+            ]);
+        }
+
+        return Team::query()->create([
+            'name' => 'Demo Team',
+            'slug' => 'demo-team-'.Str::lower(Str::random(6)),
+            'description' => 'Auto-created for nightwatch:simulate',
+            'admin_id' => $admin->id,
+        ]);
     }
 
     private function randomSentAt(int $maxSecondsBack = 900): string

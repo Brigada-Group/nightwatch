@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('client_error_events', function (Blueprint $table) {
             $table->id();
-            $table->uuid('public_id')->unique()->default(\Illuminate\Support\Facades\DB::raw('gen_random_uuid()'));
+            $table->uuid('public_id')->unique();
 
             $table->string('project_id', 64);
             $table->string('environment', 64);

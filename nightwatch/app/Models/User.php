@@ -76,4 +76,11 @@ class User extends Authenticatable
             'ends_at' => optional($subscription->ends_at)?->toIso8601String(),
         ];
     }
+
+    public function assignedProjects(): BelongsToMany
+    {
+        return $this->belongsToMany(Project::class, 'project_user_assignments')
+            ->withPivot(['assigned_by'])
+            ->withTimestamps();
+    }
 }

@@ -70,6 +70,10 @@ class CurrentTeam
 
     public function userCanManageProjects(User $user, Team $team): bool
     {
+        if ($team->admin_id === $user->id) {
+            return true;
+        }
+
         return in_array(
             $this->roleFor($user, $team),
             [Role::ADMIN, Role::PROJECT_MANAGER],
@@ -79,23 +83,45 @@ class CurrentTeam
 
     private function acceptedTeam(User $user, int $teamId): ?Team
     {
-        return $user->teams()
+        $team = $user->teams()
             ->wherePivot('status', TeamMember::STATUS_ACCEPTED)
             ->where('teams.id', $teamId)
+            ->first();
+
+        if ($team !== null) {
+            return $team;
+        }
+
+        return Team::query()
+            ->where('id', $teamId)
+            ->where('admin_id', $user->id)
             ->first();
     }
 
     private function fallbackTeam(User $user): ?Team
     {
-        return $user->teams()
+        $team = $user->teams()
             ->wherePivot('status', TeamMember::STATUS_ACCEPTED)
             ->orderBy('team_members.accepted_at')
             ->orderBy('teams.id')
+            ->first();
+
+        if ($team !== null) {
+            return $team;
+        }
+
+        return Team::query()
+            ->where('admin_id', $user->id)
+            ->orderBy('id')
             ->first();
     }
 
     private function userCanAccess(User $user, Team $team): bool
     {
+        if ($team->admin_id === $user->id) {
+            return true;
+        }
+
         return $user->teamMemberships()
             ->where('team_id', $team->id)
             ->where('status', TeamMember::STATUS_ACCEPTED)

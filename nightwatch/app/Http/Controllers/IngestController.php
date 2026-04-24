@@ -175,4 +175,5 @@ class IngestController extends Controller
 
         return response()->json(['status' => 'ok']);
     }
+
 }
