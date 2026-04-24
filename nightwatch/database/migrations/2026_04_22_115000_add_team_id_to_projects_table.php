@@ -8,22 +8,24 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('projects', function (Blueprint $table) {
-            $table->foreignId('team_id')
-                ->after('id')
-                ->constrained('teams')
-                ->cascadeOnDelete();
-
-            $table->index('team_id');
-        });
+        if (! Schema::hasColumn('projects', 'team_id')) {
+            Schema::table('projects', function (Blueprint $table) {
+                $table->foreignId('team_id')
+                    ->after('id')
+                    ->constrained('teams')
+                    ->cascadeOnDelete();
+            });
+        }
     }
 
     public function down(): void
     {
+        if (! Schema::hasColumn('projects', 'team_id')) {
+            return;
+        }
+
         Schema::table('projects', function (Blueprint $table) {
-            $table->dropForeign(['team_id']);
-            $table->dropIndex(['team_id']);
-            $table->dropColumn('team_id');
+            $table->dropConstrainedForeignId('team_id');
         });
     }
 };
