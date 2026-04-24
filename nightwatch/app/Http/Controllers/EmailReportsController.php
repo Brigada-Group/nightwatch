@@ -6,6 +6,7 @@ use App\Http\Requests\StoreEmailReportRequest;
 use App\Http\Requests\UpdateEmailReportRequest;
 use App\Http\Support\ProjectFilterOptions;
 use App\Models\EmailReport;
+use App\Services\CurrentTeam;
 use App\Services\EmailReportService;
 use DateTimeZone;
 use Illuminate\Http\RedirectResponse;
@@ -17,10 +18,14 @@ class EmailReportsController extends Controller
 {
     public function __construct(
         private readonly EmailReportService $service,
+        private readonly CurrentTeam $currentTeam,
     ) {}
 
     public function index(Request $request): Response
     {
+        $team = $this->currentTeam->for($request->user());
+        abort_unless($team !== null, 403);
+
         $reports = EmailReport::query()
             ->where('user_id', $request->user()->id)
             ->orderBy('id')
@@ -28,7 +33,7 @@ class EmailReportsController extends Controller
 
         return Inertia::render('email-reports/index', [
             'reports' => $reports,
-            'projectOptions' => ProjectFilterOptions::all(),
+            'projectOptions' => ProjectFilterOptions::forTeam($team),
             'timezones' => DateTimeZone::listIdentifiers(),
             'defaults' => [
                 'sections' => EmailReport::DEFAULT_SECTIONS,

@@ -17,11 +17,11 @@ class JobInsightsService
      *
      * @return list<array{time: string, completed: int, failed: int}>
      */
-    public function throughputSeries(CarbonImmutable $since, ?int $projectId): array
+    public function throughputSeries(CarbonImmutable $since, ?int $projectId, array $allowedProjectIds): array
     {
         $bucketExpr = InsightsSqlDialect::hourlyBucket('sent_at');
 
-        $records = $this->scope(HubJob::query(), $projectId)
+        $records = $this->scope(HubJob::query(), $projectId, $allowedProjectIds)
             ->where('sent_at', '>=', $since)
             ->selectRaw(
                 "{$bucketExpr} as bucket, ".
@@ -57,11 +57,11 @@ class JobInsightsService
      *
      * @return list<array{bucket: string, completed: int, failed: int}>
      */
-    public function retryDistribution(CarbonImmutable $since, ?int $projectId): array
+    public function retryDistribution(CarbonImmutable $since, ?int $projectId, array $allowedProjectIds): array
     {
         $bucketExpr = 'CASE WHEN attempt >= 4 THEN 4 ELSE attempt END';
 
-        $rows = $this->scope(HubJob::query(), $projectId)
+        $rows = $this->scope(HubJob::query(), $projectId, $allowedProjectIds)
             ->where('sent_at', '>=', $since)
             ->whereNotNull('attempt')
             ->selectRaw("{$bucketExpr} as attempt_bucket, status, COUNT(*) as cnt")
@@ -97,9 +97,9 @@ class JobInsightsService
      *
      * @return list<array{job_class: string, runs: int, p50: int, p95: int, p99: int, avg: int}>
      */
-    public function durationPercentiles(CarbonImmutable $since, ?int $projectId): array
+    public function durationPercentiles(CarbonImmutable $since, ?int $projectId, array $allowedProjectIds): array
     {
-        $topJobs = $this->scope(HubJob::query(), $projectId)
+        $topJobs = $this->scope(HubJob::query(), $projectId, $allowedProjectIds)
             ->where('sent_at', '>=', $since)
             ->whereNotNull('duration_ms')
             ->selectRaw('job_class, COUNT(*) as cnt, AVG(duration_ms) as avg_ms')
@@ -110,7 +110,7 @@ class JobInsightsService
 
         $out = [];
         foreach ($topJobs as $row) {
-            $durations = $this->scope(HubJob::query(), $projectId)
+            $durations = $this->scope(HubJob::query(), $projectId, $allowedProjectIds)
                 ->where('sent_at', '>=', $since)
                 ->where('job_class', $row->job_class)
                 ->whereNotNull('duration_ms')
@@ -141,8 +141,10 @@ class JobInsightsService
      * @param  Builder<HubJob>  $query
      * @return Builder<HubJob>
      */
-    private function scope(Builder $query, ?int $projectId): Builder
+    private function scope(Builder $query, ?int $projectId, array $allowedProjectIds): Builder
     {
+        $query->whereIn('project_id', $allowedProjectIds);
+
         if ($projectId !== null) {
             $query->where('project_id', $projectId);
         }

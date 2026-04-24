@@ -17,11 +17,11 @@ class RequestInsightsService
      *
      * @return list<array{time: string, c2xx: int, c3xx: int, c4xx: int, c5xx: int}>
      */
-    public function statusClassSeries(CarbonImmutable $since, ?int $projectId): array
+    public function statusClassSeries(CarbonImmutable $since, ?int $projectId, array $allowedProjectIds): array
     {
         $bucketExpr = InsightsSqlDialect::hourlyBucket('sent_at');
 
-        $records = $this->scope(HubRequest::query(), $projectId)
+        $records = $this->scope(HubRequest::query(), $projectId, $allowedProjectIds)
             ->where('sent_at', '>=', $since)
             ->selectRaw(
                 "{$bucketExpr} as bucket, ".
@@ -63,11 +63,11 @@ class RequestInsightsService
      *
      * @return list<array{endpoint: string, requests: int, p50: int, p95: int, p99: int, avg: int}>
      */
-    public function latencyPercentiles(CarbonImmutable $since, ?int $projectId): array
+    public function latencyPercentiles(CarbonImmutable $since, ?int $projectId, array $allowedProjectIds): array
     {
         $endpointExpr = $this->endpointExpression();
 
-        $topEndpoints = $this->scope(HubRequest::query(), $projectId)
+        $topEndpoints = $this->scope(HubRequest::query(), $projectId, $allowedProjectIds)
             ->where('sent_at', '>=', $since)
             ->selectRaw("{$endpointExpr} as endpoint, COUNT(*) as cnt, AVG(duration_ms) as avg_ms")
             ->groupBy('endpoint')
@@ -77,7 +77,7 @@ class RequestInsightsService
 
         $out = [];
         foreach ($topEndpoints as $row) {
-            $durations = $this->scope(HubRequest::query(), $projectId)
+            $durations = $this->scope(HubRequest::query(), $projectId, $allowedProjectIds)
                 ->where('sent_at', '>=', $since)
                 ->whereRaw("{$endpointExpr} = ?", [$row->endpoint])
                 ->orderBy('duration_ms')
@@ -112,12 +112,12 @@ class RequestInsightsService
      *     max: int
      * }
      */
-    public function errorHeatmap(CarbonImmutable $since, ?int $projectId): array
+    public function errorHeatmap(CarbonImmutable $since, ?int $projectId, array $allowedProjectIds): array
     {
         $dowExpr = InsightsSqlDialect::dayOfWeek('sent_at');
         $hourExpr = InsightsSqlDialect::hourOfDay('sent_at');
 
-        $rows = $this->scope(HubRequest::query(), $projectId)
+        $rows = $this->scope(HubRequest::query(), $projectId, $allowedProjectIds)
             ->where('sent_at', '>=', $since)
             ->where('status_code', '>=', 400)
             ->selectRaw("{$dowExpr} as dow, {$hourExpr} as hour, COUNT(*) as errors")
@@ -165,8 +165,10 @@ class RequestInsightsService
      * @param  Builder<HubRequest>  $query
      * @return Builder<HubRequest>
      */
-    private function scope(Builder $query, ?int $projectId): Builder
+    private function scope(Builder $query, ?int $projectId, array $allowedProjectIds): Builder
     {
+        $query->whereIn('project_id', $allowedProjectIds);
+
         if ($projectId !== null) {
             $query->where('project_id', $projectId);
         }

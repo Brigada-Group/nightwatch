@@ -6,22 +6,32 @@ use App\Http\Support\InertiaPaginator;
 use App\Http\Support\ProjectFilterOptions;
 use App\Models\ClientErrorEvent;
 use App\Models\Project;
+use App\Services\CurrentTeam;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ClientErrorEventsController extends Controller
 {
+    public function __construct(
+        private readonly CurrentTeam $currentTeam,
+    ) {}
+
     public function index(Request $request): Response
     {
+        $team = $this->currentTeam->for($request->user());
+        abort_unless($team !== null, 403);
+
         $perPage = (int) min(50, max(5, $request->integer('per_page', 15)));
 
         $query = ClientErrorEvent::query()
             ->with(['project:id,name,project_uuid'])
+            ->whereHas('project', fn ($projectQuery) => $projectQuery->where('team_id', $team->id))
             ->orderByDesc('occurred_at');
 
         if ($request->filled('project_id')) {
             $project = Project::query()
+                ->where('team_id', $team->id)
                 ->whereKey($request->integer('project_id'))
                 ->first();
 
@@ -49,14 +59,18 @@ class ClientErrorEventsController extends Controller
                 'severity' => $request->filled('severity') ? (string) $request->query('severity') : null,
                 'runtime' => $request->filled('runtime') ? (string) $request->query('runtime') : null,
             ],
-            'projectOptions' => ProjectFilterOptions::all(),
+            'projectOptions' => ProjectFilterOptions::forTeam($team),
         ]);
     }
 
-    public function show(int $clientError): Response
+    public function show(Request $request, int $clientError): Response
     {
+        $team = $this->currentTeam->for($request->user());
+        abort_unless($team !== null, 403);
+
         $event = ClientErrorEvent::query()
             ->with(['project:id,name,project_uuid'])
+            ->whereHas('project', fn ($projectQuery) => $projectQuery->where('team_id', $team->id))
             ->findOrFail($clientError);
 
         return Inertia::render('client-errors/show', [
