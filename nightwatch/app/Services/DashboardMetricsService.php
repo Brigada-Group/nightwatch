@@ -36,12 +36,19 @@ class DashboardMetricsService
      *     filter_active: bool
      * }
      */
-    public function overview(?DashboardFilters $filters = null): array
+    public function overview(?DashboardFilters $filters = null, ?array $teamProjectIds = null): array
     {
         $filters ??= new DashboardFilters;
-        $cacheKey = self::CACHE_KEY.$filters->cacheSuffix();
+        $teamScopeSuffix = $teamProjectIds !== null
+            ? ':team:'.md5((string) json_encode(array_values($teamProjectIds)))
+            : '';
+        $cacheKey = self::CACHE_KEY.$filters->cacheSuffix().$teamScopeSuffix;
 
-        return Cache::remember($cacheKey, self::CACHE_TTL_SECONDS, fn () => $this->compute($filters));
+        return Cache::remember(
+            $cacheKey,
+            self::CACHE_TTL_SECONDS,
+            fn () => $this->compute($filters, $teamProjectIds)
+        );
     }
 
     /**
@@ -69,12 +76,12 @@ class DashboardMetricsService
         return $query->count();
     }
 
-    private function compute(DashboardFilters $filters): array
+    private function compute(DashboardFilters $filters, ?array $teamProjectIds): array
     {
         $since24h = CarbonImmutable::now()->subHours(24);
         $since7d = CarbonImmutable::now()->subDays(7)->startOfDay();
 
-        $scopedIds = $filters->isActive() ? $this->resolveProjectIds($filters) : null;
+        $scopedIds = $this->resolveScopedIds($filters, $teamProjectIds);
 
         $stats = $this->buildStats($since24h, $filters, $scopedIds);
         $recent_projects = $this->buildProjectList($since24h, $filters, $scopedIds);
@@ -113,6 +120,28 @@ class DashboardMetricsService
             ->all();
     }
 
+    
+    private function resolveScopedIds(DashboardFilters $filters, ?array $teamProjectIds): ?array
+    {
+        if ($teamProjectIds === null) {
+            return $filters->isActive() ? $this->resolveProjectIds($filters) : null;
+        }
+
+        if ($teamProjectIds === []) {
+            return [];
+        }
+
+        $baseQuery = Project::query()->whereIn('id', $teamProjectIds);
+        
+        if ($filters->isActive()) {
+            $baseQuery = $this->applyProjectFilters($baseQuery, $filters);
+        }
+
+        return $baseQuery->pluck('id')
+            ->map(static fn ($id) => (int) $id)
+            ->all();
+    }
+
     /**
      * @param  Builder<Project>  $query
      * @return Builder<Project>
@@ -145,7 +174,16 @@ class DashboardMetricsService
             ->selectRaw('COUNT(*) as total, AVG(duration_ms) as avg_duration')
             ->first();
 
-        $projectBase = $this->applyProjectFilters(Project::query(), $filters);
+        $projectBase = Project::query();
+        if ($scopedIds !== null) {
+            if ($scopedIds === []) {
+                $projectBase->whereRaw('1 = 0');
+            } else {
+                $projectBase->whereIn('id', $scopedIds);
+            }
+        } else {
+            $projectBase = $this->applyProjectFilters($projectBase, $filters);
+        }
         $criticalProjectsQuery = (clone $projectBase)->where('status', 'critical');
 
         return [
@@ -183,6 +221,14 @@ class DashboardMetricsService
             ->orderByDesc('last_heartbeat_at')
             ->orderByDesc('id')
             ->limit($filters->isActive() ? self::FILTERED_PROJECTS_LIMIT : 10);
+
+        if ($scopedIds !== null) {
+            if ($scopedIds === []) {
+                $query->whereRaw('1 = 0');
+            } else {
+                $query->whereIn('id', $scopedIds);
+            }
+        }
 
         return $query->get()
             ->map(fn (Project $p) => [

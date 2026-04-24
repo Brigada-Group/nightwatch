@@ -24,6 +24,7 @@ use App\Http\Controllers\TeamInvitationsController;
 use App\Http\Controllers\ProjectAssignmentsController;
 use App\Models\Project;
 use App\Services\DashboardFilters;
+use App\Services\CurrentTeam;
 use App\Services\DashboardMetricsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -92,10 +93,16 @@ Route::middleware(['auth', 'team'])->group(function () {
 
     Route::get('api/dashboard', DashboardOverviewController::class)->name('api.dashboard');
 
-    Route::get('dashboard', function (Request $request, DashboardMetricsService $metrics) {
+    Route::get('dashboard', function (Request $request, DashboardMetricsService $metrics, CurrentTeam $currentTeam) {
+        $team = $currentTeam->for($request->user());
+        abort_unless($team !== null, 403);
+        $teamProjectIds = $team->projects()->pluck('projects.id')
+            ->map(static fn ($id) => (int) $id)
+            ->all();
+
         $filters = DashboardFilters::fromRequest($request);
 
-        return Inertia::render('dashboard', $metrics->overview($filters));
+        return Inertia::render('dashboard', $metrics->overview($filters, $teamProjectIds));
     })->name('dashboard');
 
     Route::get('insights', [InsightsController::class, 'index'])->name('insights.index');
