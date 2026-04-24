@@ -14,11 +14,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { cn } from '@/lib/utils';
-import { InertiaPagination } from '@/components/monitoring/inertia-pagination';
-import { ResourcePageHeader } from '@/components/monitoring/resource-page-header';
-import { CreateProjectDialog } from '@/features/projects/components/create-project-dialog';
-import { CredentialsRevealDialog } from '@/features/projects/components/credentials-reveal-dialog';
+
 import { InviteMemberDialog } from '@/features/teams/components/invite-member-dialog';
 import type {
     PaginatedResponse,
