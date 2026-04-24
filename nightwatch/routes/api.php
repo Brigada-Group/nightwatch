@@ -1,7 +1,11 @@
 <?php
 
+use App\Http\Controllers\BillingController;
+use App\Http\Controllers\Api\Ingest\IngestClientErrorController;
 use App\Http\Controllers\IngestController;
 use Illuminate\Support\Facades\Route;
+
+Route::post('billing/checkout', [BillingController::class, 'checkout'])->name('billing.checkout');
 
 Route::middleware('guardian')
     ->prefix('ingest')
@@ -21,4 +25,5 @@ Route::middleware('guardian')
         Route::post('health', [IngestController::class, 'health'])->name('ingest.health');
         Route::post('composer-audit', [IngestController::class, 'composerAudit'])->name('ingest.composerAudit');
         Route::post('npm-audit', [IngestController::class, 'npmAudit'])->name('ingest.npmAudit');
+        Route::post('client-errors', [IngestClientErrorController::class, 'store'])->name('ingest.clientErrors');
     });

@@ -26,6 +26,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'guardian' => \App\Http\Middleware\AuthenticateGuardianClient::class,
+            'team' => \App\Http\Middleware\EnsureUserHasTeam::class,
+            'subscribed' => \App\Http\Middleware\EnsureUserHasSubscription::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

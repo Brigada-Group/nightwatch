@@ -149,6 +149,33 @@
  */
 @layer utilities {
     .scrollbar-slim {
+    .landing-gradient-border {
+        position: relative;
+        border: 1px solid transparent;
+    }
+
+    .landing-gradient-border::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        padding: 1px;
+        background: linear-gradient(
+            135deg,
+            rgba(139, 92, 246, 0.55) 0%,
+            rgba(39, 39, 42, 0.8) 45%,
+            rgba(99, 102, 241, 0.5) 100%
+        );
+        -webkit-mask:
+            linear-gradient(#000 0 0) content-box,
+            linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+        opacity: 0.9;
+    }
+
+    .scrollbar-slim-dark {
         scrollbar-width: thin;
         scrollbar-color: oklch(0.78 0.01 260) oklch(0.96 0.01 260);
     }

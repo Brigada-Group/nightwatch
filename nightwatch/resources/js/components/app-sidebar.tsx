@@ -62,6 +62,11 @@ const monitoringItems: NavItem[] = [
         icon: AlertTriangle,
     },
     {
+        title: 'Client Errors',
+        href: '/client-errors',
+        icon: AlertTriangle,
+    },
+    {
         title: 'Requests',
         href: '/hub-requests',
         icon: Globe,

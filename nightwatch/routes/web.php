@@ -3,6 +3,7 @@
 use App\Http\Controllers\DashboardOverviewController;
 use App\Http\Controllers\EmailReportsController;
 use App\Http\Controllers\ExceptionsController;
+use App\Http\Controllers\ClientErrorEventsController;
 use App\Http\Controllers\HubAuditsController;
 use App\Http\Controllers\InsightsController;
 use App\Http\Controllers\HubCacheController;
@@ -16,7 +17,11 @@ use App\Http\Controllers\HubOutgoingHttpController;
 use App\Http\Controllers\HubQueriesController;
 use App\Http\Controllers\HubRequestsController;
 use App\Http\Controllers\HubScheduledTasksController;
+use App\Http\Controllers\BillingController;
 use App\Http\Controllers\ProjectsController;
+use App\Http\Controllers\TeamsController;
+use App\Http\Controllers\TeamInvitationsController;
+use App\Http\Controllers\ProjectAssignmentsController;
 use App\Models\Project;
 use App\Services\DashboardFilters;
 use App\Services\DashboardMetricsService;
@@ -26,14 +31,61 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    if (Auth::check()) {
-        return redirect()->route('dashboard');
-    }
-
-    return redirect()->route('login');
+    return Inertia::render('welcome', [
+        'canRegister' => ! Auth::check(),
+    ]);
 })->name('home');
 
+Route::prefix('billing')->group(function () {
+    Route::get('success', function (Request $request) {
+        $transactionId = (string) $request->query('tx', '');
+
+        return $transactionId !== ''
+            ? redirect('/paddle/checkout?_ptxn='.$transactionId)
+            : redirect()->route('home');
+    })->name('billing.success');
+});
+
+Route::prefix('paddle')->group(function () {
+    Route::get('checkout', function () {
+        return Inertia::render('paddle/checkout');
+    })->name('paddle.checkout');
+});
+
 Route::middleware(['auth'])->group(function () {
+    Route::post('billing/subscribe-checkout', [BillingController::class, 'subscribeCheckout'])
+        ->name('billing.subscribe-checkout');
+
+    Route::controller(TeamsController::class)->group(function () {
+        Route::get('teams/create', 'create')->name('teams.create');
+        Route::post('teams', 'store')->name('teams.store');
+        Route::post('teams/{team}/switch', 'switch')->name('teams.switch');
+    });
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('team/invitations/{token}', function (string $token) {
+        return Inertia::render('teams/accept-invite', ['token' => $token]);
+    })->name('team.invitations.show');
+
+    Route::post('team/invitations/{token}/accept', [TeamInvitationsController::class, 'accept'])
+        ->name('team.invitations.accept');
+});
+
+Route::middleware(['auth', 'team'])->group(function () {
+
+    Route::controller(TeamInvitationsController::class)->group(function () {
+        Route::get('team/invitations/search-users', 'searchUsers')->name('team.invitations.search-users');
+        Route::post('team/invitations', 'store')->name('team.invitations.store');
+    });
+
+    Route::controller(ProjectAssignmentsController::class)->group(function () {
+        Route::post('projects/{project}/assignments', 'store')->name('project.assignments.store');
+        Route::delete('projects/{project}/assignments/{user}', 'destroy')->name('project.assignments.destroy');
+    });
+});
+
+Route::middleware(['auth', 'team'])->group(function () {
     Route::get('api/project-ids', function () {
         return Project::pluck('id');
     });
@@ -46,35 +98,84 @@ Route::middleware(['auth'])->group(function () {
         return Inertia::render('dashboard', $metrics->overview($filters));
     })->name('dashboard');
 
-    Route::get('projects', [ProjectsController::class, 'index'])->name('projects.index');
-    Route::post('projects', [ProjectsController::class, 'store'])->name('projects.store');
-    Route::get('projects/{project}', [ProjectsController::class, 'show'])->name('projects.show');
-    Route::patch('projects/{project}', [ProjectsController::class, 'update'])->name('projects.update');
-    Route::post('projects/{project}/rotate-token', [ProjectsController::class, 'rotateToken'])->name('projects.rotate-token');
-    Route::delete('projects/{project}', [ProjectsController::class, 'destroy'])->name('projects.destroy');
-    Route::get('exceptions', [ExceptionsController::class, 'index'])->name('exceptions.index');
-    Route::get('hub-requests', [HubRequestsController::class, 'index'])->name('hub-requests.index');
-    Route::get('queries', [HubQueriesController::class, 'index'])->name('queries.index');
-    Route::get('jobs', [HubJobsController::class, 'index'])->name('jobs.index');
-    Route::get('logs', [HubLogsController::class, 'index'])->name('logs.index');
-    Route::get('outgoing-http', [HubOutgoingHttpController::class, 'index'])->name('outgoing-http.index');
-    Route::get('mail', [HubMailController::class, 'index'])->name('mail.index');
-    Route::get('notifications', [HubNotificationsController::class, 'index'])->name('notifications.index');
-    Route::get('cache', [HubCacheController::class, 'index'])->name('cache.index');
-    Route::get('commands', [HubCommandsController::class, 'index'])->name('commands.index');
-    Route::get('scheduled-tasks', [HubScheduledTasksController::class, 'index'])->name('scheduled-tasks.index');
-    Route::get('health-checks', [HubHealthChecksController::class, 'index'])->name('health-checks.index');
     Route::get('insights', [InsightsController::class, 'index'])->name('insights.index');
-    Route::get('audits', [HubAuditsController::class, 'index'])->name('audits.index');
-    Route::get('audits/{type}/{audit}', [HubAuditsController::class, 'show'])
-        ->where('type', 'composer|npm')
-        ->where('audit', '[0-9]+')
-        ->name('audits.show');
 
     Route::get('email-reports', [EmailReportsController::class, 'index'])->name('email-reports.index');
     Route::post('email-reports', [EmailReportsController::class, 'store'])->name('email-reports.store');
     Route::patch('email-reports/{emailReport}', [EmailReportsController::class, 'update'])->name('email-reports.update');
     Route::delete('email-reports/{emailReport}', [EmailReportsController::class, 'destroy'])->name('email-reports.destroy');
+
+    Route::controller(ProjectsController::class)->prefix('projects')->group(function () {
+        Route::get('/', 'index')->name('projects.index');
+        Route::post('/', 'store')->name('projects.store');
+        Route::get('{project}', 'show')->name('projects.show');
+        Route::patch('{project}', 'update')->name('projects.update');
+        Route::post('{project}/rotate-token', 'rotateToken')->name('projects.rotate-token');
+        Route::delete('{project}', 'destroy')->name('projects.destroy');
+    });
+
+    Route::controller(ExceptionsController::class)->group(function () {
+        Route::get('exceptions', 'index')->name('exceptions.index');
+    });
+
+    Route::controller(ClientErrorEventsController::class)->group(function () {
+        Route::get('client-errors', 'index')->name('client-errors.index');
+        Route::get('client-errors/{clientError}', 'show')
+            ->whereNumber('clientError')
+            ->name('client-errors.show');
+    });
+
+    Route::controller(HubRequestsController::class)->group(function () {
+        Route::get('hub-requests', 'index')->name('hub-requests.index');
+    });
+
+    Route::controller(HubQueriesController::class)->group(function () {
+        Route::get('queries', 'index')->name('queries.index');
+    });
+
+    Route::controller(HubJobsController::class)->group(function () {
+        Route::get('jobs', 'index')->name('jobs.index');
+    });
+
+    Route::controller(HubLogsController::class)->group(function () {
+        Route::get('logs', 'index')->name('logs.index');
+    });
+
+    Route::controller(HubOutgoingHttpController::class)->group(function () {
+        Route::get('outgoing-http', 'index')->name('outgoing-http.index');
+    });
+
+    Route::controller(HubMailController::class)->group(function () {
+        Route::get('mail', 'index')->name('mail.index');
+    });
+
+    Route::controller(HubNotificationsController::class)->group(function () {
+        Route::get('notifications', 'index')->name('notifications.index');
+    });
+
+    Route::controller(HubCacheController::class)->group(function () {
+        Route::get('cache', 'index')->name('cache.index');
+    });
+
+    Route::controller(HubCommandsController::class)->group(function () {
+        Route::get('commands', 'index')->name('commands.index');
+    });
+
+    Route::controller(HubScheduledTasksController::class)->group(function () {
+        Route::get('scheduled-tasks', 'index')->name('scheduled-tasks.index');
+    });
+
+    Route::controller(HubHealthChecksController::class)->group(function () {
+        Route::get('health-checks', 'index')->name('health-checks.index');
+    });
+
+    Route::controller(HubAuditsController::class)->prefix('audits')->group(function () {
+        Route::get('/', 'index')->name('audits.index');
+        Route::get('{type}/{audit}', 'show')
+            ->where('type', 'composer|npm')
+            ->where('audit', '[0-9]+')
+            ->name('audits.show');
+    });
 });
 
 require __DIR__.'/settings.php';

@@ -3,22 +3,25 @@
 namespace App\Services;
 
 use App\Models\Project;
+use App\Models\Team;
 use Illuminate\Support\Str;
 
 class ProjectService
 {
     /**
-     * Create a monitored project and return the plain API token so the caller
-     * can display it to the user once before it is no longer retrievable.
+     * Create a monitored project owned by the given team and return the plain
+     * API token so the caller can display it once before it is no longer
+     * retrievable.
      *
      * @param  array{name: string, description?: string|null, environment?: string|null}  $data
      * @return array{project: Project, api_token: string}
      */
-    public function create(array $data): array
+    public function create(Team $team, array $data): array
     {
         $plainToken = $this->generateToken();
 
         $project = Project::create([
+            'team_id' => $team->id,
             'project_uuid' => (string) Str::uuid(),
             'name' => $data['name'],
             'description' => $data['description'] ?? null,

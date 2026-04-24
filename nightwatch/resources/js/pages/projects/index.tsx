@@ -14,6 +14,12 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { cn } from '@/lib/utils';
+import { InertiaPagination } from '@/components/monitoring/inertia-pagination';
+import { ResourcePageHeader } from '@/components/monitoring/resource-page-header';
+import { CreateProjectDialog } from '@/features/projects/components/create-project-dialog';
+import { CredentialsRevealDialog } from '@/features/projects/components/credentials-reveal-dialog';
+import { InviteMemberDialog } from '@/features/teams/components/invite-member-dialog';
 import type {
     PaginatedResponse,
     Project,
@@ -24,17 +30,26 @@ import { CreateProjectDialog } from '@/features/projects/components/create-proje
 import { CredentialsRevealDialog } from '@/features/projects/components/credentials-reveal-dialog';
 import { cn } from '@/lib/utils';
 
+type TeamContext = {
+    current: {
+        role: string | null;
+    } | null;
+};
+
 type PageProps = {
     projects: PaginatedResponse<Project>;
     flash?: {
         projectCredentials?: ProjectCredentials | null;
     };
     hubUrl?: string;
+    teamContext?: TeamContext;
 };
 
 export default function ProjectsIndex() {
-    const { projects, flash, hubUrl } = usePage<PageProps>().props;
+    const { projects, flash, hubUrl, teamContext } = usePage<PageProps>().props;
     const credentials = flash?.projectCredentials ?? null;
+    const currentRole = teamContext?.current?.role;
+    const canInviteMembers = currentRole === 'admin' || currentRole === 'project_manager';
     const resolvedHubUrl =
         hubUrl ??
         (typeof window !== 'undefined' ? window.location.origin : 'https://your-hub.example');
@@ -50,7 +65,12 @@ export default function ProjectsIndex() {
                 <ResourcePageHeader
                     title="Projects"
                     description="Connected applications reporting telemetry to Nightwatch. Open a row for a full telemetry dossier."
-                    toolbar={<CreateProjectDialog />}
+                    toolbar={
+                        <div className="flex items-center gap-2">
+                            {canInviteMembers ? <InviteMemberDialog /> : null}
+                            <CreateProjectDialog />
+                        </div>
+                    }
                 />
                 <Card className={cn(monitoringCardClass, 'gap-0 py-0')}>
                     <CardContent className="p-0 pt-4">
