@@ -6,6 +6,7 @@ use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Http\Support\InertiaPaginator;
 use App\Models\Project;
+use App\Models\Role;
 use App\Services\CurrentTeam;
 use App\Services\ProjectService;
 use Illuminate\Http\RedirectResponse;
@@ -27,8 +28,13 @@ class ProjectsController extends Controller
         abort_unless($team !== null, 403);
 
         $perPage = (int) min(50, max(5, $request->integer('per_page', 15)));
+        $role = $this->currentTeam->roleFor($request->user(), $team);
 
-        $paginator = $team->projects()
+        $baseQuery = in_array($role, [Role::ADMIN, Role::PROJECT_MANAGER], true)
+            ? $team->projects()
+            : $team->projects()->whereHas('assignees', fn ($query) => $query->where('users.id', $request->user()->id));
+
+        $paginator = $baseQuery
             ->orderByDesc('last_heartbeat_at')
             ->orderByDesc('id')
             ->paginate($perPage)

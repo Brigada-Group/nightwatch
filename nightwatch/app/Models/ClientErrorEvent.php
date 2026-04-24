@@ -2,11 +2,22 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class ClientErrorEvent extends Model
 {
     public $timestamps = false;
+
+    protected static function booted(): void
+    {
+        static::creating(function (ClientErrorEvent $event): void {
+            if (! $event->public_id) {
+                $event->public_id = (string) Str::uuid();
+            }
+        });
+    }
 
     protected $fillable = [
         'public_id',
@@ -41,4 +52,9 @@ class ClientErrorEvent extends Model
         'user_payload' => 'array',
         'raw_payload' => 'array',
     ];
+
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class, 'project_id', 'project_uuid');
+    }
 }

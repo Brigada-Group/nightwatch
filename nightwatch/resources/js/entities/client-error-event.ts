@@ -1,0 +1,26 @@
+export type ClientErrorEvent = {
+    id: number;
+    project_id: string;
+    public_id: string;
+    environment: string;
+    server: string;
+    sent_at: string;
+    runtime: string;
+    exception_class: string;
+    message: string;
+    source_file: string | null;
+    line: number;
+    colno: number | null;
+    request_url: string | null;
+    status_code: number;
+    ip: string | null;
+    headers: string | null;
+    stack_trace: string | null;
+    component_stack: string | null;
+    severity: string;
+    user_payload: Record<string, unknown>;
+    fingerprint: string | null;
+    occurred_at: string;
+    received_at: string;
+    raw_payload: Record<string, unknown>;
+};

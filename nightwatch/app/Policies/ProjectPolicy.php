@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Project;
 use App\Models\Role;
+use App\Models\Team;
 use App\Models\TeamMember;
 use App\Models\User;
 use App\Services\CurrentTeam;
@@ -42,6 +43,12 @@ class ProjectPolicy
 
     private function isAcceptedMember(User $user, int $teamId): bool
     {
+        $team = Team::query()->find($teamId);
+
+        if ($team?->admin_id === $user->id) {
+            return true;
+        }
+
         return $user->teamMemberships()
             ->where('team_id', $teamId)
             ->where('status', TeamMember::STATUS_ACCEPTED)
@@ -50,6 +57,12 @@ class ProjectPolicy
 
     private function hasManagingRole(User $user, int $teamId): bool
     {
+        $team = Team::query()->find($teamId);
+
+        if ($team?->admin_id === $user->id) {
+            return true;
+        }
+
         return $user->teamMemberships()
             ->where('team_id', $teamId)
             ->where('status', TeamMember::STATUS_ACCEPTED)

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardOverviewController;
 use App\Http\Controllers\ExceptionsController;
+use App\Http\Controllers\ClientErrorEventsController;
 use App\Http\Controllers\HubAuditsController;
 use App\Http\Controllers\HubCacheController;
 use App\Http\Controllers\HubCommandsController;
@@ -17,6 +18,8 @@ use App\Http\Controllers\HubScheduledTasksController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\ProjectsController;
 use App\Http\Controllers\TeamsController;
+use App\Http\Controllers\TeamInvitationsController;
+use App\Http\Controllers\ProjectAssignmentsController;
 use App\Models\Project;
 use App\Services\DashboardFilters;
 use App\Services\DashboardMetricsService;
@@ -51,16 +54,37 @@ Route::middleware(['auth'])->group(function () {
     Route::post('billing/subscribe-checkout', [BillingController::class, 'subscribeCheckout'])
         ->name('billing.subscribe-checkout');
 
-    Route::middleware(['subscribed'])->group(function () {
-        Route::controller(TeamsController::class)->group(function () {
-            Route::get('teams/create', 'create')->name('teams.create');
-            Route::post('teams', 'store')->name('teams.store');
-            Route::post('teams/{team}/switch', 'switch')->name('teams.switch');
-        });
+    Route::controller(TeamsController::class)->group(function () {
+        Route::get('teams/create', 'create')->name('teams.create');
+        Route::post('teams', 'store')->name('teams.store');
+        Route::post('teams/{team}/switch', 'switch')->name('teams.switch');
     });
 });
 
-Route::middleware(['auth', 'subscribed', 'team'])->group(function () {
+Route::middleware(['auth'])->group(function () {
+    Route::get('team/invitations/{token}', function (string $token) {
+        return Inertia::render('teams/accept-invite', ['token' => $token]);
+    })->name('team.invitations.show');
+
+    Route::post('team/invitations/{token}/accept', [TeamInvitationsController::class, 'accept'])
+        ->name('team.invitations.accept');
+});
+
+Route::middleware(['auth', 'team'])->group(function () {
+
+    Route::controller(TeamInvitationsController::class)->group(function () {
+        Route::get('team/invitations/search-users', 'searchUsers')->name('team.invitations.search-users');
+        Route::post('team/invitations', 'store')->name('team.invitations.store');
+    });
+
+    Route::controller(ProjectAssignmentsController::class)->group(function () {
+        Route::post('projects/{project}/assignments', 'store')->name('project.assignments.store');
+        Route::delete('projects/{project}/assignments/{user}', 'destroy')->name('project.assignments.destroy');
+    });
+});
+
+
+Route::middleware(['auth', 'team'])->group(function () {
     Route::get('api/project-ids', function () {
         return Project::pluck('id');
     });
@@ -86,9 +110,18 @@ Route::middleware(['auth', 'subscribed', 'team'])->group(function () {
         Route::get('exceptions', 'index')->name('exceptions.index');
     });
 
+    Route::controller(ClientErrorEventsController::class)->group(function () {
+        Route::get('client-errors', 'index')->name('client-errors.index');
+        Route::get('client-errors/{clientError}', 'show')
+            ->whereNumber('clientError')
+            ->name('client-errors.show');
+    });
+
     Route::controller(HubRequestsController::class)->group(function () {
         Route::get('hub-requests', 'index')->name('hub-requests.index');
     });
+
+
 
     Route::controller(HubQueriesController::class)->group(function () {
         Route::get('queries', 'index')->name('queries.index');
