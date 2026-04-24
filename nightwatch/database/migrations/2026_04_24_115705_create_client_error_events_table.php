@@ -34,7 +34,7 @@ return new class extends Migration
             $table->text('component_stack')->nullable();
 
             $table->string('severity', 32)->default('error');
-            $table->jsonb('user_payload')->default('{}');
+            $table->json('user_payload');
             $table->string('fingerprint', 64)->nullable();
 
             $table->timestampTz('occurred_at');
