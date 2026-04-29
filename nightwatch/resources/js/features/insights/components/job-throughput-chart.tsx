@@ -17,6 +17,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { useAppearance } from '@/hooks/use-appearance';
+import { countDomain } from '@/lib/chart-domain';
 
 export type ThroughputPoint = {
     time: string;
@@ -149,6 +150,8 @@ export function JobThroughputChart({ data }: Props) {
                                 axisLine={false}
                                 tick={{ fontSize: 10, fill: theme.tick }}
                                 width={36}
+                                domain={countDomain()}
+                                allowDecimals={false}
                             />
                             <Tooltip content={<ThroughputTooltip />} cursor={false} />
                             <Legend

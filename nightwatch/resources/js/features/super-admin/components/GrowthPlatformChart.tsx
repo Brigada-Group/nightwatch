@@ -1,6 +1,7 @@
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { GrowthSeriesPoint } from '@/features/super-admin/types';
+import { countDomain } from '@/lib/chart-domain';
 
 type Props = {
     series: GrowthSeriesPoint[];
@@ -26,7 +27,7 @@ export function GrowthPlatformChart({ series, hasSparseHistory }: Props) {
                         <LineChart data={series} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
                             <XAxis dataKey="date" tick={{ fontSize: 10 }} className="text-muted-foreground" />
-                            <YAxis allowDecimals={false} tick={{ fontSize: 10 }} className="text-muted-foreground" />
+                            <YAxis allowDecimals={false} domain={countDomain()} tick={{ fontSize: 10 }} className="text-muted-foreground" />
                             <Tooltip
                                 contentStyle={{ fontSize: 12 }}
                                 labelFormatter={(d) => String(d)}

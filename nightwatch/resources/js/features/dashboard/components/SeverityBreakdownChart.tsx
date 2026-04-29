@@ -14,6 +14,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { countDomain } from '@/lib/chart-domain';
 
 type VolumePoint = {
     time: string;
@@ -124,6 +125,8 @@ export function SeverityBreakdownChart({ data, timePeriod = '24H' }: Props) {
                                 axisLine={false}
                                 tick={{ fontSize: 10, fill: COLORS.muted }}
                                 width={30}
+                                domain={countDomain()}
+                                allowDecimals={false}
                             />
                             <Tooltip content={<CustomTooltip />} cursor={false} />
                             <Bar

@@ -3,8 +3,10 @@ import {
     Bar,
     BarChart,
     ResponsiveContainer,
+    YAxis,
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { countDomain } from '@/lib/chart-domain';
 import { cn } from '@/lib/utils';
 
 type BarDatum = { value: number };
@@ -68,6 +70,11 @@ export function StatCard({
                     <div className="h-[60px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={chartData} barCategoryGap="20%">
+                                <YAxis
+                                    hide
+                                    domain={countDomain()}
+                                    allowDecimals={false}
+                                />
                                 <Bar
                                     dataKey="value"
                                     fill={chartColor}

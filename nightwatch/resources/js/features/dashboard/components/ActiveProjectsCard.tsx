@@ -3,6 +3,7 @@ import {
     Bar,
     BarChart,
     ResponsiveContainer,
+    YAxis,
 } from 'recharts';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -13,6 +14,7 @@ import {
 } from '@/components/ui/card';
 import type { ProjectStatus } from '@/entities';
 import { StatusIndicator } from '@/features/dashboard/components/StatusIndicator';
+import { countDomain } from '@/lib/chart-domain';
 
 type ProjectSummary = {
     id: number;
@@ -130,6 +132,11 @@ export function ActiveProjectsCard({
                 <div className="h-[60px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={activityData} barCategoryGap="15%">
+                            <YAxis
+                                hide
+                                domain={countDomain()}
+                                allowDecimals={false}
+                            />
                             <Bar
                                 dataKey="value"
                                 radius={[2, 2, 0, 0]}
