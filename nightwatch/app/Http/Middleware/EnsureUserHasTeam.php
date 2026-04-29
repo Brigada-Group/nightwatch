@@ -2,8 +2,8 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\TeamMember;
 use App\Models\Team;
+use App\Models\TeamMember;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,6 +21,10 @@ class EnsureUserHasTeam
         $user = $request->user();
 
         if ($user === null) {
+            return $next($request);
+        }
+
+        if ($user->isSuperAdmin()) {
             return $next($request);
         }
 
