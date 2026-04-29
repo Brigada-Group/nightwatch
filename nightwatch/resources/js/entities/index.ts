@@ -1,6 +1,7 @@
 export type { Project, ProjectStatus, ProjectCredentials } from './project';
 export type { HubException } from './exception';
 export type { ClientErrorEvent } from './client-error-event';
+export type { WebhookDestination } from './webhook-destination';
 export type { HubRequest } from './request';
 export type { HubQuery } from './query';
 export type { HubJob, JobStatus } from './job';

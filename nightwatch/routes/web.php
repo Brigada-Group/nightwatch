@@ -1,11 +1,11 @@
 <?php
 
+use App\Http\Controllers\BillingController;
+use App\Http\Controllers\ClientErrorEventsController;
 use App\Http\Controllers\DashboardOverviewController;
 use App\Http\Controllers\EmailReportsController;
 use App\Http\Controllers\ExceptionsController;
-use App\Http\Controllers\ClientErrorEventsController;
 use App\Http\Controllers\HubAuditsController;
-use App\Http\Controllers\InsightsController;
 use App\Http\Controllers\HubCacheController;
 use App\Http\Controllers\HubCommandsController;
 use App\Http\Controllers\HubHealthChecksController;
@@ -17,14 +17,16 @@ use App\Http\Controllers\HubOutgoingHttpController;
 use App\Http\Controllers\HubQueriesController;
 use App\Http\Controllers\HubRequestsController;
 use App\Http\Controllers\HubScheduledTasksController;
-use App\Http\Controllers\BillingController;
-use App\Http\Controllers\ProjectsController;
-use App\Http\Controllers\TeamsController;
-use App\Http\Controllers\TeamInvitationsController;
+use App\Http\Controllers\InsightsController;
 use App\Http\Controllers\ProjectAssignmentsController;
+use App\Http\Controllers\ProjectsController;
+use App\Http\Controllers\SuperAdminDashboardController;
+use App\Http\Controllers\TeamInvitationsController;
+use App\Http\Controllers\TeamsController;
+use App\Http\Controllers\WebhookDestinationsController;
 use App\Models\Project;
-use App\Services\DashboardFilters;
 use App\Services\CurrentTeam;
+use App\Services\DashboardFilters;
 use App\Services\DashboardMetricsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -73,6 +75,18 @@ Route::middleware(['auth'])->group(function () {
         ->name('team.invitations.accept');
 });
 
+Route::middleware(['auth', 'super_admin'])->prefix('super-admin')->group(function () {
+    Route::get('dashboard', [SuperAdminDashboardController::class, 'dashboard'])->name('super-admin.dashboard');
+    Route::get('external-dependencies', [SuperAdminDashboardController::class, 'externalDependencies'])->name('super-admin.external-dependencies');
+    Route::get('teams', [SuperAdminDashboardController::class, 'teams'])->name('super-admin.teams.index');
+    Route::get('teams/{team}', [SuperAdminDashboardController::class, 'team'])->name('super-admin.teams.show');
+    Route::get('projects', [SuperAdminDashboardController::class, 'projects'])->name('super-admin.projects');
+    Route::get('retention-config', [SuperAdminDashboardController::class, 'retentionConfig'])->name('super-admin.retention-config');
+    Route::post('retention-details', [SuperAdminDashboardController::class, 'storeRetention'])->name('super-admin.retention.store');
+    Route::patch('retention-details/{retentionDetail}', [SuperAdminDashboardController::class, 'updateRetention'])->name('super-admin.retention.update');
+    Route::delete('retention-details/{retentionDetail}', [SuperAdminDashboardController::class, 'destroyRetention'])->name('super-admin.retention.destroy');
+});
+
 Route::middleware(['auth', 'team'])->group(function () {
 
     Route::controller(TeamInvitationsController::class)->group(function () {
@@ -111,6 +125,11 @@ Route::middleware(['auth', 'team'])->group(function () {
     Route::post('email-reports', [EmailReportsController::class, 'store'])->name('email-reports.store');
     Route::patch('email-reports/{emailReport}', [EmailReportsController::class, 'update'])->name('email-reports.update');
     Route::delete('email-reports/{emailReport}', [EmailReportsController::class, 'destroy'])->name('email-reports.destroy');
+
+    Route::get('webhooks', [WebhookDestinationsController::class, 'index'])->name('webhooks.index');
+    Route::post('webhooks', [WebhookDestinationsController::class, 'store'])->name('webhooks.store');
+    Route::patch('webhooks/{webhookDestination}', [WebhookDestinationsController::class, 'update'])->name('webhooks.update');
+    Route::delete('webhooks/{webhookDestination}', [WebhookDestinationsController::class, 'destroy'])->name('webhooks.destroy');
 
     Route::controller(ProjectsController::class)->prefix('projects')->group(function () {
         Route::get('/', 'index')->name('projects.index');
