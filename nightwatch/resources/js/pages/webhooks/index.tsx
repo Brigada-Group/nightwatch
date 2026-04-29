@@ -1,5 +1,5 @@
 import { Head, router, usePage } from '@inertiajs/react';
-import { ChevronsUpDown, Pencil, Plus, Trash2, Webhook as WebhookIcon } from 'lucide-react';
+import { ChevronsUpDown, Layers, Pencil, Plus, Trash2, Webhook as WebhookIcon } from 'lucide-react';
 import * as React from 'react';
 import { monitoringCardClass } from '@/components/monitoring/monitoring-surface';
 import { ResourcePageHeader } from '@/components/monitoring/resource-page-header';
@@ -83,6 +83,99 @@ const WEBHOOK_EVENT_HINTS: Partial<Record<string, string>> = {
     'composer_audit.issues_found': 'Composer audit reported advisories or abandoned packages.',
     'npm_audit.issues_found': 'npm audit reported vulnerabilities.',
 };
+
+function subscribedCoversCatalog(events: string[], catalog: string[]): boolean {
+    if (catalog.length === 0 || events.length !== catalog.length) {
+        return false;
+    }
+    const set = new Set(events);
+
+    return catalog.every((e) => set.has(e));
+}
+
+type WebhookSubscribedEventsPreviewProps = {
+    events: string[];
+    catalog: string[];
+};
+
+function WebhookSubscribedEventsPreview({ events, catalog }: WebhookSubscribedEventsPreviewProps) {
+    const count = events.length;
+
+    if (count === 0) {
+        return <span className="text-muted-foreground">None</span>;
+    }
+
+    const allTypes = subscribedCoversCatalog(events, catalog);
+
+    return (
+        <Popover modal={false}>
+            <PopoverTrigger asChild>
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className={cn(
+                        'h-auto max-w-full justify-start gap-1.5 border-dashed py-1.5 pr-2 pl-2',
+                        allTypes &&
+                            'border-emerald-500/40 bg-emerald-500/10 text-emerald-200 hover:bg-emerald-500/15 hover:text-emerald-100',
+                    )}
+                >
+                    <Layers className="size-3.5 shrink-0 opacity-80" aria-hidden />
+                    <span className="min-w-0">
+                        <span className="tabular-nums font-medium">{count}</span>
+                        <span className="text-muted-foreground ml-1 font-normal">
+                            {count === 1 ? 'event' : 'events'}
+                        </span>
+                        {allTypes ? (
+                            <Badge
+                                variant="secondary"
+                                className="ml-2 shrink-0 border-emerald-500/30 bg-emerald-600/25 py-0 font-mono text-[10px] text-emerald-100 uppercase"
+                            >
+                                All types
+                            </Badge>
+                        ) : null}
+                    </span>
+                    <ChevronsUpDown className="text-muted-foreground ml-auto size-3.5 shrink-0 opacity-70" aria-hidden />
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent
+                align="start"
+                className="z-[110] w-[min(22rem,calc(100vw-2rem))] p-0"
+                sideOffset={6}
+                onCloseAutoFocus={(event) => event.preventDefault()}
+            >
+                <div className="border-b px-3 py-2">
+                    <p className="font-medium text-sm">Subscribed events</p>
+                    <p className="text-muted-foreground text-xs leading-relaxed">
+                        {catalog.length > 0 && allTypes ? (
+                            <>This destination receives every Nightwatch event type ({catalog.length} total).</>
+                        ) : catalog.length > 0 ? (
+                            <>
+                                Showing {count} of {catalog.length} available types. Expand details for the full list.
+                            </>
+                        ) : (
+                            <>Listed below.</>
+                        )}
+                    </p>
+                </div>
+                <ScrollArea className="h-[min(18rem,40vh)]">
+                    <div className="flex flex-wrap gap-1.5 p-3 pb-4">
+                        {events.map((eventType) => (
+                            <Badge
+                                key={eventType}
+                                variant="outline"
+                                className="bg-background/80 max-w-full font-mono text-[11px] font-normal"
+                                title={eventType}
+                            >
+                                {eventType}
+                            </Badge>
+                        ))}
+                    </div>
+                </ScrollArea>
+            </PopoverContent>
+        </Popover>
+    );
+}
 
 function buildFormState(destination: WebhookDestination | null): FormState {
     if (!destination) {
@@ -224,14 +317,11 @@ export default function WebhooksIndex() {
                                                 </div>
                                             </TableCell>
                                             <TableCell className="text-sm">{destination.provider}</TableCell>
-                                            <TableCell className="text-xs">
-                                                <div className="flex flex-wrap gap-1.5">
-                                                    {destination.subscribed_events.map((eventType) => (
-                                                        <Badge key={eventType} variant="outline">
-                                                            {eventType}
-                                                        </Badge>
-                                                    ))}
-                                                </div>
+                                            <TableCell className="max-w-[280px] align-top lg:max-w-[320px]">
+                                                <WebhookSubscribedEventsPreview
+                                                    events={destination.subscribed_events ?? []}
+                                                    catalog={eventTypes}
+                                                />
                                             </TableCell>
                                             <TableCell>
                                                 {destination.enabled ? (

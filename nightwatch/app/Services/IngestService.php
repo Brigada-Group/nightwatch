@@ -2,453 +2,118 @@
 
 namespace App\Services;
 
-use App\Events\CacheReceived;
-use App\Events\CommandReceived;
-use App\Events\ExceptionReceived;
-use App\Events\HeartbeatReceived;
-use App\Events\HealthCheckReceived;
-use App\Events\JobReceived;
-use App\Events\LogReceived;
-use App\Events\MailReceived;
-use App\Events\NotificationReceived;
-use App\Events\OutgoingHttpReceived;
-use App\Events\QueryReceived;
-use App\Events\RequestReceived;
-use App\Events\ScheduledTaskReceived;
-use App\Jobs\RecalculateProjectStatus;
-use App\Models\HubCache;
-use App\Models\HubCommand;
-use App\Models\HubComposerAudit;
-use App\Models\HubException;
-use App\Models\HubHealthCheck;
-use App\Models\HubJob;
-use App\Models\HubLog;
-use App\Models\HubMail;
-use App\Models\HubNotification;
-use App\Models\HubNpmAudit;
-use App\Models\HubOutgoingHttp;
-use App\Models\HubQuery;
-use App\Models\HubRequest;
-use App\Models\HubScheduledTask;
 use App\Models\Project;
+use App\Services\Ingest\Recorders\CacheIngestRecorder;
+use App\Services\Ingest\Recorders\CommandIngestRecorder;
+use App\Services\Ingest\Recorders\ComposerAuditIngestRecorder;
+use App\Services\Ingest\Recorders\ExceptionIngestRecorder;
+use App\Services\Ingest\Recorders\HealthChecksIngestRecorder;
+use App\Services\Ingest\Recorders\HeartbeatIngestRecorder;
+use App\Services\Ingest\Recorders\JobIngestRecorder;
+use App\Services\Ingest\Recorders\LogIngestRecorder;
+use App\Services\Ingest\Recorders\MailIngestRecorder;
+use App\Services\Ingest\Recorders\NotificationIngestRecorder;
+use App\Services\Ingest\Recorders\NpmAuditIngestRecorder;
+use App\Services\Ingest\Recorders\OutgoingHttpIngestRecorder;
+use App\Services\Ingest\Recorders\QueryIngestRecorder;
+use App\Services\Ingest\Recorders\RequestIngestRecorder;
+use App\Services\Ingest\Recorders\ScheduledTaskIngestRecorder;
 
+/**
+ * Facade over ingest recorders (strategy objects). Each record* method delegates to a dedicated recorder.
+ */
 class IngestService
 {
+    public function __construct(
+        private readonly HeartbeatIngestRecorder $heartbeat,
+        private readonly ExceptionIngestRecorder $exception,
+        private readonly RequestIngestRecorder $request,
+        private readonly QueryIngestRecorder $query,
+        private readonly JobIngestRecorder $job,
+        private readonly LogIngestRecorder $log,
+        private readonly OutgoingHttpIngestRecorder $outgoingHttp,
+        private readonly MailIngestRecorder $mail,
+        private readonly NotificationIngestRecorder $notification,
+        private readonly CacheIngestRecorder $cache,
+        private readonly CommandIngestRecorder $command,
+        private readonly ScheduledTaskIngestRecorder $scheduledTask,
+        private readonly HealthChecksIngestRecorder $healthChecks,
+        private readonly ComposerAuditIngestRecorder $composerAudit,
+        private readonly NpmAuditIngestRecorder $npmAudit,
+    ) {}
+
     public function recordHeartbeat(Project $project, array $data): void
     {
-        $project->update([
-            'last_heartbeat_at' => now(),
-            'metadata' => [
-                'php_version' => $data['php_version'],
-                'laravel_version' => $data['laravel_version'],
-            ],
-        ]);
-
-        broadcast(new HeartbeatReceived([
-            'project_id' => $project->id,
-            'project_name' => $project->name,
-            'status' => $project->status,
-            'last_heartbeat_at' => $project->last_heartbeat_at->toIso8601String(),
-            'metadata' => $project->metadata,
-        ]));
+        $this->heartbeat->record($project, $data);
     }
 
     public function recordException(Project $project, array $data): void
     {
-        $exception = HubException::create([
-            'project_id' => $project->id,
-            'environment' => $data['environment'],
-            'server' => $data['server'],
-            'exception_class' => $data['exception_class'],
-            'message' => $data['message'],
-            'file' => $data['file'] ?? null,
-            'line' => $data['line'] ?? null,
-            'url' => $data['url'] ?? null,
-            'status_code' => $data['status_code'] ?? null,
-            'user' => $data['user'] ?? null,
-            'ip' => $data['ip'] ?? null,
-            'headers' => $data['headers'] ?? null,
-            'stack_trace' => $data['stack_trace'] ?? null,
-            'severity' => $data['severity'] ?? 'error',
-            'sent_at' => $data['sent_at'],
-        ]);
-
-        broadcast(new ExceptionReceived([
-            'id' => $exception->id,
-            'project_id' => $project->id,
-            'exception_class' => $exception->exception_class,
-            'message' => $exception->message,
-            'file' => $exception->file,
-            'line' => $exception->line,
-            'severity' => $exception->severity,
-            'environment' => $exception->environment,
-            'server' => $exception->server,
-            'sent_at' => $data['sent_at'],
-        ]));
-
-        $this->recalculateStatus($project);
+        $this->exception->record($project, $data);
     }
 
     public function recordRequest(Project $project, array $data): void
     {
-        $hubRequest = HubRequest::create([
-            'project_id' => $project->id,
-            'environment' => $data['environment'],
-            'server' => $data['server'],
-            'method' => $data['method'],
-            'uri' => $data['uri'],
-            'route_name' => $data['route_name'] ?? null,
-            'status_code' => $data['status_code'],
-            'duration_ms' => $data['duration_ms'],
-            'ip' => $data['ip'] ?? null,
-            'user_id' => $data['user_id'] ?? null,
-            'sent_at' => $data['sent_at'],
-        ]);
-
-        broadcast(new RequestReceived([
-            'id' => $hubRequest->id,
-            'project_id' => $project->id,
-            'method' => $hubRequest->method,
-            'uri' => $hubRequest->uri,
-            'route_name' => $hubRequest->route_name,
-            'status_code' => $hubRequest->status_code,
-            'duration_ms' => $hubRequest->duration_ms,
-            'ip' => $hubRequest->ip,
-            'user_id' => $hubRequest->user_id,
-            'environment' => $hubRequest->environment,
-            'sent_at' => $data['sent_at'],
-        ]));
+        $this->request->record($project, $data);
     }
 
     public function recordQuery(Project $project, array $data): void
     {
-        $query = HubQuery::create([
-            'project_id' => $project->id,
-            'environment' => $data['environment'],
-            'server' => $data['server'],
-            'sql' => $data['sql'],
-            'duration_ms' => $data['duration_ms'],
-            'connection' => $data['connection'] ?? null,
-            'file' => $data['file'] ?? null,
-            'line' => $data['line'] ?? null,
-            'is_slow' => $data['is_slow'] ?? false,
-            'is_n_plus_one' => $data['is_n_plus_one'] ?? false,
-            'metadata' => $data['metadata'] ?? null,
-            'sent_at' => $data['sent_at'],
-        ]);
-
-        broadcast(new QueryReceived([
-            'id' => $query->id,
-            'project_id' => $project->id,
-            'sql' => $query->sql,
-            'duration_ms' => $query->duration_ms,
-            'connection' => $query->connection,
-            'file' => $query->file,
-            'line' => $query->line,
-            'is_slow' => $query->is_slow,
-            'is_n_plus_one' => $query->is_n_plus_one,
-            'environment' => $query->environment,
-            'sent_at' => $data['sent_at'],
-        ]));
+        $this->query->record($project, $data);
     }
 
     public function recordJob(Project $project, array $data): void
     {
-        $job = HubJob::create([
-            'project_id' => $project->id,
-            'environment' => $data['environment'],
-            'server' => $data['server'],
-            'job_class' => $data['job_class'],
-            'queue' => $data['queue'] ?? null,
-            'connection' => $data['connection'] ?? null,
-            'status' => $data['status'],
-            'duration_ms' => $data['duration_ms'] ?? null,
-            'attempt' => $data['attempt'] ?? null,
-            'error_message' => $data['error_message'] ?? null,
-            'metadata' => $data['metadata'] ?? null,
-            'sent_at' => $data['sent_at'],
-        ]);
-
-        broadcast(new JobReceived([
-            'id' => $job->id,
-            'project_id' => $project->id,
-            'job_class' => $job->job_class,
-            'queue' => $job->queue,
-            'status' => $job->status,
-            'duration_ms' => $job->duration_ms,
-            'attempt' => $job->attempt,
-            'error_message' => $job->error_message,
-            'environment' => $job->environment,
-            'sent_at' => $data['sent_at'],
-        ]));
-
-        if ($data['status'] === 'failed') {
-            $this->recalculateStatus($project);
-        }
+        $this->job->record($project, $data);
     }
 
     public function recordLog(Project $project, array $data): void
     {
-        $log = HubLog::create([
-            'project_id' => $project->id,
-            'environment' => $data['environment'],
-            'server' => $data['server'],
-            'level' => $data['level'],
-            'message' => $data['message'],
-            'channel' => $data['channel'] ?? null,
-            'context' => $data['context'] ?? null,
-            'sent_at' => $data['sent_at'],
-        ]);
-
-        broadcast(new LogReceived([
-            'id' => $log->id,
-            'project_id' => $project->id,
-            'level' => $log->level,
-            'message' => $log->message,
-            'channel' => $log->channel,
-            'context' => $log->context,
-            'environment' => $log->environment,
-            'sent_at' => $data['sent_at'],
-        ]));
-
-        if (in_array($data['level'], ['emergency', 'alert', 'critical'])) {
-            $this->recalculateStatus($project);
-        }
+        $this->log->record($project, $data);
     }
 
     public function recordOutgoingHttp(Project $project, array $data): void
     {
-        $http = HubOutgoingHttp::create([
-            'project_id' => $project->id,
-            'environment' => $data['environment'],
-            'server' => $data['server'],
-            'method' => $data['method'],
-            'url' => $data['url'],
-            'host' => $data['host'],
-            'status_code' => $data['status_code'] ?? null,
-            'duration_ms' => $data['duration_ms'] ?? null,
-            'failed' => $data['failed'] ?? false,
-            'error_message' => $data['error_message'] ?? null,
-            'sent_at' => $data['sent_at'],
-        ]);
-
-        broadcast(new OutgoingHttpReceived([
-            'id' => $http->id,
-            'project_id' => $project->id,
-            'method' => $http->method,
-            'url' => $http->url,
-            'host' => $http->host,
-            'status_code' => $http->status_code,
-            'duration_ms' => $http->duration_ms,
-            'failed' => $http->failed,
-            'environment' => $http->environment,
-            'sent_at' => $data['sent_at'],
-        ]));
+        $this->outgoingHttp->record($project, $data);
     }
 
     public function recordMail(Project $project, array $data): void
     {
-        $mail = HubMail::create([
-            'project_id' => $project->id,
-            'environment' => $data['environment'],
-            'server' => $data['server'],
-            'mailable' => $data['mailable'] ?? null,
-            'subject' => $data['subject'] ?? null,
-            'to' => $data['to'] ?? null,
-            'status' => $data['status'],
-            'error_message' => $data['error_message'] ?? null,
-            'sent_at' => $data['sent_at'],
-        ]);
-
-        broadcast(new MailReceived([
-            'id' => $mail->id,
-            'project_id' => $project->id,
-            'mailable' => $mail->mailable,
-            'subject' => $mail->subject,
-            'to' => $mail->to,
-            'status' => $mail->status,
-            'error_message' => $mail->error_message,
-            'environment' => $mail->environment,
-            'sent_at' => $data['sent_at'],
-        ]));
+        $this->mail->record($project, $data);
     }
 
     public function recordNotification(Project $project, array $data): void
     {
-        $notification = HubNotification::create([
-            'project_id' => $project->id,
-            'environment' => $data['environment'],
-            'server' => $data['server'],
-            'notification_class' => $data['notification_class'],
-            'channel' => $data['channel'],
-            'notifiable_type' => $data['notifiable_type'],
-            'notifiable_id' => $data['notifiable_id'] ?? null,
-            'status' => $data['status'],
-            'error_message' => $data['error_message'] ?? null,
-            'sent_at' => $data['sent_at'],
-        ]);
-
-        broadcast(new NotificationReceived([
-            'id' => $notification->id,
-            'project_id' => $project->id,
-            'notification_class' => $notification->notification_class,
-            'channel' => $notification->channel,
-            'notifiable_type' => $notification->notifiable_type,
-            'notifiable_id' => $notification->notifiable_id,
-            'status' => $notification->status,
-            'error_message' => $notification->error_message,
-            'environment' => $notification->environment,
-            'sent_at' => $data['sent_at'],
-        ]));
+        $this->notification->record($project, $data);
     }
 
     public function recordCache(Project $project, array $data): void
     {
-        $cache = HubCache::create([
-            'project_id' => $project->id,
-            'environment' => $data['environment'],
-            'server' => $data['server'],
-            'store' => $data['store'],
-            'hits' => $data['hits'],
-            'misses' => $data['misses'],
-            'writes' => $data['writes'],
-            'forgets' => $data['forgets'],
-            'hit_rate' => $data['hit_rate'] ?? null,
-            'period_start' => $data['period_start'] ?? null,
-            'sent_at' => $data['sent_at'],
-        ]);
-
-        broadcast(new CacheReceived([
-            'id' => $cache->id,
-            'project_id' => $project->id,
-            'store' => $cache->store,
-            'hits' => $cache->hits,
-            'misses' => $cache->misses,
-            'writes' => $cache->writes,
-            'forgets' => $cache->forgets,
-            'hit_rate' => $cache->hit_rate,
-            'period_start' => $cache->period_start,
-            'environment' => $cache->environment,
-            'sent_at' => $data['sent_at'],
-        ]));
+        $this->cache->record($project, $data);
     }
 
     public function recordCommand(Project $project, array $data): void
     {
-        $command = HubCommand::create([
-            'project_id' => $project->id,
-            'environment' => $data['environment'],
-            'server' => $data['server'],
-            'command' => $data['command'],
-            'exit_code' => $data['exit_code'] ?? null,
-            'duration_ms' => $data['duration_ms'] ?? null,
-            'sent_at' => $data['sent_at'],
-        ]);
-
-        broadcast(new CommandReceived([
-            'id' => $command->id,
-            'project_id' => $project->id,
-            'command' => $command->command,
-            'exit_code' => $command->exit_code,
-            'duration_ms' => $command->duration_ms,
-            'environment' => $command->environment,
-            'sent_at' => $data['sent_at'],
-        ]));
+        $this->command->record($project, $data);
     }
 
     public function recordScheduledTask(Project $project, array $data): void
     {
-        $task = HubScheduledTask::create([
-            'project_id' => $project->id,
-            'environment' => $data['environment'],
-            'server' => $data['server'],
-            'task' => $data['task'],
-            'description' => $data['description'] ?? null,
-            'expression' => $data['expression'] ?? null,
-            'status' => $data['status'],
-            'duration_ms' => $data['duration_ms'] ?? null,
-            'output' => $data['output'] ?? null,
-            'sent_at' => $data['sent_at'],
-        ]);
-
-        broadcast(new ScheduledTaskReceived([
-            'id' => $task->id,
-            'project_id' => $project->id,
-            'task' => $task->task,
-            'description' => $task->description,
-            'expression' => $task->expression,
-            'status' => $task->status,
-            'duration_ms' => $task->duration_ms,
-            'output' => $task->output,
-            'environment' => $task->environment,
-            'sent_at' => $data['sent_at'],
-        ]));
-
-        if ($data['status'] === 'failed') {
-            $this->recalculateStatus($project);
-        }
+        $this->scheduledTask->record($project, $data);
     }
 
     public function recordHealthChecks(Project $project, array $data): void
     {
-        foreach ($data['checks'] as $check) {
-            HubHealthCheck::create([
-                'project_id' => $project->id,
-                'environment' => $data['environment'],
-                'server' => $data['server'],
-                'check_name' => $check['name'],
-                'status' => $check['status'],
-                'message' => $check['message'] ?? null,
-                'metadata' => $check['metadata'] ?? null,
-                'sent_at' => $data['sent_at'],
-            ]);
-        }
-
-        broadcast(new HealthCheckReceived([
-            'project_id' => $project->id,
-            'checks' => $data['checks'],
-            'environment' => $data['environment'],
-            'server' => $data['server'],
-            'sent_at' => $data['sent_at'],
-        ]));
-
-        $this->recalculateStatus($project);
+        $this->healthChecks->record($project, $data);
     }
 
     public function recordComposerAudit(Project $project, array $data): void
     {
-        HubComposerAudit::create([
-            'project_id' => $project->id,
-            'environment' => $data['environment'],
-            'server' => $data['server'],
-            'advisories_count' => $data['advisories_count'] ?? count($data['advisories'] ?? []),
-            'abandoned_count' => $data['abandoned_count'] ?? count($data['abandoned'] ?? []),
-            'advisories' => $data['advisories'] ?? null,
-            'abandoned' => $data['abandoned'] ?? null,
-            'sent_at' => $data['sent_at'],
-        ]);
+        $this->composerAudit->record($project, $data);
     }
 
     public function recordNpmAudit(Project $project, array $data): void
     {
-        HubNpmAudit::create([
-            'project_id' => $project->id,
-            'environment' => $data['environment'],
-            'server' => $data['server'],
-            'total_vulnerabilities' => $data['total_vulnerabilities'] ?? 0,
-            'info_count' => $data['info_count'] ?? 0,
-            'low_count' => $data['low_count'] ?? 0,
-            'moderate_count' => $data['moderate_count'] ?? 0,
-            'high_count' => $data['high_count'] ?? 0,
-            'critical_count' => $data['critical_count'] ?? 0,
-            'vulnerabilities' => $data['vulnerabilities'] ?? null,
-            'audit_metadata' => $data['audit_metadata'] ?? null,
-            'sent_at' => $data['sent_at'],
-        ]);
-    }
-
-    private function recalculateStatus(Project $project): void
-    {
-        RecalculateProjectStatus::dispatch($project->id);
+        $this->npmAudit->record($project, $data);
     }
 }
