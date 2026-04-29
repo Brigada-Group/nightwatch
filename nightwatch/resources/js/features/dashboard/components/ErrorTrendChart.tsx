@@ -56,8 +56,8 @@ function CustomTooltip({
     label?: string;
 }) {
     if (!active || !payload?.length) {
-return null;
-}
+        return null;
+    }
 
     return (
         <div className="bg-popover border-border rounded-lg border px-3 py-2 text-xs shadow-xl">

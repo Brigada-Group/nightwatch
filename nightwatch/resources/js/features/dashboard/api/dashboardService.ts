@@ -119,8 +119,8 @@ export async function getDashboardOverview(
         const trimmed = filters.search.trim();
 
         if (trimmed !== '') {
-params.search = trimmed;
-}
+            params.search = trimmed;
+        }
 
         if (filters.statuses.length > 0) {
             params.statuses = filters.statuses.join(',');

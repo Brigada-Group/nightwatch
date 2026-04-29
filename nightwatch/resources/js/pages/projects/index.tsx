@@ -1,5 +1,5 @@
-import { Head, router, usePage } from '@inertiajs/react';
-import { ExternalLink } from 'lucide-react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { ExternalLink, Link2 } from 'lucide-react';
 import { InertiaPagination } from '@/components/monitoring/inertia-pagination';
 import { monitoringCardClass } from '@/components/monitoring/monitoring-surface';
 import { ResourcePageHeader } from '@/components/monitoring/resource-page-header';
@@ -14,7 +14,6 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { InviteMemberDialog } from '@/features/teams/components/invite-member-dialog';
 import type {
     PaginatedResponse,
     Project,
@@ -28,6 +27,7 @@ import { cn } from '@/lib/utils';
 type TeamContext = {
     current: {
         role: string | null;
+        can_manage_team_projects?: boolean;
     } | null;
 };
 
@@ -43,8 +43,10 @@ type PageProps = {
 export default function ProjectsIndex() {
     const { projects, flash, hubUrl, teamContext } = usePage<PageProps>().props;
     const credentials = flash?.projectCredentials ?? null;
-    const currentRole = teamContext?.current?.role;
-    const canInviteMembers = currentRole === 'admin' || currentRole === 'project_manager';
+    const canInviteMembers =
+        teamContext?.current?.can_manage_team_projects === true ||
+        teamContext?.current?.role === 'admin' ||
+        teamContext?.current?.role === 'project_manager';
     const resolvedHubUrl =
         hubUrl ??
         (typeof window !== 'undefined' ? window.location.origin : 'https://your-hub.example');
@@ -62,7 +64,17 @@ export default function ProjectsIndex() {
                     description="Connected applications reporting telemetry to Nightwatch. Open a row for a full telemetry dossier."
                     toolbar={
                         <div className="flex items-center gap-2">
-                            {canInviteMembers ? <InviteMemberDialog /> : null}
+                            {canInviteMembers ? (
+                                <Button variant="outline" asChild>
+                                    <Link
+                                        href="/team/invitation-links"
+                                        className="gap-2"
+                                    >
+                                        <Link2 className="size-4" />
+                                        Invitation links
+                                    </Link>
+                                </Button>
+                            ) : null}
                             <CreateProjectDialog />
                         </div>
                     }

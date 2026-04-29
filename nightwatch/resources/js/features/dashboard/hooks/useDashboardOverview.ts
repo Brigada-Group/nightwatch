@@ -2,11 +2,12 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import {
     EMPTY_FILTERS,
     filtersAreActive,
-    getDashboardOverview
-    
-    
+    getDashboardOverview,
 } from '../api/dashboardService';
-import type {DashboardFilters, DashboardOverview} from '../api/dashboardService';
+import type {
+    DashboardFilters,
+    DashboardOverview,
+} from '../api/dashboardService';
 
 export function useDashboardOverview(
     initial: DashboardOverview,

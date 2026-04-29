@@ -41,8 +41,8 @@ export function DashboardToolbar({
         const unique = new Set<string>(availableEnvironments ?? DEFAULT_ENVIRONMENTS);
 
         for (const env of filters.environments) {
-unique.add(env);
-}
+            unique.add(env);
+        }
 
         return [...unique].sort();
     }, [availableEnvironments, filters.environments]);
