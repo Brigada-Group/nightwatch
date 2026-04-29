@@ -17,7 +17,15 @@ class ProjectPolicy
 
     public function view(User $user, Project $project): bool
     {
-        return $this->isAcceptedMember($user, $project->team_id);
+        if (! $this->isAcceptedMember($user, $project->team_id)) {
+            return false;
+        }
+
+        if ($this->hasManagingRole($user, $project->team_id)) {
+            return true;
+        }
+
+        return $project->assignees()->whereKey($user->id)->exists();
     }
 
     public function create(User $user): bool

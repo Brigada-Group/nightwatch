@@ -26,4 +26,26 @@ final class ProjectFilterOptions
             ->values()
             ->all();
     }
+
+    /**
+     * Restricted variant: only the projects whose ids are in $allowedIds.
+     * Useful for non-managers whose visible project list is the subset they
+     * are explicitly assigned to.
+     *
+     * @param  array<int>  $allowedIds
+     */
+    public static function forIds(Team $team, array $allowedIds): array
+    {
+        if ($allowedIds === []) {
+            return [];
+        }
+
+        return $team->projects()
+            ->whereIn('projects.id', $allowedIds)
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn (Project $p) => ['id' => $p->id, 'name' => $p->name])
+            ->values()
+            ->all();
+    }
 }

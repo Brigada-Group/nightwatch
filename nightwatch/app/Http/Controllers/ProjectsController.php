@@ -26,10 +26,11 @@ class ProjectsController extends Controller
 
         abort_unless($team !== null, 403);
 
+        $accessibleProjectIds = $this->currentTeam->accessibleProjectIdsFor($request->user(), $team);
         $perPage = (int) min(50, max(5, $request->integer('per_page', 15)));
-        $baseQuery = $team->projects();
 
-        $paginator = $baseQuery
+        $paginator = $team->projects()
+            ->whereIn('projects.id', $accessibleProjectIds)
             ->orderByDesc('last_heartbeat_at')
             ->orderByDesc('id')
             ->paginate($perPage)
