@@ -4,49 +4,61 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
+/**
+ * Updates the existing super-admin user's email (e.g. default install email → production address).
+ * Does not create users or change passwords.
+ *
+ * Configure in .env / Forge: SUPER_ADMIN_MATCH_EMAIL, SUPER_ADMIN_EMAIL.
+ */
 class SuperAdminUserSeeder extends Seeder
 {
     public function run(): void
     {
-        $email = (string) config('super_admin.email');
+        $matchEmail = (string) config('super_admin.match_email');
+        $newEmail = (string) config('super_admin.email');
 
-        User::updateOrCreate(
-            ['email' => $email],
-            [
-                'name' => (string) config('super_admin.name'),
-                'password' => Hash::make($this->resolvePassword()),
-                'email_verified_at' => now(),
-                'is_super_admin' => true,
-            ],
-        );
+        $user = User::query()
+            ->where('email', $matchEmail)
+            ->first();
+
+        if ($user === null) {
+            $user = User::query()
+                ->where('is_super_admin', true)
+                ->orderBy('id')
+                ->first();
+        }
+
+        if ($user === null) {
+            if ($this->command !== null) {
+                $this->command->warn(
+                    "No super-admin user found (no row with email [{$matchEmail}] and no is_super_admin=1). Nothing to update.",
+                );
+            }
+
+            return;
+        }
+
+        if ($user->email === $newEmail) {
+            if ($this->command !== null) {
+                $this->command->info("Super admin already uses [{$newEmail}]. Skipping.");
+            }
+
+            return;
+        }
+
+        if (User::query()->where('email', $newEmail)->whereKeyNot($user->getKey())->exists()) {
+            throw new \RuntimeException(
+                "Cannot move super admin to [{$newEmail}]: another user already uses that email."
+            );
+        }
+
+        $user->forceFill(['email' => $newEmail])->save();
 
         if ($this->command !== null) {
             $this->command->info(
-                "Super admin user ready [{$email}]. In production, rely on config('super_admin.*') (set env, then config:cache).",
-            );
-            if (app()->isProduction()) {
-                $this->command->warn('Ensure SUPER_ADMIN_PASSWORD is set and strong in production.');
-            }
-        }
-    }
-
-    private function resolvePassword(): string
-    {
-        $explicit = config('super_admin.password');
-
-        if (is_string($explicit) && $explicit !== '') {
-            return $explicit;
-        }
-
-        if (app()->isProduction()) {
-            throw new \RuntimeException(
-                'SUPER_ADMIN_PASSWORD must be set in production and config must include it. '.
-                'If you use `php artisan config:cache`, set the variable in .env (or Forge env), then run `php artisan config:cache` again (or `config:clear` then seed).'
+                "Super admin email updated: [{$matchEmail}] → [{$newEmail}] (user id {$user->id}).",
             );
         }
-
-        return 'password';
     }
 }
