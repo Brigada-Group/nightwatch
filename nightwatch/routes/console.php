@@ -1,6 +1,8 @@
 <?php
 
 use App\Console\Commands\DispatchDueEmailReports;
+use App\Console\Commands\RecordPlatformMetrics;
+use App\Console\Commands\RunRetentionCleanup;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -13,3 +15,12 @@ Schedule::command(DispatchDueEmailReports::class)
     ->everyMinute()
     ->withoutOverlapping()
     ->runInBackground();
+
+Schedule::command(RunRetentionCleanup::class)
+    ->dailyAt('00:01')
+    ->withoutOverlapping()
+    ->runInBackground();
+
+Schedule::command(RecordPlatformMetrics::class)
+    ->dailyAt('00:10')
+    ->withoutOverlapping();

@@ -15,13 +15,12 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Paddle\Billable;
 use Laravel\Paddle\Subscription;
 
-
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password', 'is_super_admin'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable, Billable;
+    use Billable, HasFactory, Notifiable, TwoFactorAuthenticatable;
 
     /**
      * Get the attributes that should be cast.
@@ -34,6 +33,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
+            'is_super_admin' => 'boolean',
         ];
     }
 
@@ -82,5 +82,15 @@ class User extends Authenticatable
         return $this->belongsToMany(Project::class, 'project_user_assignments')
             ->withPivot(['assigned_by'])
             ->withTimestamps();
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return (bool) $this->is_super_admin;
+    }
+
+    public function emailReports(): HasMany
+    {
+        return $this->hasMany(EmailReport::class, 'user_id');
     }
 }

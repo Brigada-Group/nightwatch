@@ -8,16 +8,16 @@ import { initializeTheme } from '@/hooks/use-appearance';
 import AppLayout from '@/layouts/app-layout';
 import AuthLayout from '@/layouts/auth-layout';
 import SettingsLayout from '@/layouts/settings/layout';
+import { appDisplayName } from '@/lib/app-brand';
 
 configureEcho({
     broadcaster: 'reverb',
 });
-
-const appName = import.meta.env.VITE_APP_NAME || 'Nightwatch';
 const PlainLayout = ({ children }: { children: ReactNode }) => children;
 
 createInertiaApp({
-    title: (title) => (title ? `${title} - ${appName}` : appName),
+    title: (title) =>
+        title ? `${title} — ${appDisplayName}` : appDisplayName,
     layout: (name) => {
         switch (true) {
             case name === 'welcome':

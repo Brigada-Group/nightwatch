@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Middleware\AuthenticateGuardianClient;
+use App\Http\Middleware\EnsureSuperAdmin;
+use App\Http\Middleware\EnsureUserHasSubscription;
+use App\Http\Middleware\EnsureUserHasTeam;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
@@ -25,9 +29,10 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
-            'guardian' => \App\Http\Middleware\AuthenticateGuardianClient::class,
-            'team' => \App\Http\Middleware\EnsureUserHasTeam::class,
-            'subscribed' => \App\Http\Middleware\EnsureUserHasSubscription::class,
+            'guardian' => AuthenticateGuardianClient::class,
+            'team' => EnsureUserHasTeam::class,
+            'subscribed' => EnsureUserHasSubscription::class,
+            'super_admin' => EnsureSuperAdmin::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

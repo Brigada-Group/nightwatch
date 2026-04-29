@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -18,19 +17,19 @@ class Team extends Model
         'name',
         'slug',
         'description',
-        'admin_id'
+        'admin_id',
     ];
 
     protected static function booted(): void
     {
         static::creating(function (Team $team): void {
-            if(empty($team->team_uuid)) {
+            if (empty($team->team_uuid)) {
                 $team->team_uuid = (string) Str::uuid();
             }
         });
 
         static::created(function (Team $team): void {
-            $adminRole = Role::where('slug',Role::ADMIN)->first();
+            $adminRole = Role::where('slug', Role::ADMIN)->first();
 
             if ($adminRole !== null) {
                 $team->members()->create([
@@ -39,15 +38,15 @@ class Team extends Model
                     'status' => TeamMember::STATUS_ACCEPTED,
                     'invited_by' => $team->admin_id,
                     'invited_at' => now(),
-                    'accepted_at' => now()
+                    'accepted_at' => now(),
                 ]);
             }
         });
     }
 
-    public function admin(): BelongsTo 
+    public function admin(): BelongsTo
     {
-        return $this->belongsTo(User::class,'admin_id');
+        return $this->belongsTo(User::class, 'admin_id');
     }
 
     public function members(): HasMany
@@ -65,5 +64,10 @@ class Team extends Model
     public function projects(): HasMany
     {
         return $this->hasMany(Project::class);
+    }
+
+    public function webhookDestinations(): HasMany
+    {
+        return $this->hasMany(WebhookDestination::class);
     }
 }

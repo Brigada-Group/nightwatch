@@ -362,11 +362,7 @@ export function EmailReportFormDialog({
                         >
                             Cancel
                         </Button>
-                        <Button
-                            type="submit"
-                            disabled={form.processing}
-                            className="bg-gradient-to-br from-violet-500 to-cyan-500 text-white hover:from-violet-400 hover:to-cyan-400"
-                        >
+                        <Button type="submit" disabled={form.processing}>
                             {form.processing
                                 ? 'Saving…'
                                 : report

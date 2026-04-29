@@ -46,7 +46,7 @@ export function LandingNavbar({ authenticated, canRegister }: LandingNavbarProps
                         {canRegister ? (
                             <Link
                                 href={register()}
-                                className="cursor-pointer rounded-full bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-500 px-4 py-1.5 text-xs font-semibold text-white shadow-[0_10px_34px_rgba(124,58,237,0.45)] transition hover:brightness-110"
+                                className="cursor-pointer rounded-full bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground shadow-md transition hover:bg-primary/90"
                             >
                                 Get Started Free
                             </Link>

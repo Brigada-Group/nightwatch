@@ -15,12 +15,14 @@ use App\Models\HubQuery;
 use App\Models\HubRequest;
 use App\Models\HubScheduledTask;
 use App\Models\Project;
+use App\Models\User;
 use App\Services\DashboardMetricsService;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -57,6 +59,10 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
         $this->registerDashboardCacheBusting();
+
+        Gate::before(function (User $user, string $ability): ?bool {
+            return $user->isSuperAdmin() ? true : null;
+        });
     }
 
     /**

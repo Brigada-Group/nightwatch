@@ -1,35 +1,33 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import {
     Activity,
-    AlertTriangle,
     BarChart3,
-    BookOpen,
+    Bug,
+    Building2,
     Clock,
     Database,
-    FolderGit2,
     Globe,
     HeartPulse,
     LayoutGrid,
     Mail,
     MailPlus,
+    MonitorSmartphone,
     MessageSquare,
+    Plug,
     PackageCheck,
     ScrollText,
     Server,
-    Settings,
     ShieldCheck,
     Terminal,
+    Webhook,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
-import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
     Sidebar,
     SidebarContent,
     SidebarFooter,
-    SidebarGroup,
-    SidebarGroupLabel,
     SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
@@ -59,12 +57,7 @@ const monitoringItems: NavItem[] = [
     {
         title: 'Exceptions',
         href: '/exceptions',
-        icon: AlertTriangle,
-    },
-    {
-        title: 'Client Errors',
-        href: '/client-errors',
-        icon: AlertTriangle,
+        icon: Bug,
     },
     {
         title: 'Requests',
@@ -90,6 +83,14 @@ const monitoringItems: NavItem[] = [
         title: 'Outgoing HTTP',
         href: '/outgoing-http',
         icon: Activity,
+    },
+];
+
+const clientSideItems: NavItem[] = [
+    {
+        title: 'Client Errors',
+        href: '/client-errors',
+        icon: MonitorSmartphone,
     },
 ];
 
@@ -134,29 +135,49 @@ const systemItems: NavItem[] = [
         href: '/email-reports',
         icon: MailPlus,
     },
-];
-
-const footerNavItems: NavItem[] = [
     {
-        title: 'Settings',
-        href: '/settings/profile',
-        icon: Settings,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://github.com/Brigada-Group/nightwatch',
-        icon: BookOpen,
+        title: 'Webhooks',
+        href: '/webhooks',
+        icon: Webhook,
     },
 ];
 
 export function AppSidebar() {
+    const page = usePage<{ auth?: { user?: { is_super_admin?: boolean } } }>();
+    const { auth } = page.props;
+    const currentPath = page.url.split('?')[0];
+    const isSuperAdmin = Boolean(auth?.user?.is_super_admin);
+    const isSuperAdminRoute = currentPath.startsWith('/super-admin');
+    const superAdminItems: NavItem[] = [
+        {
+            title: 'Platform',
+            href: '/super-admin/dashboard',
+            icon: LayoutGrid,
+        },
+        {
+            title: 'Teams',
+            href: '/super-admin/teams',
+            icon: Building2,
+        },
+        {
+            title: 'Dependencies',
+            href: '/super-admin/external-dependencies',
+            icon: Plug,
+        },
+        {
+            title: 'Retention Config',
+            href: '/super-admin/retention-config',
+            icon: Database,
+        },
+    ];
+
     return (
         <Sidebar collapsible="icon" variant="sidebar">
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href="/dashboard" prefetch>
+                            <Link href={isSuperAdminRoute ? '/super-admin/dashboard' : '/dashboard'} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>
@@ -165,13 +186,19 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={overviewItems} label="Overview" />
-                <NavMain items={monitoringItems} label="Monitoring" />
-                <NavMain items={systemItems} label="System" />
+                {isSuperAdminRoute && isSuperAdmin ? (
+                    <NavMain items={superAdminItems} label="Super Admin" />
+                ) : (
+                    <>
+                        <NavMain items={overviewItems} label="Overview" />
+                        <NavMain items={monitoringItems} label="Monitoring" />
+                        <NavMain items={clientSideItems} label="Client-side" />
+                        <NavMain items={systemItems} label="System" />
+                    </>
+                )}
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

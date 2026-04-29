@@ -107,7 +107,7 @@ export default function EmailReportsIndex() {
                         <Button
                             type="button"
                             onClick={openCreate}
-                            className="gap-2 bg-gradient-to-br from-violet-500 to-cyan-500 text-white hover:from-violet-400 hover:to-cyan-400"
+                            className="gap-2"
                         >
                             <Plus className="size-4" />
                             New report
@@ -117,16 +117,28 @@ export default function EmailReportsIndex() {
 
                 <Card className={cn(monitoringCardClass, 'gap-0 py-0')}>
                     <CardContent className="p-0 pt-4">
-                        <Table>
+                        <Table className="border-collapse border border-border">
                             <TableHeader>
-                                <TableRow>
-                                    <TableHead>Recipient</TableHead>
-                                    <TableHead>Cadence</TableHead>
-                                    <TableHead>Scope</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Last sent</TableHead>
-                                    <TableHead>Next run</TableHead>
-                                    <TableHead className="w-[120px] text-right">
+                                <TableRow className="hover:bg-transparent">
+                                    <TableHead className="h-9 border-border border-r bg-muted/40 px-1.5 py-1.5 text-xs font-semibold">
+                                        Recipient
+                                    </TableHead>
+                                    <TableHead className="h-9 border-border border-r bg-muted/40 px-1.5 py-1.5 text-xs font-semibold">
+                                        Cadence
+                                    </TableHead>
+                                    <TableHead className="h-9 border-border border-r bg-muted/40 px-1.5 py-1.5 text-xs font-semibold">
+                                        Scope
+                                    </TableHead>
+                                    <TableHead className="h-9 border-border border-r bg-muted/40 px-1.5 py-1.5 text-xs font-semibold">
+                                        Status
+                                    </TableHead>
+                                    <TableHead className="h-9 border-border border-r bg-muted/40 px-1.5 py-1.5 text-xs font-semibold">
+                                        Last sent
+                                    </TableHead>
+                                    <TableHead className="h-9 border-border border-r bg-muted/40 px-1.5 py-1.5 text-xs font-semibold">
+                                        Next run
+                                    </TableHead>
+                                    <TableHead className="h-9 w-[108px] border-border bg-muted/40 px-1.5 py-1.5 text-right text-xs font-semibold">
                                         Actions
                                     </TableHead>
                                 </TableRow>
@@ -136,7 +148,7 @@ export default function EmailReportsIndex() {
                                     <TableRow>
                                         <TableCell
                                             colSpan={7}
-                                            className="text-muted-foreground py-12 text-center text-sm"
+                                            className="text-muted-foreground border-r-0 py-12 text-center text-sm"
                                         >
                                             <Mail className="mx-auto mb-2 size-5 opacity-60" />
                                             No reports yet. Create one to start receiving
@@ -146,13 +158,13 @@ export default function EmailReportsIndex() {
                                 ) : (
                                     reports.map((r) => (
                                         <TableRow key={r.id}>
-                                            <TableCell className="font-medium text-foreground">
+                                            <TableCell className="border-border border-r px-1.5 py-1.5 font-medium text-foreground">
                                                 {r.email}
                                             </TableCell>
-                                            <TableCell className="text-muted-foreground text-xs">
+                                            <TableCell className="border-border border-r px-1.5 py-1.5 whitespace-normal text-muted-foreground text-xs">
                                                 {cadenceLabel(r)}
                                             </TableCell>
-                                            <TableCell className="text-xs">
+                                            <TableCell className="border-border border-r px-1.5 py-1.5 text-xs">
                                                 {r.project_scope === 'all' ? (
                                                     <Badge variant="outline">
                                                         All projects
@@ -164,7 +176,7 @@ export default function EmailReportsIndex() {
                                                     </Badge>
                                                 )}
                                             </TableCell>
-                                            <TableCell>
+                                            <TableCell className="border-border border-r px-1.5 py-1.5">
                                                 {r.enabled ? (
                                                     <Badge className="bg-emerald-500/15 text-emerald-300">
                                                         Enabled
@@ -175,13 +187,13 @@ export default function EmailReportsIndex() {
                                                     </Badge>
                                                 )}
                                             </TableCell>
-                                            <TableCell className="text-muted-foreground text-xs">
+                                            <TableCell className="border-border border-r px-1.5 py-1.5 text-muted-foreground text-xs">
                                                 {fmt(r.last_sent_at)}
                                             </TableCell>
-                                            <TableCell className="text-muted-foreground text-xs">
+                                            <TableCell className="border-border border-r px-1.5 py-1.5 text-muted-foreground text-xs">
                                                 {fmt(r.next_run_at)}
                                             </TableCell>
-                                            <TableCell className="text-right">
+                                            <TableCell className="px-1.5 py-1.5 text-right">
                                                 <div className="inline-flex items-center gap-1">
                                                     <Button
                                                         variant="ghost"

@@ -7,7 +7,7 @@ function ShieldVisual() {
         <div className="landing-gradient-border relative overflow-hidden rounded-2xl border border-violet-300/20 bg-[#0b0b0c] p-6">
             <div className="absolute inset-x-0 top-0 h-20 bg-[radial-gradient(circle_at_top,rgba(139,92,246,0.45),transparent_70%)]" />
             <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-3xl border border-violet-300/20 bg-zinc-900">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-500 shadow-[0_0_38px_rgba(139,92,246,0.45)]">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" aria-hidden>
                         <path
                             d="M12 3.25 18.5 6v5.4c0 4.1-2.8 7.8-6.5 9.35-3.7-1.55-6.5-5.25-6.5-9.35V6L12 3.25Z"

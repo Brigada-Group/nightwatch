@@ -11,7 +11,7 @@ export function PricingCard({ plan, onCheckout, loading }: PricingCardProps) {
         <article
             className={`landing-gradient-border rounded-2xl border p-4 transition duration-300 hover:-translate-y-1 ${
                 plan.highlighted
-                    ? 'border-violet-300/45 bg-gradient-to-b from-violet-500/10 to-[#0b0b0e] shadow-[0_18px_40px_rgba(124,58,237,0.22)]'
+                    ? 'border-violet-300/45 bg-[#0b0b0e] shadow-[0_18px_40px_rgba(124,58,237,0.22)]'
                     : 'border-zinc-800 bg-[#0a0a0c] hover:border-violet-300/35'
             }`}
         >
@@ -29,7 +29,7 @@ export function PricingCard({ plan, onCheckout, loading }: PricingCardProps) {
                 disabled={loading}
                 className={`mt-4 w-full cursor-pointer rounded-full px-4 py-2 text-xs font-semibold transition ${
                     plan.highlighted
-                        ? 'bg-gradient-to-r from-violet-500 to-indigo-500 text-white hover:brightness-110'
+                        ? 'bg-primary text-primary-foreground hover:bg-primary/90'
                         : 'border border-zinc-700 bg-zinc-900 text-zinc-100 hover:border-violet-300/45 hover:bg-violet-500/10'
                 } ${loading ? 'cursor-not-allowed opacity-60' : ''}`}
             >

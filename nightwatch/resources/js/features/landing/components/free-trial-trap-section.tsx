@@ -17,7 +17,7 @@ function TrapMiniMock({ index }: { index: number }) {
                         <div className="h-4 rounded-md bg-zinc-800" />
                         <div className="h-4 rounded-md bg-zinc-800" />
                     </div>
-                    <div className="h-6 rounded-md bg-gradient-to-r from-violet-600 to-indigo-500" />
+                    <div className="h-6 rounded-md bg-primary" />
                 </div>
             </div>
         );

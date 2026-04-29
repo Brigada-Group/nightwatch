@@ -10,7 +10,10 @@ use Illuminate\Support\Str;
 
 class ClientErrorIngestService
 {
-    
+    public function __construct(
+        private readonly WebhookDispatcherService $webhooks,
+    ) {}
+
     public function store(Project $project, array $validated, array $rawPayload): ClientErrorEvent
     {
         $payloadProjectId = (string) $validated['project_id'];
@@ -21,7 +24,7 @@ class ClientErrorIngestService
         }
 
         $requestUrl = $validated['url'] ?? null;
-        
+
         $normalizedUrl = is_string($requestUrl) && str_starts_with($requestUrl, 'GET ')
             ? substr($requestUrl, 4)
             : $requestUrl;
@@ -37,7 +40,7 @@ class ClientErrorIngestService
             (string) $validated['message'],
         );
 
-        return ClientErrorEvent::create([
+        $event = ClientErrorEvent::create([
             'project_id' => $payloadProjectId,
             'environment' => $validated['environment'],
             'server' => $validated['server'],
@@ -61,6 +64,35 @@ class ClientErrorIngestService
             'received_at' => now(),
             'raw_payload' => $rawPayload,
         ]);
+
+        $this->webhooks->dispatchToTeam(
+            $project->team_id,
+            'client_error.created',
+            [
+                'event_type' => 'client_error.created',
+                'project' => [
+                    'id' => $project->id,
+                    'uuid' => $project->project_uuid,
+                    'name' => $project->name,
+                    'environment' => $project->environment,
+                ],
+                'data' => [
+                    'severity' => $event->severity,
+                    'runtime' => $event->runtime,
+                    'exception_class' => $event->exception_class,
+                    'message' => $event->message,
+                    'source_file' => $event->source_file,
+                    'line' => $event->line,
+                    'request_url' => $event->request_url,
+                    'fingerprint' => $event->fingerprint,
+                    'user_payload' => $event->user_payload,
+                    'occurred_at' => optional($event->occurred_at)?->toIso8601String(),
+                ],
+                'nightwatch_url' => config('app.url'),
+            ]
+        );
+
+        return $event;
     }
 
     private function fingerprint(string $class, string $file, int $line, string $message): string

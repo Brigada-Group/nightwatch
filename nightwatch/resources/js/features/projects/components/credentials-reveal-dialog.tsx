@@ -103,7 +103,7 @@ export function CredentialsRevealDialog({ credentials, hubUrl }: Props) {
                     <Button
                         type="button"
                         onClick={() => setOpen(false)}
-                        className="shrink-0 bg-gradient-to-br from-violet-500 to-cyan-500 text-white hover:from-violet-400 hover:to-cyan-400"
+                        className="shrink-0"
                     >
                         I have saved the credentials
                     </Button>
