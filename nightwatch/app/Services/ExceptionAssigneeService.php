@@ -84,6 +84,8 @@ class ExceptionAssigneeService
                 'assigned_to' => $assignee->id,
                 'assigned_by' => $actor->id,
                 'assigned_at' => now(),
+                'task_status' => HubException::TASK_STATUS_STARTED,
+                'task_finished_at' => null,
             ])->save();
         });
 

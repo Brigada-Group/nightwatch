@@ -4,6 +4,7 @@ import {
     BarChart3,
     Bug,
     Building2,
+    CheckCircle2,
     Clock,
     Database,
     Globe,
@@ -49,11 +50,23 @@ const overviewItemsBase: NavItem[] = [
         icon: Server,
     },
     {
-        title: 'Team',
-        href: '/team',
-        icon: Users,
+        title: 'Tasks',
+        href: '/tasks',
+        icon: CheckCircle2,
     },
 ];
+
+const teamManagementItem: NavItem = {
+    title: 'Team',
+    href: '/team',
+    icon: Users,
+};
+
+const invitationLinksItem: NavItem = {
+    title: 'Invitation links',
+    href: '/team/invitation-links',
+    icon: Link2,
+};
 
 const monitoringItems: NavItem[] = [
     {
@@ -101,7 +114,7 @@ const clientSideItems: NavItem[] = [
     },
 ];
 
-const systemItems: NavItem[] = [
+const systemItemsBase: NavItem[] = [
     {
         title: 'Mail',
         href: '/mail',
@@ -137,6 +150,9 @@ const systemItems: NavItem[] = [
         href: '/audits',
         icon: ShieldCheck,
     },
+];
+
+const managerSystemItems: NavItem[] = [
     {
         title: 'Email Reports',
         href: '/email-reports',
@@ -172,12 +188,12 @@ export function AppSidebar() {
     const overviewItems: NavItem[] = [...overviewItemsBase];
 
     if (canManageTeamInvitations) {
-        overviewItems.splice(3, 0, {
-            title: 'Invitation links',
-            href: '/team/invitation-links',
-            icon: Link2,
-        });
+        overviewItems.push(teamManagementItem, invitationLinksItem);
     }
+
+    const systemItems: NavItem[] = canManageTeamInvitations
+        ? [...systemItemsBase, ...managerSystemItems]
+        : systemItemsBase;
 
     const superAdminItems: NavItem[] = [
         {

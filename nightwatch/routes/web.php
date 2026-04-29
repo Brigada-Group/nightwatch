@@ -27,6 +27,7 @@ use App\Http\Controllers\TeamInvitationLinksController;
 use App\Http\Controllers\TeamInvitationsController;
 use App\Http\Controllers\TeamJoinController;
 use App\Http\Controllers\TeamPageController;
+use App\Http\Controllers\TasksController;
 use App\Http\Controllers\TeamProjectAssignmentsController;
 use App\Http\Controllers\TeamsController;
 use App\Http\Controllers\WebhookDestinationsController;
@@ -129,13 +130,11 @@ Route::middleware(['auth', 'verified', 'team'])->group(function () {
     Route::get('dashboard', function (Request $request, DashboardMetricsService $metrics, CurrentTeam $currentTeam) {
         $team = $currentTeam->for($request->user());
         abort_unless($team !== null, 403);
-        $teamProjectIds = $team->projects()->pluck('projects.id')
-            ->map(static fn ($id) => (int) $id)
-            ->all();
+        $accessibleProjectIds = $currentTeam->accessibleProjectIdsFor($request->user(), $team);
 
         $filters = DashboardFilters::fromRequest($request);
 
-        return Inertia::render('dashboard', $metrics->overview($filters, $teamProjectIds));
+        return Inertia::render('dashboard', $metrics->overview($filters, $accessibleProjectIds));
     })->name('dashboard');
 
     Route::get('insights', [InsightsController::class, 'index'])->name('insights.index');
@@ -161,6 +160,13 @@ Route::middleware(['auth', 'verified', 'team'])->group(function () {
 
     Route::controller(ExceptionsController::class)->group(function () {
         Route::get('exceptions', 'index')->name('exceptions.index');
+    });
+
+    Route::controller(TasksController::class)->group(function () {
+        Route::get('tasks', 'index')->name('tasks.index');
+        Route::patch('tasks/{exception}/status', 'updateStatus')
+            ->whereNumber('exception')
+            ->name('tasks.update-status');
     });
 
     Route::controller(ExceptionAssignmentsController::class)->group(function () {
