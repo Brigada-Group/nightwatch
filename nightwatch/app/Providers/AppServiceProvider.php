@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Listeners\SendEmailVerificationCodeOnLogin;
 use App\Models\HubCache;
 use App\Models\HubCommand;
 use App\Models\HubException;
@@ -18,10 +19,12 @@ use App\Models\Project;
 use App\Models\User;
 use App\Services\DashboardMetricsService;
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -58,6 +61,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        Event::listen(Login::class, SendEmailVerificationCodeOnLogin::class);
         $this->registerDashboardCacheBusting();
 
         Gate::before(function (User $user, string $ability): ?bool {
