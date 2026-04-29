@@ -9,9 +9,8 @@
 
 @theme {
     --font-sans:
-        'Inter', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
-        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-        'Noto Color Emoji';
+        'Poppins', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
@@ -141,6 +140,20 @@
 
     body {
         @apply bg-background text-foreground;
+    }
+
+    button,
+    input[type='button'],
+    input[type='submit'],
+    input[type='reset'] {
+        cursor: pointer;
+    }
+
+    button:disabled,
+    input[type='button']:disabled,
+    input[type='submit']:disabled,
+    input[type='reset']:disabled {
+        cursor: not-allowed;
     }
 }
 

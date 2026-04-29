@@ -101,7 +101,7 @@ export function PricingSection() {
                                 type="button"
                                 className={`cursor-pointer rounded-full px-3 py-1 text-[11px] font-medium transition ${
                                     index === 0
-                                        ? 'bg-gradient-to-r from-violet-500 to-indigo-500 text-white'
+                                        ? 'bg-primary text-primary-foreground hover:bg-primary/90'
                                         : 'text-zinc-400 hover:text-zinc-200'
                                 }`}
                             >

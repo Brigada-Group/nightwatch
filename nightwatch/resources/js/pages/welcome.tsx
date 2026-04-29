@@ -9,9 +9,6 @@ import { SetupTimelineSection } from '@/features/landing/components/setup-timeli
 import { SubscriptionsTamedSection } from '@/features/landing/components/subscriptions-tamed-section';
 import { TestimonialsSection } from '@/features/landing/components/testimonials-section';
 import { TrustedMarqueeSection } from '@/features/landing/components/trusted-marquee-section';
-import '@fontsource/inter/400.css';
-import '@fontsource/inter/600.css';
-
 export default function Welcome({
     canRegister = true,
 }: {

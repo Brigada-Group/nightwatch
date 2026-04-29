@@ -8,10 +8,7 @@ type HomeHeroSectionProps = {
 
 export function HomeHeroSection({ authenticated, canRegister }: HomeHeroSectionProps) {
     return (
-        <section
-            className="relative min-h-screen overflow-hidden bg-[#070707] px-4 py-8 text-white sm:px-6 lg:px-8"
-            style={{ fontFamily: 'Inter, sans-serif' }}
-        >
+        <section className="relative min-h-screen overflow-hidden bg-[#070707] px-4 py-8 font-sans text-white sm:px-6 lg:px-8">
             <div
                 aria-hidden
                 className="absolute inset-0 opacity-40"
@@ -53,7 +50,7 @@ export function HomeHeroSection({ authenticated, canRegister }: HomeHeroSectionP
                     <div className="mt-7 flex items-center justify-center gap-3">
                         <button
                             type="button"
-                            className="cursor-pointer rounded-full bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-500 px-6 py-2.5 text-sm font-semibold text-white shadow-[0_12px_40px_rgba(124,58,237,0.45)] transition hover:brightness-110"
+                            className="cursor-pointer rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-md transition hover:bg-primary/90"
                         >
                             Get Started Free
                         </button>

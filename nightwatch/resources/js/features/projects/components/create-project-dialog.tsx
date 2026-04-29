@@ -53,10 +53,7 @@ export function CreateProjectDialog() {
             }}
         >
             <DialogTrigger asChild>
-                <Button
-                    type="button"
-                    className="gap-2 bg-gradient-to-br from-violet-500 via-violet-500 to-cyan-500 text-white hover:from-violet-400 hover:to-cyan-400"
-                >
+                <Button type="button" className="gap-2">
                     <Plus className="size-4" />
                     New project
                 </Button>
@@ -133,11 +130,7 @@ export function CreateProjectDialog() {
                         >
                             Cancel
                         </Button>
-                        <Button
-                            type="submit"
-                            disabled={form.processing}
-                            className="bg-gradient-to-br from-violet-500 to-cyan-500 text-white hover:from-violet-400 hover:to-cyan-400"
-                        >
+                        <Button type="submit" disabled={form.processing}>
                             {form.processing ? 'Creating…' : 'Create project'}
                         </Button>
                     </DialogFooter>

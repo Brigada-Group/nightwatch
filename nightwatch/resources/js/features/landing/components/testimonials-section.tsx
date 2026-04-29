@@ -28,7 +28,7 @@ function TestimonialCardView({ card }: { card: TestimonialCard }) {
             <Stars />
             <p className="min-h-[96px] text-xs leading-5 text-zinc-300">{card.quote}</p>
             <div className="mt-4 flex items-center gap-2 border-t border-zinc-800 pt-3">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 text-[10px] font-semibold text-white">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[10px] font-semibold text-primary-foreground">
                     {card.author.split(' ').map((part) => part[0]).join('')}
                 </span>
                 <div>
