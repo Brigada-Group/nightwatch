@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/table';
 import type { HubException, PaginatedResponse } from '@/entities';
 import type { ProjectOption, WithProjectRelation } from '@/types/monitoring';
+import { AssigneeCell } from '@/features/exceptions/components/AssigneeCell';
 
 type Filters = {
     project_id: number | null;
@@ -110,6 +111,7 @@ export default function ExceptionsIndex() {
                                     <TableHead>Exception</TableHead>
                                     <TableHead>Project</TableHead>
                                     <TableHead>Severity</TableHead>
+                                    <TableHead>Assignee</TableHead>
                                     <TableHead className="text-right">
                                         Sent
                                     </TableHead>
@@ -119,7 +121,7 @@ export default function ExceptionsIndex() {
                                 {exceptions.data.length === 0 ? (
                                     <TableRow>
                                         <TableCell
-                                            colSpan={4}
+                                            colSpan={5}
                                             className="text-muted-foreground py-10 text-center text-sm"
                                         >
                                             No exceptions in this range.
@@ -145,6 +147,12 @@ export default function ExceptionsIndex() {
                                                 <Badge variant="outline">
                                                     {row.severity}
                                                 </Badge>
+                                            </TableCell>
+                                            <TableCell>
+                                                <AssigneeCell
+                                                    exceptionId={row.id}
+                                                    assignee={row.assignee}
+                                                />
                                             </TableCell>
                                             <TableCell className="text-muted-foreground text-right text-xs">
                                                 {new Date(

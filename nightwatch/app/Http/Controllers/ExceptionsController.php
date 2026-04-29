@@ -25,7 +25,7 @@ class ExceptionsController extends Controller
         $perPage = (int) min(50, max(5, $request->integer('per_page', 15)));
 
         $query = HubException::query()
-            ->with(['project:id,name'])
+            ->with(['project:id,name', 'assignee:id,name,email'])
             ->whereIn('project_id', $teamProjectIds)
             ->orderByDesc('sent_at');
 

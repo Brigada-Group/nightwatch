@@ -1,3 +1,9 @@
+export type ExceptionAssignee = {
+    id: number;
+    name: string;
+    email: string;
+};
+
 export type HubException = {
     id: number;
     project_id: number;
@@ -17,4 +23,8 @@ export type HubException = {
     sent_at: string;
     created_at: string;
     updated_at: string;
+    assigned_to: number | null;
+    assigned_by: number | null;
+    assigned_at: string | null;
+    assignee?: ExceptionAssignee | null;
 };
