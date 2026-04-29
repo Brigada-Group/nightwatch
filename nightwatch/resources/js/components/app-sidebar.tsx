@@ -4,11 +4,13 @@ import {
     BarChart3,
     Bug,
     Building2,
+    CheckCircle2,
     Clock,
     Database,
     Globe,
     HeartPulse,
     LayoutGrid,
+    Link2,
     Mail,
     MailPlus,
     MonitorSmartphone,
@@ -19,6 +21,7 @@ import {
     Server,
     ShieldCheck,
     Terminal,
+    Users,
     Webhook,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
@@ -35,7 +38,7 @@ import {
 } from '@/components/ui/sidebar';
 import type { NavItem } from '@/types';
 
-const overviewItems: NavItem[] = [
+const overviewItemsBase: NavItem[] = [
     {
         title: 'Dashboard',
         href: '/dashboard',
@@ -46,7 +49,24 @@ const overviewItems: NavItem[] = [
         href: '/projects',
         icon: Server,
     },
+    {
+        title: 'Tasks',
+        href: '/tasks',
+        icon: CheckCircle2,
+    },
 ];
+
+const teamManagementItem: NavItem = {
+    title: 'Team',
+    href: '/team',
+    icon: Users,
+};
+
+const invitationLinksItem: NavItem = {
+    title: 'Invitation links',
+    href: '/team/invitation-links',
+    icon: Link2,
+};
 
 const monitoringItems: NavItem[] = [
     {
@@ -94,7 +114,7 @@ const clientSideItems: NavItem[] = [
     },
 ];
 
-const systemItems: NavItem[] = [
+const systemItemsBase: NavItem[] = [
     {
         title: 'Mail',
         href: '/mail',
@@ -130,6 +150,9 @@ const systemItems: NavItem[] = [
         href: '/audits',
         icon: ShieldCheck,
     },
+];
+
+const managerSystemItems: NavItem[] = [
     {
         title: 'Email Reports',
         href: '/email-reports',
@@ -143,11 +166,35 @@ const systemItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
-    const page = usePage<{ auth?: { user?: { is_super_admin?: boolean } } }>();
+    const page = usePage<{
+        auth?: { user?: { is_super_admin?: boolean } };
+        teamContext?: {
+            current?: {
+                role?: string | null;
+                can_manage_team_projects?: boolean;
+            } | null;
+        };
+    }>();
     const { auth } = page.props;
     const currentPath = page.url.split('?')[0];
     const isSuperAdmin = Boolean(auth?.user?.is_super_admin);
     const isSuperAdminRoute = currentPath.startsWith('/super-admin');
+
+    const canManageTeamInvitations =
+        page.props.teamContext?.current?.can_manage_team_projects === true ||
+        page.props.teamContext?.current?.role === 'admin' ||
+        page.props.teamContext?.current?.role === 'project_manager';
+
+    const overviewItems: NavItem[] = [...overviewItemsBase];
+
+    if (canManageTeamInvitations) {
+        overviewItems.push(teamManagementItem, invitationLinksItem);
+    }
+
+    const systemItems: NavItem[] = canManageTeamInvitations
+        ? [...systemItemsBase, ...managerSystemItems]
+        : systemItemsBase;
+
     const superAdminItems: NavItem[] = [
         {
             title: 'Platform',

@@ -34,37 +34,38 @@ class InsightsController extends Controller
         $team = $this->currentTeam->for($request->user());
         abort_unless($team !== null, 403);
 
-        $teamProjectIds = $team->projects()->pluck('projects.id')->all();
+        $accessibleProjectIds = $this->currentTeam->accessibleProjectIdsFor($request->user(), $team);
         $tab = $request->query('tab') === 'jobs' ? 'jobs' : 'requests';
         $window = $this->resolveWindow($request->query('window'));
         $projectId = $request->filled('project_id') ? $request->integer('project_id') : null;
 
-        if ($projectId !== null && ! in_array($projectId, $teamProjectIds, true)) {
+        if ($projectId !== null && ! in_array($projectId, $accessibleProjectIds, true)) {
             $projectId = null;
         }
 
         $since = CarbonImmutable::now()->subHours(self::WINDOW_HOURS[$window]);
 
         $cacheKey = sprintf(
-            'insights:%s:%s:%s',
+            'insights:%s:%s:%s:%s',
             $tab,
             $window,
             $projectId ?? 'all',
+            md5(implode(',', $accessibleProjectIds)),
         );
 
-        $data = Cache::remember($cacheKey, self::CACHE_TTL_SECONDS, function () use ($tab, $since, $projectId, $teamProjectIds) {
+        $data = Cache::remember($cacheKey, self::CACHE_TTL_SECONDS, function () use ($tab, $since, $projectId, $accessibleProjectIds) {
             if ($tab === 'jobs') {
                 return [
-                    'throughput' => $this->jobInsights->throughputSeries($since, $projectId, $teamProjectIds),
-                    'retry_distribution' => $this->jobInsights->retryDistribution($since, $projectId, $teamProjectIds),
-                    'job_durations' => $this->jobInsights->durationPercentiles($since, $projectId, $teamProjectIds),
+                    'throughput' => $this->jobInsights->throughputSeries($since, $projectId, $accessibleProjectIds),
+                    'retry_distribution' => $this->jobInsights->retryDistribution($since, $projectId, $accessibleProjectIds),
+                    'job_durations' => $this->jobInsights->durationPercentiles($since, $projectId, $accessibleProjectIds),
                 ];
             }
 
             return [
-                'status_mix' => $this->requestInsights->statusClassSeries($since, $projectId, $teamProjectIds),
-                'latency' => $this->requestInsights->latencyPercentiles($since, $projectId, $teamProjectIds),
-                'heatmap' => $this->requestInsights->errorHeatmap($since, $projectId, $teamProjectIds),
+                'status_mix' => $this->requestInsights->statusClassSeries($since, $projectId, $accessibleProjectIds),
+                'latency' => $this->requestInsights->latencyPercentiles($since, $projectId, $accessibleProjectIds),
+                'heatmap' => $this->requestInsights->errorHeatmap($since, $projectId, $accessibleProjectIds),
             ];
         });
 
@@ -76,7 +77,7 @@ class InsightsController extends Controller
                 'window' => $window,
                 'tab' => $tab,
             ],
-            'projectOptions' => ProjectFilterOptions::forTeam($team),
+            'projectOptions' => ProjectFilterOptions::forIds($team, $accessibleProjectIds),
             'windowOptions' => array_keys(self::WINDOW_HOURS),
             'data' => $data,
         ]);

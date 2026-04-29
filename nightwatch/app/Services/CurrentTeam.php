@@ -81,6 +81,39 @@ class CurrentTeam
         );
     }
 
+    /**
+     * Project IDs the user is allowed to see in the given team.
+     *
+     * Managers (team admin / Admin / Project Manager) see every project.
+     * Other roles (Developer / Viewer) see only the projects they are
+     * explicitly assigned to via `project_user_assignments`. Unassigned
+     * non-managers see nothing — assignment is the gate.
+     *
+     * @return list<int>
+     */
+    public function accessibleProjectIdsFor(User $user, Team $team): array
+    {
+        $teamProjectIds = $team->projects()
+            ->pluck('projects.id')
+            ->map(static fn ($id) => (int) $id)
+            ->all();
+
+        if ($teamProjectIds === []) {
+            return [];
+        }
+
+        if ($this->userCanManageProjects($user, $team)) {
+            return $teamProjectIds;
+        }
+
+        return $user->assignedProjects()
+            ->whereIn('projects.id', $teamProjectIds)
+            ->pluck('projects.id')
+            ->map(static fn ($id) => (int) $id)
+            ->values()
+            ->all();
+    }
+
     private function acceptedTeam(User $user, int $teamId): ?Team
     {
         $team = $user->teams()

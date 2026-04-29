@@ -19,10 +19,8 @@ class DashboardOverviewController extends Controller
         $filters = DashboardFilters::fromRequest($request);
         $team = $currentTeam->for($request->user());
         abort_unless($team !== null, 403);
-        $teamProjectIds = $team->projects()->pluck('projects.id')
-            ->map(static fn ($id) => (int) $id)
-            ->all();
+        $accessibleProjectIds = $currentTeam->accessibleProjectIdsFor($request->user(), $team);
 
-        return response()->json($metrics->overview($filters, $teamProjectIds));
+        return response()->json($metrics->overview($filters, $accessibleProjectIds));
     }
 }

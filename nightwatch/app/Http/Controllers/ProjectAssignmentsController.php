@@ -3,15 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
-use App\Models\Role;
 use App\Models\User;
 use App\Services\CurrentTeam;
+use App\Services\TeamProjectAssignmentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ProjectAssignmentsController extends Controller
 {
-    public function __construct(private readonly CurrentTeam $currentTeam) {}
+    public function __construct(
+        private readonly CurrentTeam $currentTeam,
+        private readonly TeamProjectAssignmentService $teamProjectAssignments,
+    ) {}
 
     public function store(Project $project, Request $request): JsonResponse
     {
@@ -24,15 +27,14 @@ class ProjectAssignmentsController extends Controller
         $team = $this->currentTeam->for($request->user());
         abort_unless($team && $team->id === $project->team_id, 403);
 
-        $isTeamMember = $team->members()
-            ->where('user_id', $data['user_id'])
-            ->where('status', 'accepted')
-            ->exists();
-        abort_unless($isTeamMember, 422);
+        $member = User::query()->findOrFail($data['user_id']);
 
-        $project->assignees()->syncWithoutDetaching([
-            $data['user_id'] => ['assigned_by' => $request->user()->id],
-        ]);
+        $this->teamProjectAssignments->attachUserToTeamProjects(
+            $member,
+            $team,
+            [$project->id],
+            $request->user(),
+        );
 
         return response()->json(['ok' => true]);
     }

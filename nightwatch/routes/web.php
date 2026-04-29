@@ -4,6 +4,8 @@ use App\Http\Controllers\BillingController;
 use App\Http\Controllers\ClientErrorEventsController;
 use App\Http\Controllers\DashboardOverviewController;
 use App\Http\Controllers\EmailReportsController;
+use App\Http\Controllers\EmailVerificationCodeController;
+use App\Http\Controllers\ExceptionAssignmentsController;
 use App\Http\Controllers\ExceptionsController;
 use App\Http\Controllers\HubAuditsController;
 use App\Http\Controllers\HubCacheController;
@@ -21,7 +23,12 @@ use App\Http\Controllers\InsightsController;
 use App\Http\Controllers\ProjectAssignmentsController;
 use App\Http\Controllers\ProjectsController;
 use App\Http\Controllers\SuperAdminDashboardController;
+use App\Http\Controllers\TeamInvitationLinksController;
 use App\Http\Controllers\TeamInvitationsController;
+use App\Http\Controllers\TeamJoinController;
+use App\Http\Controllers\TeamPageController;
+use App\Http\Controllers\TasksController;
+use App\Http\Controllers\TeamProjectAssignmentsController;
 use App\Http\Controllers\TeamsController;
 use App\Http\Controllers\WebhookDestinationsController;
 use App\Models\Project;
@@ -56,6 +63,19 @@ Route::prefix('paddle')->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('/email/verify', [EmailVerificationCodeController::class, 'show'])
+        ->name('verification.notice');
+
+    Route::post('/email/verify', [EmailVerificationCodeController::class, 'verify'])
+        ->middleware(['throttle:12,1'])
+        ->name('verification.verify-code');
+
+    Route::post('/email/verify/resend', [EmailVerificationCodeController::class, 'resend'])
+        ->middleware(['throttle:12,1'])
+        ->name('verification.send');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('billing/subscribe-checkout', [BillingController::class, 'subscribeCheckout'])
         ->name('billing.subscribe-checkout');
 
@@ -66,7 +86,7 @@ Route::middleware(['auth'])->group(function () {
     });
 });
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('team/invitations/{token}', function (string $token) {
         return Inertia::render('teams/accept-invite', ['token' => $token]);
     })->name('team.invitations.show');
@@ -75,7 +95,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('team.invitations.accept');
 });
 
-Route::middleware(['auth', 'super_admin'])->prefix('super-admin')->group(function () {
+Route::middleware(['auth', 'verified', 'super_admin'])->prefix('super-admin')->group(function () {
     Route::get('dashboard', [SuperAdminDashboardController::class, 'dashboard'])->name('super-admin.dashboard');
     Route::get('external-dependencies', [SuperAdminDashboardController::class, 'externalDependencies'])->name('super-admin.external-dependencies');
     Route::get('teams', [SuperAdminDashboardController::class, 'teams'])->name('super-admin.teams.index');
@@ -87,7 +107,7 @@ Route::middleware(['auth', 'super_admin'])->prefix('super-admin')->group(functio
     Route::delete('retention-details/{retentionDetail}', [SuperAdminDashboardController::class, 'destroyRetention'])->name('super-admin.retention.destroy');
 });
 
-Route::middleware(['auth', 'team'])->group(function () {
+Route::middleware(['auth', 'verified', 'team'])->group(function () {
 
     Route::controller(TeamInvitationsController::class)->group(function () {
         Route::get('team/invitations/search-users', 'searchUsers')->name('team.invitations.search-users');
@@ -100,7 +120,7 @@ Route::middleware(['auth', 'team'])->group(function () {
     });
 });
 
-Route::middleware(['auth', 'team'])->group(function () {
+Route::middleware(['auth', 'verified', 'team'])->group(function () {
     Route::get('api/project-ids', function () {
         return Project::pluck('id');
     });
@@ -110,13 +130,11 @@ Route::middleware(['auth', 'team'])->group(function () {
     Route::get('dashboard', function (Request $request, DashboardMetricsService $metrics, CurrentTeam $currentTeam) {
         $team = $currentTeam->for($request->user());
         abort_unless($team !== null, 403);
-        $teamProjectIds = $team->projects()->pluck('projects.id')
-            ->map(static fn ($id) => (int) $id)
-            ->all();
+        $accessibleProjectIds = $currentTeam->accessibleProjectIdsFor($request->user(), $team);
 
         $filters = DashboardFilters::fromRequest($request);
 
-        return Inertia::render('dashboard', $metrics->overview($filters, $teamProjectIds));
+        return Inertia::render('dashboard', $metrics->overview($filters, $accessibleProjectIds));
     })->name('dashboard');
 
     Route::get('insights', [InsightsController::class, 'index'])->name('insights.index');
@@ -142,6 +160,22 @@ Route::middleware(['auth', 'team'])->group(function () {
 
     Route::controller(ExceptionsController::class)->group(function () {
         Route::get('exceptions', 'index')->name('exceptions.index');
+    });
+
+    Route::controller(TasksController::class)->group(function () {
+        Route::get('tasks', 'index')->name('tasks.index');
+        Route::patch('tasks/{exception}/status', 'updateStatus')
+            ->whereNumber('exception')
+            ->name('tasks.update-status');
+    });
+
+    Route::controller(ExceptionAssignmentsController::class)->group(function () {
+        Route::get('exceptions/{exception}/assignable-users', 'assignableUsers')
+            ->whereNumber('exception')
+            ->name('exceptions.assignable-users');
+        Route::post('exceptions/{exception}/assign', 'assign')
+            ->whereNumber('exception')
+            ->name('exceptions.assign');
     });
 
     Route::controller(ClientErrorEventsController::class)->group(function () {
@@ -202,6 +236,35 @@ Route::middleware(['auth', 'team'])->group(function () {
             ->where('audit', '[0-9]+')
             ->name('audits.show');
     });
+
+    Route::get('team', [TeamPageController::class, 'index'])->name('team.index');
+
+    Route::get('team/invitation-links', [TeamInvitationLinksController::class, 'index'])
+        ->name('team.invitation-links.index');
+
+    Route::post('team/invitation-links', [TeamInvitationLinksController::class, 'store'])
+        ->name('team.invitation-links.store');
+
+    Route::post('team/project-assignments', [TeamProjectAssignmentsController::class, 'sync'])
+        ->name('team.project-assignments.sync');
+
+    Route::delete('team/invitation-links/{teamInvitationLink}', [TeamInvitationLinksController::class, 'destroy'])
+        ->name('team.invitation-links.destroy');
+
+    Route::delete('team/invitation-links/{teamInvitationLink}/purge', [TeamInvitationLinksController::class, 'purgeRevoked'])
+        ->name('team.invitation-links.purge-revoked');
+});
+
+Route::middleware(['throttle:120,1'])->group(function () {
+    Route::get('join/{token}', [TeamJoinController::class, 'show'])
+        ->where('token', '[a-f0-9]{64}')
+        ->name('team.join.show');
+});
+
+Route::middleware(['auth', 'verified', 'throttle:30,1'])->group(function () {
+    Route::post('join/{token}/accept', [TeamJoinController::class, 'accept'])
+        ->where('token', '[a-f0-9]{64}')
+        ->name('team.join.accept');
 });
 
 require __DIR__.'/settings.php';

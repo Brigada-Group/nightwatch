@@ -70,4 +70,9 @@ class Team extends Model
     {
         return $this->hasMany(WebhookDestination::class);
     }
+
+    public function invitationLinks(): HasMany
+    {
+        return $this->hasMany(TeamInvitationLink::class);
+    }
 }

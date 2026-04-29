@@ -4,12 +4,13 @@ import type { ProjectStatus } from '@/entities';
 import {
     EMPTY_FILTERS,
     filtersAreActive,
-    mergeDashboardOverview
-    
-    
-    
+    mergeDashboardOverview,
 } from '@/features/dashboard/api/dashboardService';
-import type {DashboardFilters, DashboardOverview, ProjectSummary} from '@/features/dashboard/api/dashboardService';
+import type {
+    DashboardFilters,
+    DashboardOverview,
+    ProjectSummary,
+} from '@/features/dashboard/api/dashboardService';
 import { ActiveProjectsCard } from '@/features/dashboard/components/ActiveProjectsCard';
 import { DashboardToolbar } from '@/features/dashboard/components/DashboardToolbar';
 import { ErrorTrendChart } from '@/features/dashboard/components/ErrorTrendChart';
@@ -43,7 +44,8 @@ export default function Dashboard(raw: DashboardPageProps) {
 
     const stats = view.stats;
     const projects = (view.recent_projects ?? []) as ProjectSummary[];
-    const isFiltered = filtersAreActive(effectiveFilters) && view.filter_active;
+
+    const isFiltered = filtersAreActive(effectiveFilters);
 
     const throughputTxPerS =
         stats.total_requests_24h > 0
@@ -55,8 +57,8 @@ export default function Dashboard(raw: DashboardPageProps) {
 
         for (const p of projects) {
             if (p.environment) {
-set.add(p.environment);
-}
+                set.add(p.environment);
+            }
         }
 
         return [...set];

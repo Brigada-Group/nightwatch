@@ -22,16 +22,17 @@ class ClientErrorEventsController extends Controller
         $team = $this->currentTeam->for($request->user());
         abort_unless($team !== null, 403);
 
+        $accessibleProjectIds = $this->currentTeam->accessibleProjectIdsFor($request->user(), $team);
         $perPage = (int) min(50, max(5, $request->integer('per_page', 15)));
 
         $query = ClientErrorEvent::query()
             ->with(['project:id,name,project_uuid'])
-            ->whereHas('project', fn ($projectQuery) => $projectQuery->where('team_id', $team->id))
+            ->whereHas('project', fn ($projectQuery) => $projectQuery->whereIn('id', $accessibleProjectIds))
             ->orderByDesc('occurred_at');
 
         if ($request->filled('project_id')) {
             $project = Project::query()
-                ->where('team_id', $team->id)
+                ->whereIn('id', $accessibleProjectIds)
                 ->whereKey($request->integer('project_id'))
                 ->first();
 
@@ -59,7 +60,7 @@ class ClientErrorEventsController extends Controller
                 'severity' => $request->filled('severity') ? (string) $request->query('severity') : null,
                 'runtime' => $request->filled('runtime') ? (string) $request->query('runtime') : null,
             ],
-            'projectOptions' => ProjectFilterOptions::forTeam($team),
+            'projectOptions' => ProjectFilterOptions::forIds($team, $accessibleProjectIds),
         ]);
     }
 
@@ -68,9 +69,11 @@ class ClientErrorEventsController extends Controller
         $team = $this->currentTeam->for($request->user());
         abort_unless($team !== null, 403);
 
+        $accessibleProjectIds = $this->currentTeam->accessibleProjectIdsFor($request->user(), $team);
+
         $event = ClientErrorEvent::query()
             ->with(['project:id,name,project_uuid'])
-            ->whereHas('project', fn ($projectQuery) => $projectQuery->where('team_id', $team->id))
+            ->whereHas('project', fn ($projectQuery) => $projectQuery->whereIn('id', $accessibleProjectIds))
             ->findOrFail($clientError);
 
         return Inertia::render('client-errors/show', [

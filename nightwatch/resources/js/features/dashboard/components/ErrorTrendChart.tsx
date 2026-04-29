@@ -14,6 +14,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { countDomain } from '@/lib/chart-domain';
 
 type ErrorTrendPoint = {
     time: string;
@@ -56,8 +57,8 @@ function CustomTooltip({
     label?: string;
 }) {
     if (!active || !payload?.length) {
-return null;
-}
+        return null;
+    }
 
     return (
         <div className="bg-popover border-border rounded-lg border px-3 py-2 text-xs shadow-xl">
@@ -160,6 +161,8 @@ export function ErrorTrendChart({ data, timePeriod = '24H' }: Props) {
                                 axisLine={false}
                                 tick={{ fontSize: 10, fill: COLORS.muted }}
                                 width={30}
+                                domain={countDomain()}
+                                allowDecimals={false}
                             />
                             <Tooltip content={<CustomTooltip />} cursor={false} />
                             <Area

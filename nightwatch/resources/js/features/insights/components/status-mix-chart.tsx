@@ -17,6 +17,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { useAppearance } from '@/hooks/use-appearance';
+import { countDomain } from '@/lib/chart-domain';
 
 export type StatusMixPoint = {
     time: string;
@@ -153,6 +154,8 @@ export function StatusMixChart({ data }: Props) {
                                 axisLine={false}
                                 tick={{ fontSize: 10, fill: theme.tick }}
                                 width={36}
+                                domain={countDomain()}
+                                allowDecimals={false}
                             />
                             <Tooltip content={<StatusTooltip />} cursor={false} />
                             <Legend

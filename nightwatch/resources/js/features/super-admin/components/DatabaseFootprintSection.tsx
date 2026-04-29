@@ -1,5 +1,6 @@
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { countDomain } from '@/lib/chart-domain';
 
 type Props = {
     databaseLabel: string;
@@ -39,7 +40,7 @@ export function DatabaseFootprintSection({ databaseLabel, telemetryRows, trend }
                             <AreaChart data={trend} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
                                 <XAxis dataKey="date" tick={{ fontSize: 10 }} className="text-muted-foreground" />
-                                <YAxis tick={{ fontSize: 10 }} className="text-muted-foreground" />
+                                <YAxis tick={{ fontSize: 10 }} domain={countDomain()} allowDecimals={false} className="text-muted-foreground" />
                                 <Tooltip contentStyle={{ fontSize: 12 }} />
                                 <Area type="monotone" dataKey="value" name="Rows" stroke="#6d8cff" fill="#6d8cff" fillOpacity={0.2} />
                             </AreaChart>
