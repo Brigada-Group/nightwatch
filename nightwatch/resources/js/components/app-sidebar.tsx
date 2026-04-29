@@ -9,6 +9,7 @@ import {
     Globe,
     HeartPulse,
     LayoutGrid,
+    Link2,
     Mail,
     MailPlus,
     MonitorSmartphone,
@@ -19,6 +20,7 @@ import {
     Server,
     ShieldCheck,
     Terminal,
+    Users,
     Webhook,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
@@ -35,7 +37,7 @@ import {
 } from '@/components/ui/sidebar';
 import type { NavItem } from '@/types';
 
-const overviewItems: NavItem[] = [
+const overviewItemsBase: NavItem[] = [
     {
         title: 'Dashboard',
         href: '/dashboard',
@@ -45,6 +47,11 @@ const overviewItems: NavItem[] = [
         title: 'Projects',
         href: '/projects',
         icon: Server,
+    },
+    {
+        title: 'Team',
+        href: '/team',
+        icon: Users,
     },
 ];
 
@@ -143,11 +150,35 @@ const systemItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
-    const page = usePage<{ auth?: { user?: { is_super_admin?: boolean } } }>();
+    const page = usePage<{
+        auth?: { user?: { is_super_admin?: boolean } };
+        teamContext?: {
+            current?: {
+                role?: string | null;
+                can_manage_team_projects?: boolean;
+            } | null;
+        };
+    }>();
     const { auth } = page.props;
     const currentPath = page.url.split('?')[0];
     const isSuperAdmin = Boolean(auth?.user?.is_super_admin);
     const isSuperAdminRoute = currentPath.startsWith('/super-admin');
+
+    const canManageTeamInvitations =
+        page.props.teamContext?.current?.can_manage_team_projects === true ||
+        page.props.teamContext?.current?.role === 'admin' ||
+        page.props.teamContext?.current?.role === 'project_manager';
+
+    const overviewItems: NavItem[] = [...overviewItemsBase];
+
+    if (canManageTeamInvitations) {
+        overviewItems.splice(3, 0, {
+            title: 'Invitation links',
+            href: '/team/invitation-links',
+            icon: Link2,
+        });
+    }
+
     const superAdminItems: NavItem[] = [
         {
             title: 'Platform',

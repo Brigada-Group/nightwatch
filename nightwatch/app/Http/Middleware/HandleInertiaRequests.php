@@ -57,6 +57,7 @@ class HandleInertiaRequests extends Middleware
             'hubUrl' => fn () => rtrim(config('app.url') ?? $request->getSchemeAndHttpHost(), '/'),
             'flash' => [
                 'projectCredentials' => fn () => $request->session()->get('projectCredentials'),
+                'invitationLinkCreated' => fn () => $request->session()->get('invitationLinkCreated'),
             ],
             'teamContext' => fn () => $this->teamContext($request),
         ];
@@ -64,7 +65,7 @@ class HandleInertiaRequests extends Middleware
 
     /**
      * @return array{
-     *     current: array{id:int,name:string,slug:string,role:?string}|null,
+     *     current: array{id:int,name:string,slug:string,role:?string,can_manage_team_projects:bool}|null,
      *     teams: array<int, array{id:int,name:string,slug:string,role:?string}>,
      * }
      */
@@ -92,6 +93,7 @@ class HandleInertiaRequests extends Middleware
                 'name' => $current->name,
                 'slug' => $current->slug,
                 'role' => $currentRole,
+                'can_manage_team_projects' => $this->currentTeam->userCanManageProjects($user, $current),
             ] : null,
             'teams' => $teams->map(fn ($team) => [
                 'id' => $team->id,
