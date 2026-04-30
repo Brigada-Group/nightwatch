@@ -6,6 +6,7 @@ use App\Http\Support\InertiaPaginator;
 use App\Http\Support\ProjectFilterOptions;
 use App\Models\HubException;
 use App\Services\CurrentTeam;
+use App\Services\ExceptionDetailService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -14,6 +15,7 @@ class ExceptionsController extends Controller
 {
     public function __construct(
         private readonly CurrentTeam $currentTeam,
+        private readonly ExceptionDetailService $details,
     ) {}
 
     public function index(Request $request): Response
@@ -46,6 +48,21 @@ class ExceptionsController extends Controller
                 'severity' => $request->filled('severity') ? (string) $request->query('severity') : null,
             ],
             'projectOptions' => ProjectFilterOptions::forIds($team, $accessibleProjectIds),
+        ]);
+    }
+
+    public function show(Request $request, int $exception): Response
+    {
+        $user = $request->user();
+        $team = $this->currentTeam->for($user);
+        abort_unless($team !== null, 403);
+
+        $accessibleProjectIds = $this->currentTeam->accessibleProjectIdsFor($user, $team);
+        $hubException = $this->details->loadForActor($exception, $accessibleProjectIds);
+
+        return Inertia::render('exceptions/show', [
+            'exception' => $this->details->serializeForPage($hubException),
+            'markdown' => $this->details->formatAsMarkdown($hubException),
         ]);
     }
 }

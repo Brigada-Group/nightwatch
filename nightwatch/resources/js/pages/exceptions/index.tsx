@@ -1,4 +1,4 @@
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { InertiaPagination } from '@/components/monitoring/inertia-pagination';
 import { ProjectFilter } from '@/components/monitoring/project-filter';
 import { ResourcePageHeader } from '@/components/monitoring/resource-page-header';
@@ -131,14 +131,17 @@ export default function ExceptionsIndex() {
                                     exceptions.data.map((row) => (
                                         <TableRow key={row.id}>
                                             <TableCell>
-                                                <div className="max-w-md">
-                                                    <p className="truncate font-mono text-xs">
+                                                <Link
+                                                    href={`/exceptions/${row.id}`}
+                                                    className="block max-w-md hover:underline"
+                                                >
+                                                    <p className="truncate font-mono text-xs font-medium">
                                                         {row.exception_class}
                                                     </p>
                                                     <p className="text-muted-foreground truncate text-xs">
                                                         {row.message}
                                                     </p>
-                                                </div>
+                                                </Link>
                                             </TableCell>
                                             <TableCell className="text-sm">
                                                 {row.project?.name ?? `#${row.project_id}`}
