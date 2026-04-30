@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AiConfigController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\ClientErrorEventsController;
 use App\Http\Controllers\DashboardOverviewController;
@@ -105,6 +106,7 @@ Route::middleware(['auth', 'verified', 'super_admin'])->prefix('super-admin')->g
     Route::post('retention-details', [SuperAdminDashboardController::class, 'storeRetention'])->name('super-admin.retention.store');
     Route::patch('retention-details/{retentionDetail}', [SuperAdminDashboardController::class, 'updateRetention'])->name('super-admin.retention.update');
     Route::delete('retention-details/{retentionDetail}', [SuperAdminDashboardController::class, 'destroyRetention'])->name('super-admin.retention.destroy');
+
 });
 
 Route::middleware(['auth', 'verified', 'team'])->group(function () {
@@ -118,6 +120,9 @@ Route::middleware(['auth', 'verified', 'team'])->group(function () {
         Route::post('projects/{project}/assignments', 'store')->name('project.assignments.store');
         Route::delete('projects/{project}/assignments/{user}', 'destroy')->name('project.assignments.destroy');
     });
+
+    Route::get('ai-config', [AiConfigController::class, 'show'])->name('ai-config.show');
+    Route::patch('ai-config/{project}', [AiConfigController::class, 'update'])->name('ai-config.update');
 });
 
 Route::middleware(['auth', 'verified', 'team'])->group(function () {
@@ -160,6 +165,9 @@ Route::middleware(['auth', 'verified', 'team'])->group(function () {
 
     Route::controller(ExceptionsController::class)->group(function () {
         Route::get('exceptions', 'index')->name('exceptions.index');
+        Route::get('exceptions/{exception}', 'show')
+            ->whereNumber('exception')
+            ->name('exceptions.show');
     });
 
     Route::controller(TasksController::class)->group(function () {

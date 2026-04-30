@@ -2,6 +2,7 @@ import { Link, usePage } from '@inertiajs/react';
 import {
     Activity,
     BarChart3,
+    Bot,
     Bug,
     Building2,
     CheckCircle2,
@@ -111,6 +112,14 @@ const clientSideItems: NavItem[] = [
         title: 'Client Errors',
         href: '/client-errors',
         icon: MonitorSmartphone,
+    },
+];
+
+const aiConfigItems: NavItem[] = [
+    {
+        title: 'AI Config',
+        href: '/ai-config',
+        icon: Bot,
     },
 ];
 
@@ -241,6 +250,9 @@ export function AppSidebar() {
                         <NavMain items={monitoringItems} label="Monitoring" />
                         <NavMain items={clientSideItems} label="Client-side" />
                         <NavMain items={systemItems} label="System" />
+                        {canManageTeamInvitations ? (
+                            <NavMain items={aiConfigItems} label="AI Config" />
+                        ) : null}
                     </>
                 )}
             </SidebarContent>
