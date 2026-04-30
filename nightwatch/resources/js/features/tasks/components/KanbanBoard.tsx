@@ -15,6 +15,7 @@ type Props = {
 const COLUMN_ACCENTS: Record<TaskStatus, string> = {
     started: 'bg-sky-500',
     ongoing: 'bg-amber-500',
+    review: 'bg-violet-500',
     finished: 'bg-emerald-500',
 };
 
@@ -41,7 +42,7 @@ export function KanbanBoard({ initial }: Props) {
     );
 
     return (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {TASK_STATUSES.map((status) => (
                 <TaskColumn
                     key={status}

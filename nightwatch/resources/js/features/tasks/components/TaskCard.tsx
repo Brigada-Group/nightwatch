@@ -35,14 +35,14 @@ export function TaskCard({ task, isDragging, onDragStart, onDragEnd }: Props) {
         >
             <div className="flex items-start justify-between gap-2">
                 <p
-                    className="font-mono text-xs font-semibold leading-tight"
+                    className="min-w-0 flex-1 truncate font-mono text-xs font-semibold leading-tight"
                     title={task.exception_class}
                 >
                     {task.exception_class}
                 </p>
                 <Badge
                     variant="outline"
-                    className="text-[10px] uppercase tracking-wide"
+                    className="shrink-0 text-[10px] uppercase tracking-wide"
                 >
                     {task.severity}
                 </Badge>

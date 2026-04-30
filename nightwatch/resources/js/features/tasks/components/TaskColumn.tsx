@@ -39,7 +39,7 @@ export function TaskColumn({
                 onDrop(status);
             }}
             className={cn(
-                'bg-muted/30 flex h-full min-h-[400px] flex-col gap-3 rounded-lg border p-3 transition',
+                'bg-muted/30 flex min-h-[240px] flex-col gap-3 rounded-lg border p-3 transition',
                 isOver && 'border-primary/60 bg-primary/5',
             )}
         >

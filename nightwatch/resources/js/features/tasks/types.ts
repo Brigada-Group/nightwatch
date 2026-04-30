@@ -1,10 +1,16 @@
-export type TaskStatus = 'started' | 'ongoing' | 'finished';
+export type TaskStatus = 'started' | 'ongoing' | 'review' | 'finished';
 
-export const TASK_STATUSES: TaskStatus[] = ['started', 'ongoing', 'finished'];
+export const TASK_STATUSES: TaskStatus[] = [
+    'started',
+    'ongoing',
+    'review',
+    'finished',
+];
 
 export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
-    started: 'Started',
+    started: 'To be Started',
     ongoing: 'Ongoing',
+    review: 'Review',
     finished: 'Finished',
 };
 
@@ -50,6 +56,7 @@ export type KanbanColumns = Record<TaskStatus, DeveloperTask[]>;
 export type StatusCounts = {
     started: number;
     ongoing: number;
+    review: number;
     finished: number;
     total: number;
     resolution_rate: number;

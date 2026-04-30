@@ -20,6 +20,8 @@ const STATUS_TONE: Record<TaskStatus, string> = {
     started: 'border-sky-500/40 bg-sky-500/10 text-sky-700 dark:text-sky-300',
     ongoing:
         'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300',
+    review:
+        'border-violet-500/40 bg-violet-500/10 text-violet-700 dark:text-violet-300',
     finished:
         'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
 };

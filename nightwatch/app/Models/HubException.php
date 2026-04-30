@@ -9,11 +9,13 @@ class HubException extends Model
 {
     public const TASK_STATUS_STARTED = 'started';
     public const TASK_STATUS_ONGOING = 'ongoing';
+    public const TASK_STATUS_REVIEW = 'review';
     public const TASK_STATUS_FINISHED = 'finished';
 
     public const TASK_STATUSES = [
         self::TASK_STATUS_STARTED,
         self::TASK_STATUS_ONGOING,
+        self::TASK_STATUS_REVIEW,
         self::TASK_STATUS_FINISHED,
     ];
 
