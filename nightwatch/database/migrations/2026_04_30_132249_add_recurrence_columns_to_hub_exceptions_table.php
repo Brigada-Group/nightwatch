@@ -1,48 +1,38 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 
+/**
+ * Intentionally empty.
+ *
+ * The original body of this migration had two issues that broke deploys:
+ *   1. A literal newline accidentally embedded in the 'original_exception_id'
+ *      column name passed to ->after(...), producing SQLSTATE[42S22] on
+ *      MySQL ("Unknown column 'or\n  iginal_exception_id'").
+ *   2. No idempotency guards — re-runs against a database where the columns
+ *      already existed would fail with duplicate-column errors.
+ *
+ * Rather than fix both in place (which doesn't help environments where this
+ * file already ran successfully and is recorded in the migrations table),
+ * this migration is now a no-op and the actual work moved to the guarded
+ * companion migration that runs immediately after:
+ *
+ *   2026_04_30_230000_add_recurrence_columns_to_hub_exceptions_table
+ *
+ * Outcomes per environment state:
+ *   - fresh DB:               this migration no-ops, 230000 creates columns.
+ *   - already-ran (recorded): no change; 230000's guards see existing columns.
+ *   - half-failed:            this no-ops, 230000 fills in what's missing.
+ */
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::table('hub_exceptions', function (Blueprint $table) {
-            //
-            $table->char('fingerprint',64)->nullable()->after('severity');
-
-            $table->boolean('is_recurrence')->default(false)->after('fingerprint');
-            
-            $table->foreignId('original_exception_id')                        
-                ->nullable()
-                ->after('is_recurrence')                                      
-                ->constrained('hub_exceptions')
-                ->nullOnDelete();  
-
-            $table->unsignedInteger('recurrence_count')->default(0)->after('or
-  iginal_exception_id');  
-
-            $table->index(
-                ['project_id','fingerprint','task_status','task_finished_at'],
-                'hub_exceptions_recurrence_lookup_idx',
-            );
-        });
+        // no-op — see header docblock
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::table('hub_exceptions', function (Blueprint $table): void {
-            $table->dropIndex('hub_exceptions_recurrence_lookup_idx');        
-            $table->dropConstrainedForeignId('original_exception_id');
-            $table->dropColumn(['fingerprint', 'is_recurrence',               
-'recurrence_count']);
-        }); 
+        // no-op — see header docblock
     }
 };
