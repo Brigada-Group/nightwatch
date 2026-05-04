@@ -15,6 +15,7 @@ final class CacheIngestRecorder implements IngestRecorderInterface
             'project_id' => $project->id,
             'environment' => $data['environment'],
             'server' => $data['server'],
+            'trace_id' => $data['trace_id'] ?? null,
             'store' => $data['store'],
             'hits' => $data['hits'],
             'misses' => $data['misses'],

@@ -16,6 +16,7 @@ class ExceptionRequest extends FormRequest
         return [
             'environment' => ['required', 'string', 'max:50'],
             'server' => ['required', 'string', 'max:255'],
+            'trace_id' => ['nullable', 'string', 'size:32', 'regex:/^[0-9a-f]{32}$/'],
             'exception_class' => ['required', 'string', 'max:255'],
             'message' => ['required', 'string'],
             'file' => ['nullable', 'string', 'max:255'],

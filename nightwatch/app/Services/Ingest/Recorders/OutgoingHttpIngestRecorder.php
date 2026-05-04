@@ -20,6 +20,7 @@ final class OutgoingHttpIngestRecorder implements IngestRecorderInterface
             'project_id' => $project->id,
             'environment' => $data['environment'],
             'server' => $data['server'],
+            'trace_id' => $data['trace_id'] ?? null,
             'method' => $data['method'],
             'url' => $data['url'],
             'host' => $data['host'],

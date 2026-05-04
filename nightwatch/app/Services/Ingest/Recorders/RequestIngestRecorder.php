@@ -7,11 +7,13 @@ use App\Models\HubRequest;
 use App\Models\Project;
 use App\Services\Ingest\Contracts\IngestRecorderInterface;
 use App\Services\Ingest\IngestRecordingCoordinator;
+use App\Services\IssuePromotionService;
 
 final class RequestIngestRecorder implements IngestRecorderInterface
 {
     public function __construct(
-        private readonly IngestRecordingCoordinator $coordinator
+        private readonly IngestRecordingCoordinator $coordinator,
+        private readonly IssuePromotionService $issues,
     ) {}
 
     public function record(Project $project, array $data): void
@@ -20,6 +22,7 @@ final class RequestIngestRecorder implements IngestRecorderInterface
             'project_id' => $project->id,
             'environment' => $data['environment'],
             'server' => $data['server'],
+            'trace_id' => $data['trace_id'] ?? null,
             'method' => $data['method'],
             'uri' => $data['uri'],
             'route_name' => $data['route_name'] ?? null,
@@ -46,6 +49,16 @@ final class RequestIngestRecorder implements IngestRecorderInterface
 
         $code = (int) $hubRequest->status_code;
 
+        // Promote first so the webhook payloads can carry issue metadata
+        // (issue_id + recurrence_count) — receivers can dedupe alerts on
+        // recurring 5xx routes by these fields.
+        $issue = $this->issues->promoteSlowRequest($hubRequest);
+        $issueMeta = $issue ? [
+            'issue_id' => $issue->id,
+            'recurrence_count' => (int) $issue->recurrence_count,
+            'is_recurrence' => (bool) $issue->is_recurrence,
+        ] : [];
+
         if ($code >= 500) {
             $this->coordinator->dispatchTeamWebhook($project, 'request.server_error', [
                 'message' => sprintf(
@@ -62,6 +75,7 @@ final class RequestIngestRecorder implements IngestRecorderInterface
                 'occurred_at' => is_string($data['sent_at'] ?? null)
                     ? $data['sent_at']
                     : now()->toIso8601String(),
+                ...$issueMeta,
             ]);
         } elseif ($code >= 400) {
             $this->coordinator->dispatchTeamWebhook($project, 'request.client_error', [
@@ -79,6 +93,7 @@ final class RequestIngestRecorder implements IngestRecorderInterface
                 'occurred_at' => is_string($data['sent_at'] ?? null)
                     ? $data['sent_at']
                     : now()->toIso8601String(),
+                ...$issueMeta,
             ]);
         }
     }

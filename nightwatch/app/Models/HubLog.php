@@ -11,6 +11,7 @@ class HubLog extends Model
         'project_id',
         'environment',
         'server',
+        'trace_id',
         'level',
         'message',
         'channel',

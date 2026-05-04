@@ -11,6 +11,7 @@ class HubRequest extends Model
         'project_id',
         'environment',
         'server',
+        'trace_id',
         'method',
         'uri',
         'route_name',

@@ -13,6 +13,7 @@ class HubOutgoingHttp extends Model
         'project_id',
         'environment',
         'server',
+        'trace_id',
         'method',
         'url',
         'host',

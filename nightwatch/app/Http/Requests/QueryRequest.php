@@ -16,6 +16,7 @@ class QueryRequest extends FormRequest
         return [
             'environment' => ['required', 'string', 'max:50'],
             'server' => ['required', 'string', 'max:255'],
+            'trace_id' => ['nullable', 'string', 'size:32', 'regex:/^[0-9a-f]{32}$/'],
             'sql' => ['required', 'string'],
             'duration_ms' => ['required', 'numeric'],
             'connection' => ['nullable', 'string', 'max:255'],

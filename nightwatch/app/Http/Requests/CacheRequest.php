@@ -16,6 +16,7 @@ class CacheRequest extends FormRequest
         return [
             'environment' => ['required', 'string', 'max:50'],
             'server' => ['required', 'string', 'max:255'],
+            'trace_id' => ['nullable', 'string', 'size:32', 'regex:/^[0-9a-f]{32}$/'],
             'store' => ['required', 'string', 'max:255'],
             'hits' => ['required', 'integer'],
             'misses' => ['required', 'integer'],

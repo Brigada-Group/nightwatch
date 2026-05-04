@@ -16,6 +16,7 @@ class LogRequest extends FormRequest
         return [
             'environment' => ['required', 'string', 'max:50'],
             'server' => ['required', 'string', 'max:255'],
+            'trace_id' => ['nullable', 'string', 'size:32', 'regex:/^[0-9a-f]{32}$/'],
             'level' => ['required', 'string', 'in:emergency,alert,critical,error,warning'],
             'message' => ['required', 'string'],
             'channel' => ['nullable', 'string', 'max:255'],

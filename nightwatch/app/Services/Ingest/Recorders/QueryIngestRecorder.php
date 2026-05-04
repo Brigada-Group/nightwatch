@@ -7,11 +7,13 @@ use App\Models\HubQuery;
 use App\Models\Project;
 use App\Services\Ingest\Contracts\IngestRecorderInterface;
 use App\Services\Ingest\IngestRecordingCoordinator;
+use App\Services\IssuePromotionService;
 
 final class QueryIngestRecorder implements IngestRecorderInterface
 {
     public function __construct(
-        private readonly IngestRecordingCoordinator $coordinator
+        private readonly IngestRecordingCoordinator $coordinator,
+        private readonly IssuePromotionService $issues,
     ) {}
 
     public function record(Project $project, array $data): void
@@ -20,6 +22,7 @@ final class QueryIngestRecorder implements IngestRecorderInterface
             'project_id' => $project->id,
             'environment' => $data['environment'],
             'server' => $data['server'],
+            'trace_id' => $data['trace_id'] ?? null,
             'sql' => $data['sql'],
             'duration_ms' => $data['duration_ms'],
             'connection' => $data['connection'] ?? null,
@@ -45,6 +48,16 @@ final class QueryIngestRecorder implements IngestRecorderInterface
             'sent_at' => $data['sent_at'],
         ]));
 
+        // Promote first so the webhook payloads can carry issue metadata
+        // (issue_id + recurrence_count). Receivers can dedupe alerts on
+        // recurring slow queries by these fields.
+        $issue = $this->issues->promoteSlowQuery($query);
+        $issueMeta = $issue ? [
+            'issue_id' => $issue->id,
+            'recurrence_count' => (int) $issue->recurrence_count,
+            'is_recurrence' => (bool) $issue->is_recurrence,
+        ] : [];
+
         if ($query->is_slow) {
             $this->coordinator->dispatchTeamWebhook($project, 'query.slow', [
                 'message' => sprintf('Slow database query (%sms)', $query->duration_ms),
@@ -56,6 +69,7 @@ final class QueryIngestRecorder implements IngestRecorderInterface
                 'occurred_at' => is_string($data['sent_at'] ?? null)
                     ? $data['sent_at']
                     : now()->toIso8601String(),
+                ...$issueMeta,
             ]);
         }
 
@@ -70,6 +84,7 @@ final class QueryIngestRecorder implements IngestRecorderInterface
                 'occurred_at' => is_string($data['sent_at'] ?? null)
                     ? $data['sent_at']
                     : now()->toIso8601String(),
+                ...$issueMeta,
             ]);
         }
     }

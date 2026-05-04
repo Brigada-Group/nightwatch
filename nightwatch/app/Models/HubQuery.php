@@ -11,6 +11,7 @@ class HubQuery extends Model
         'project_id',
         'environment',
         'server',
+        'trace_id',
         'sql',
         'duration_ms',
         'connection',
