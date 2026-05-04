@@ -10,10 +10,30 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
-import { TASK_STATUS_LABELS, type ManagerTask, type TaskStatus } from '../types';
+import {
+    TASK_STATUS_LABELS,
+    type ManagerTask,
+    type TaskSourceType,
+    type TaskStatus,
+} from '../types';
 
 type Props = {
     tasks: ManagerTask[];
+};
+
+const SOURCE_LABEL: Record<TaskSourceType, string> = {
+    exception: 'bug',
+    slow_query: 'slow query',
+    slow_request: 'slow request',
+};
+
+const SOURCE_TONE: Record<TaskSourceType, string> = {
+    exception:
+        'border-red-500/40 bg-red-500/10 text-red-700 dark:text-red-300',
+    slow_query:
+        'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300',
+    slow_request:
+        'border-sky-500/40 bg-sky-500/10 text-sky-700 dark:text-sky-300',
 };
 
 const STATUS_TONE: Record<TaskStatus, string> = {
@@ -79,10 +99,21 @@ export function AssignedTasksTable({ tasks }: Props) {
                                     <TableCell className="align-top">
                                         <div className="min-w-0">
                                             <p
-                                                className="truncate font-mono text-xs"
+                                                className="flex items-center gap-1.5 truncate font-mono text-xs"
                                                 title={task.exception_class}
                                             >
-                                                {task.exception_class}
+                                                <Badge
+                                                    variant="outline"
+                                                    className={cn(
+                                                        'shrink-0 text-[10px] uppercase tracking-wide',
+                                                        SOURCE_TONE[task.source_type],
+                                                    )}
+                                                >
+                                                    {SOURCE_LABEL[task.source_type]}
+                                                </Badge>
+                                                <span className="truncate">
+                                                    {task.exception_class}
+                                                </span>
                                             </p>
                                             <p
                                                 className="text-muted-foreground truncate text-xs"

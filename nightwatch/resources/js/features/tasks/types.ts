@@ -25,28 +25,34 @@ export type TaskActor = {
     email?: string;
 };
 
+export type TaskSourceType = 'exception' | 'slow_query' | 'slow_request';
+
 export type DeveloperTask = {
     id: number;
+    source_type: TaskSourceType;
     exception_class: string;
     message: string;
     severity: string;
-    environment: string;
+    environment: string | null;
     task_status: TaskStatus;
     sent_at: string | null;
     assigned_at: string | null;
+    is_recurrence: boolean;
     project: TaskProject | null;
     assigned_by: TaskActor | null;
 };
 
 export type ManagerTask = {
     id: number;
+    source_type: TaskSourceType;
     exception_class: string;
     message: string;
     severity: string;
-    environment: string;
+    environment: string | null;
     task_status: TaskStatus;
     sent_at: string | null;
     assigned_at: string | null;
+    is_recurrence: boolean;
     project: TaskProject | null;
     assignee: TaskActor | null;
 };
