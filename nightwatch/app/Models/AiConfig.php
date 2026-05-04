@@ -11,6 +11,7 @@ class AiConfig extends Model
         'project_id',
         'use_ai',
         'self_heal',
+        'auto_assign_recurrences'
     ];
 
     protected function casts(): array
@@ -18,6 +19,7 @@ class AiConfig extends Model
         return [
             'use_ai' => 'boolean',
             'self_heal' => 'boolean',
+            'auto_assign_recurrences' => 'boolean'
         ];
     }
 

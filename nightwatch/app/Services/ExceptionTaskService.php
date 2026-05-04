@@ -159,6 +159,7 @@ class ExceptionTaskService
     {
         $payload = [
             'id' => $exception->id,
+            'source_type' => 'exception',
             'exception_class' => (string) $exception->exception_class,
             'message' => (string) $exception->message,
             'severity' => (string) $exception->severity,
@@ -166,6 +167,7 @@ class ExceptionTaskService
             'task_status' => $exception->task_status ?? HubException::TASK_STATUS_STARTED,
             'sent_at' => $exception->sent_at?->toIso8601String(),
             'assigned_at' => $exception->assigned_at?->toIso8601String(),
+            'is_recurrence' => (bool) $exception->is_recurrence,
             'project' => $exception->project
                 ? ['id' => $exception->project->id, 'name' => $exception->project->name]
                 : null,

@@ -1,4 +1,4 @@
-import { ChevronDown, UserCircle } from 'lucide-react';
+import { ChevronDown, UserCircle, X } from 'lucide-react';
 import type { ExceptionAssignee } from '@/entities';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,6 +24,7 @@ export function AssigneeCell({ exceptionId, assignee }: AssigneeCellProps) {
         submitting,
         loadUsers,
         assign,
+        unassign,
     } = useExceptionAssignment({ exceptionId, initialAssignee: assignee });
 
     return (
@@ -81,6 +82,22 @@ export function AssigneeCell({ exceptionId, assignee }: AssigneeCellProps) {
                         </DropdownMenuItem>
                     ))
                 )}
+                {current ? (
+                    <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                            disabled={submitting}
+                            onSelect={(event) => {
+                                event.preventDefault();
+                                void unassign();
+                            }}
+                            className="text-destructive focus:text-destructive flex items-center gap-2"
+                        >
+                            <X className="size-3.5" />
+                            <span className="text-sm">Unassign</span>
+                        </DropdownMenuItem>
+                    </>
+                ) : null}
             </DropdownMenuContent>
         </DropdownMenu>
     );

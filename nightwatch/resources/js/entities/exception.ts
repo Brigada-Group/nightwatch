@@ -27,4 +27,7 @@ export type HubException = {
     assigned_by: number | null;
     assigned_at: string | null;
     assignee?: ExceptionAssignee | null;
+    is_recurrence: boolean;
+    original_exception_id: number | null;
+    recurrence_count: number;
 };

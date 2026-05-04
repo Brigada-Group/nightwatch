@@ -23,6 +23,7 @@ class HubException extends Model
         'project_id',
         'environment',
         'server',
+        'trace_id',
         'exception_class',
         'message',
         'file',
@@ -40,6 +41,10 @@ class HubException extends Model
         'assigned_at',
         'task_status',
         'task_finished_at',
+        'fingerprint',
+        'is_recurrence',
+        'original_exception_id',
+        'recurrence_count'
     ];
 
     protected function casts(): array
@@ -48,6 +53,7 @@ class HubException extends Model
             'sent_at' => 'datetime',
             'assigned_at' => 'datetime',
             'task_finished_at' => 'datetime',
+            'is_recurrence' => 'boolean'
         ];
     }
 
@@ -64,5 +70,10 @@ class HubException extends Model
     public function assignedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_by');
+    }
+
+    public function originalException(): BelongsTo 
+    {
+        return $this->belongsTo(HubException::class,'original_exception_id');
     }
 }

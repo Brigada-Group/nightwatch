@@ -23,6 +23,7 @@ import {
 import type { HubException, PaginatedResponse } from '@/entities';
 import type { ProjectOption, WithProjectRelation } from '@/types/monitoring';
 import { AssigneeCell } from '@/features/exceptions/components/AssigneeCell';
+import { RecurrenceBadge } from '@/features/exceptions/components/RecurrenceBadge';
 
 type Filters = {
     project_id: number | null;
@@ -135,8 +136,13 @@ export default function ExceptionsIndex() {
                                                     href={`/exceptions/${row.id}`}
                                                     className="block max-w-md hover:underline"
                                                 >
-                                                    <p className="truncate font-mono text-xs font-medium">
-                                                        {row.exception_class}
+                                                    <p className="flex items-center gap-2 truncate font-mono text-xs font-medium">
+                                                        <span className="truncate">
+                                                            {row.exception_class}
+                                                        </span>
+                                                        {row.is_recurrence ? (
+                                                            <RecurrenceBadge />
+                                                        ) : null}
                                                     </p>
                                                     <p className="text-muted-foreground truncate text-xs">
                                                         {row.message}

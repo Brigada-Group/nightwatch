@@ -8,6 +8,11 @@ import {
     ExceptionFieldList,
     type ExceptionField,
 } from '@/features/exceptions/components/ExceptionFieldList';
+import {
+    ExceptionTimeline,
+    type TimelinePayload,
+} from '@/features/exceptions/components/ExceptionTimeline';
+import { RecurrenceBadge } from '@/features/exceptions/components/RecurrenceBadge';
 
 type ExceptionPayload = {
     id: number;
@@ -28,6 +33,10 @@ type ExceptionPayload = {
     task_status: string | null;
     task_finished_at: string | null;
     assigned_at: string | null;
+    is_recurrence: boolean;
+    recurrence_count: number;
+    total_recurrences: number;
+    original_exception_id: number | null;
     project: { id: number; name: string; environment: string | null } | null;
     assignee: { id: number; name: string; email: string } | null;
     assigned_by: { id: number; name: string; email: string } | null;
@@ -36,6 +45,7 @@ type ExceptionPayload = {
 type PageProps = {
     exception: ExceptionPayload;
     markdown: string;
+    timeline: TimelinePayload;
 };
 
 const SEVERITY_TONE: Record<string, string> = {
@@ -59,7 +69,7 @@ function formatDateTime(iso: string | null): string {
 }
 
 export default function ExceptionShow() {
-    const { exception, markdown } = usePage<PageProps>().props;
+    const { exception, markdown, timeline } = usePage<PageProps>().props;
 
     const overviewFields: ExceptionField[] = [
         {
@@ -160,6 +170,9 @@ export default function ExceptionShow() {
                                         Status: {exception.task_status}
                                     </Badge>
                                 ) : null}
+                                {exception.is_recurrence ? (
+                                    <RecurrenceBadge />
+                                ) : null}
                             </div>
                         </div>
 
@@ -169,12 +182,60 @@ export default function ExceptionShow() {
                     </CardHeader>
                 </Card>
 
+                {exception.is_recurrence ? (
+                    <Card className="border-red-500/40">
+                        <CardHeader>
+                            <CardTitle className="text-base text-red-700 dark:text-red-300">
+                                Recurrence
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="grid gap-3 text-sm sm:grid-cols-2">
+                            <div>
+                                <p className="text-muted-foreground text-[11px] font-medium uppercase tracking-wider">
+                                    Times recurred
+                                </p>
+                                <p className="text-foreground mt-0.5">
+                                    {exception.total_recurrences}
+                                </p>
+                            </div>
+                            {exception.original_exception_id ? (
+                                <div>
+                                    <p className="text-muted-foreground text-[11px] font-medium uppercase tracking-wider">
+                                        Original occurrence
+                                    </p>
+                                    <p className="text-foreground mt-0.5">
+                                        <Link
+                                            href={`/exceptions/${exception.original_exception_id}`}
+                                            className="underline-offset-2 hover:underline"
+                                        >
+                                            #{exception.original_exception_id}
+                                        </Link>
+                                    </p>
+                                </div>
+                            ) : null}
+                        </CardContent>
+                    </Card>
+                ) : null}
+
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-base">Overview</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <ExceptionFieldList fields={overviewFields} />
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-base">Timeline</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ExceptionTimeline
+                            timeline={timeline}
+                            exceptionClass={exception.exception_class}
+                            exceptionMessage={exception.message}
+                        />
                     </CardContent>
                 </Card>
 

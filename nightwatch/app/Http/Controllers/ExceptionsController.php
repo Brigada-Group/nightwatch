@@ -7,6 +7,7 @@ use App\Http\Support\ProjectFilterOptions;
 use App\Models\HubException;
 use App\Services\CurrentTeam;
 use App\Services\ExceptionDetailService;
+use App\Services\ExceptionTimelineService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -16,6 +17,7 @@ class ExceptionsController extends Controller
     public function __construct(
         private readonly CurrentTeam $currentTeam,
         private readonly ExceptionDetailService $details,
+        private readonly ExceptionTimelineService $timeline,
     ) {}
 
     public function index(Request $request): Response
@@ -63,6 +65,7 @@ class ExceptionsController extends Controller
         return Inertia::render('exceptions/show', [
             'exception' => $this->details->serializeForPage($hubException),
             'markdown' => $this->details->formatAsMarkdown($hubException),
+            'timeline' => $this->timeline->forException($hubException),
         ]);
     }
 }
