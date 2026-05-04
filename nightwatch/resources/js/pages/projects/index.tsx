@@ -20,6 +20,10 @@ import type {
     ProjectCredentials,
     ProjectStatus,
 } from '@/entities';
+import {
+    ConnectionStatusBadge,
+    type ConnectionStatus,
+} from '@/features/projects/components/ConnectionStatusBadge';
 import { CreateProjectDialog } from '@/features/projects/components/create-project-dialog';
 import { CredentialsRevealDialog } from '@/features/projects/components/credentials-reveal-dialog';
 import { cn } from '@/lib/utils';
@@ -134,10 +138,18 @@ export default function ProjectsIndex() {
                                                 {p.environment}
                                             </TableCell>
                                             <TableCell>
-                                                <ToneChip
-                                                    kind="projectStatus"
-                                                    value={p.status as ProjectStatus}
-                                                />
+                                                <div className="flex items-center gap-2">
+                                                    <ToneChip
+                                                        kind="projectStatus"
+                                                        value={p.status as ProjectStatus}
+                                                    />
+                                                    <ConnectionStatusBadge
+                                                        status={
+                                                            ((p as unknown as { connection_status?: ConnectionStatus })
+                                                                .connection_status ?? 'disconnected')
+                                                        }
+                                                    />
+                                                </div>
                                             </TableCell>
                                             <TableCell className="text-muted-foreground text-right text-xs">
                                                 {p.last_heartbeat_at

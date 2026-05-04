@@ -8,6 +8,8 @@ use App\Http\Support\InertiaPaginator;
 use App\Models\Project;
 use App\Services\CurrentTeam;
 use App\Services\ProjectService;
+use App\Services\ProjectVerificationService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -18,6 +20,7 @@ class ProjectsController extends Controller
     public function __construct(
         private readonly ProjectService $projectService,
         private readonly CurrentTeam $currentTeam,
+        private readonly ProjectVerificationService $verification,
     ) {}
 
     public function index(Request $request): Response
@@ -82,7 +85,13 @@ class ProjectsController extends Controller
         ]);
 
         return Inertia::render('projects/show', [
-            'project' => $project,
+            'project' => array_merge(
+                $project->toArray(),
+                [
+                    'connection_status' => $project->connectionStatus(),
+                    'verified_at' => $project->verified_at?->toIso8601String(),
+                ],
+            ),
             'counts' => [
                 'exceptions' => $project->exceptions_count,
                 'requests' => $project->requests_count,
@@ -123,6 +132,29 @@ class ProjectsController extends Controller
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Project updated.')]);
 
         return to_route('projects.show', $project);
+    }
+
+    /**
+     * Generate a new 6-digit verification token, valid for 5 minutes. The
+     * frontend modal calls this when the user clicks "Verify connection
+     * now", then displays the token + the artisan command the user must
+     * run on their consuming app.
+     */
+    public function startVerification(Project $project): JsonResponse
+    {
+        $this->authorize('update', $project);
+
+        $issued = $this->verification->startVerification($project);
+
+        return response()->json([
+            'data' => [
+                'project_uuid' => $project->project_uuid,
+                'token' => $issued['token'],
+                'expires_at' => $issued['expires_at'],
+                'ttl_seconds' => $issued['ttl_seconds'],
+                'command' => sprintf('php artisan guardian:verify %s', $issued['token']),
+            ],
+        ]);
     }
 
     public function rotateToken(Project $project): RedirectResponse

@@ -60,7 +60,12 @@ import type {
     ProjectStatus,
 } from '@/entities';
 import { ConnectGuideCard } from '@/features/projects/components/connect-guide-card';
+import {
+    ConnectionStatusBadge,
+    type ConnectionStatus,
+} from '@/features/projects/components/ConnectionStatusBadge';
 import { CredentialsRevealDialog } from '@/features/projects/components/credentials-reveal-dialog';
+import { VerifyConnectionDialog } from '@/features/projects/components/VerifyConnectionDialog';
 import { pathWithQuery } from '@/lib/inertia-query';
 import { cn } from '@/lib/utils';
 
@@ -142,6 +147,7 @@ export default function ProjectShow() {
 
     const [rotating, setRotating] = React.useState(false);
     const [deleting, setDeleting] = React.useState(false);
+    const [verifyOpen, setVerifyOpen] = React.useState(false);
 
     const rotateToken = () => {
         router.post(
@@ -235,6 +241,28 @@ export default function ProjectShow() {
                                     kind="projectStatus"
                                     value={project.status as ProjectStatus}
                                 />
+                                <ConnectionStatusBadge
+                                    status={
+                                        ((project as unknown as {
+                                            connection_status?: ConnectionStatus;
+                                        }).connection_status ?? 'disconnected')
+                                    }
+                                />
+                                {(project as unknown as { verified_at?: string | null })
+                                    .verified_at ? (
+                                    <span className="border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium">
+                                        ✓ Verified
+                                    </span>
+                                ) : null}
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="ml-1 h-7 gap-1.5 text-xs"
+                                    onClick={() => setVerifyOpen(true)}
+                                >
+                                    Verify connection
+                                </Button>
                             </div>
                             <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
                                 {project.name}
@@ -536,6 +564,13 @@ export default function ProjectShow() {
                     </div>
                 </div>
             </div>
+
+            <VerifyConnectionDialog
+                isOpen={verifyOpen}
+                onOpenChange={setVerifyOpen}
+                projectUuid={project.project_uuid}
+                projectName={project.name}
+            />
         </>
     );
 }
