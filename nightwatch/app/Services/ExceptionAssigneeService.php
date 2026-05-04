@@ -95,6 +95,28 @@ class ExceptionAssigneeService
     }
 
     /**
+     * Clear the assignment on an exception. Wipes assigned_to, assigned_by,
+     * assigned_at, task_status, and task_finished_at so the row returns to
+     * its pre-assignment state. The actor must be in the team that owns the
+     * exception's project — caller's job to enforce, since this service has
+     * no way to know who's allowed.
+     */
+    public function unassign(HubException $exception): HubException
+    {
+        DB::transaction(function () use ($exception): void {
+            $exception->forceFill([
+                'assigned_to' => null,
+                'assigned_by' => null,
+                'assigned_at' => null,
+                'task_status' => null,
+                'task_finished_at' => null,
+            ])->save();
+        });
+
+        return $exception->refresh();
+    }
+
+    /**
      * Send the assignment notification. Failures are reported but don't roll
      * back the assignment — the row already records the change.
      */

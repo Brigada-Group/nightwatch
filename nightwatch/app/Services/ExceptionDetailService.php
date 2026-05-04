@@ -33,6 +33,7 @@ class ExceptionDetailService
                 'project:id,name,environment',
                 'assignee:id,name,email',
                 'assignedBy:id,name,email',
+                'originalException:id,recurrence_count',
             ])
             ->whereIn('project_id', $accessibleProjectIds)
             ->findOrFail($exceptionId);
@@ -62,6 +63,17 @@ class ExceptionDetailService
             'task_status' => $exception->task_status,
             'task_finished_at' => $exception->task_finished_at?->toIso8601String(),
             'assigned_at' => $exception->assigned_at?->toIso8601String(),
+            'is_recurrence' => (bool) $exception->is_recurrence,
+            'recurrence_count' => (int) $exception->recurrence_count,
+            'original_exception_id' => $exception->original_exception_id,
+            // The chain count for this bug. In the current "issue" model the
+            // row IS the chain anchor, so we read the row's own count. The
+            // legacy model (a separate "original" row pointed to via
+            // original_exception_id) is preserved here for any pre-existing
+            // recurrence rows: in that case we read the original's count.
+            'total_recurrences' => $exception->is_recurrence && $exception->original_exception_id !== null
+                ? (int) ($exception->originalException?->recurrence_count ?? 0)
+                : (int) $exception->recurrence_count,
             'project' => $exception->project
                 ? [
                     'id' => $exception->project->id,
@@ -173,6 +185,21 @@ class ExceptionDetailService
             if ($assignment !== []) {
                 $sections[] = "## Assignment\n".implode("\n", $assignment);
             }
+        }
+
+        if ($exception->is_recurrence) {
+            $totalRecurrences = $exception->original_exception_id !== null
+                ? (int) ($exception->originalException?->recurrence_count ?? 0)
+                : (int) $exception->recurrence_count;
+
+            $recurrence = ['- **Status:** Recurrence (this exception was resolved before and has come back)'];
+            if ($exception->original_exception_id) {
+                $recurrence[] = '- **Original exception ID:** '.$exception->original_exception_id;
+            }
+            if ($totalRecurrences > 0) {
+                $recurrence[] = '- **Times recurred:** '.$totalRecurrences;
+            }
+            $sections[] = "## Recurrence\n".implode("\n", $recurrence);
         }
 
         return implode("\n\n", $sections)."\n";

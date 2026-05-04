@@ -58,6 +58,23 @@ class ExceptionAssignmentsController extends Controller
         ]);
     }
 
+    public function unassign(Request $request, HubException $exception): JsonResponse
+    {
+        // Reuses the same team-scope check as assign() so a user can't
+        // unassign someone from another team's exception by guessing IDs.
+        $this->scopedTeamFor($request, $exception);
+
+        $this->assignees->unassign($exception);
+
+        return response()->json([
+            'data' => [
+                'id' => $exception->id,
+                'assigned_at' => null,
+                'assignee' => null,
+            ],
+        ]);
+    }
+
     /**
      * Resolve and validate the team that owns this exception. Returns the
      * actor's current team or aborts when the exception isn't part of it.
