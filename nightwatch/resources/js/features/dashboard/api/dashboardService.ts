@@ -36,6 +36,27 @@ export type IncidentVolumePoint = {
 
 export type ChartBarPoint = { value: number };
 
+export type TopExceptionClass = {
+    exception_class: string;
+    total: number;
+};
+
+export type RequestDurationPoint = {
+    time: string;
+    avg_ms: number;
+};
+
+export type SlowQueryRow = {
+    id: number;
+    sql: string;
+    duration_ms: number;
+    file: string | null;
+    line: number | null;
+    sent_at: string;
+    is_slow: boolean;
+    is_n_plus_one: boolean;
+};
+
 export type DashboardOverview = {
     stats: DashboardStats;
     recent_projects: ProjectSummary[];
@@ -44,6 +65,9 @@ export type DashboardOverview = {
     throughput_chart: ChartBarPoint[];
     bugs_chart: ChartBarPoint[];
     running_checks_chart: ChartBarPoint[];
+    top_exception_classes: TopExceptionClass[];
+    request_duration_trend: RequestDurationPoint[];
+    slowest_queries: SlowQueryRow[];
     filter_active: boolean;
 };
 
@@ -87,6 +111,17 @@ export function emptyDashboardOverview(): DashboardOverview {
         running_checks_chart: Array.from({ length: 24 }, () => ({
             value: 0,
         })),
+        top_exception_classes: [],
+        request_duration_trend: Array.from({ length: 24 }, (_, i) => {
+            const start = new Date();
+            start.setMinutes(0, 0, 0);
+            start.setHours(start.getHours() - 23 + i);
+            return {
+                time: `${start.getHours().toString().padStart(2, '0')}:00`,
+                avg_ms: 0,
+            };
+        }),
+        slowest_queries: [],
         filter_active: false,
     };
 }
@@ -106,6 +141,11 @@ export function mergeDashboardOverview(
         bugs_chart: partial.bugs_chart ?? base.bugs_chart,
         running_checks_chart:
             partial.running_checks_chart ?? base.running_checks_chart,
+        top_exception_classes:
+            partial.top_exception_classes ?? base.top_exception_classes,
+        request_duration_trend:
+            partial.request_duration_trend ?? base.request_duration_trend,
+        slowest_queries: partial.slowest_queries ?? base.slowest_queries,
         filter_active: partial.filter_active ?? base.filter_active,
     };
 }
