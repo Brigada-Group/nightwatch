@@ -8,9 +8,11 @@ import {
     CheckCircle2,
     Clock,
     Database,
+    Bell,
     Globe,
     HeartPulse,
     LayoutGrid,
+    ListChecks,
     Link2,
     Mail,
     MailPlus,
@@ -28,6 +30,7 @@ import {
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
+import { TeamSwitcher } from '@/components/team-switcher';
 import {
     Sidebar,
     SidebarContent,
@@ -79,6 +82,11 @@ const monitoringItems: NavItem[] = [
         title: 'Exceptions',
         href: '/exceptions',
         icon: Bug,
+    },
+    {
+        title: 'Issues',
+        href: '/issues',
+        icon: ListChecks,
     },
     {
         title: 'Requests',
@@ -172,6 +180,11 @@ const managerSystemItems: NavItem[] = [
         href: '/webhooks',
         icon: Webhook,
     },
+    {
+        title: 'Alert rules',
+        href: '/alert-rules',
+        icon: Bell,
+    },
 ];
 
 export function AppSidebar() {
@@ -239,6 +252,7 @@ export function AppSidebar() {
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
+                {isSuperAdminRoute && isSuperAdmin ? null : <TeamSwitcher />}
             </SidebarHeader>
 
             <SidebarContent>
