@@ -1,6 +1,7 @@
 <?php
 
 use App\Console\Commands\DispatchDueEmailReports;
+use App\Console\Commands\EvaluateAlertRulesCommand;
 use App\Console\Commands\RecordPlatformMetrics;
 use App\Console\Commands\RunRetentionCleanup;
 use Illuminate\Foundation\Inspiring;
@@ -12,6 +13,11 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command(DispatchDueEmailReports::class)
+    ->everyMinute()
+    ->withoutOverlapping()
+    ->runInBackground();
+
+Schedule::command(EvaluateAlertRulesCommand::class)
     ->everyMinute()
     ->withoutOverlapping()
     ->runInBackground();
