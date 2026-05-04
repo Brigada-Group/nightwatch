@@ -20,6 +20,7 @@ final class NotificationIngestRecorder implements IngestRecorderInterface
             'project_id' => $project->id,
             'environment' => $data['environment'],
             'server' => $data['server'],
+            'trace_id' => $data['trace_id'] ?? null,
             'notification_class' => $data['notification_class'],
             'channel' => $data['channel'],
             'notifiable_type' => $data['notifiable_type'],

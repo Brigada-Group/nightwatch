@@ -28,6 +28,7 @@ class TeamPageService
                 'id' => $team->id,
                 'name' => $team->name,
                 'slug' => $team->slug,
+                'admin_id' => $team->admin_id,
             ],
             'members' => $this->serializeMembers($members),
         ];
