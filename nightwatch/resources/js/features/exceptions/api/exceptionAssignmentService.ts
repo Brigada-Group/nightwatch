@@ -40,3 +40,13 @@ export async function assignException(
 
     return data.data;
 }
+
+export async function unassignException(
+    exceptionId: number,
+): Promise<AssignResponse['data']> {
+    const { data } = await webApi.delete<AssignResponse>(
+        `/exceptions/${exceptionId}/assign`,
+    );
+
+    return data.data;
+}

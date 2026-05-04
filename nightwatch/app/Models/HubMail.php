@@ -11,6 +11,7 @@ class HubMail extends Model
         'project_id',
         'environment',
         'server',
+        'trace_id',
         'mailable',
         'subject',
         'to',

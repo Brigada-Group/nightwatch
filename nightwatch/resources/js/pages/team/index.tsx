@@ -1,8 +1,18 @@
 import { Head, router, usePage } from '@inertiajs/react';
-import { Pencil, Users } from 'lucide-react';
+import { Pencil, Trash2, Users } from 'lucide-react';
 import * as React from 'react';
 import { monitoringCardClass } from '@/components/monitoring/monitoring-surface';
 import { ResourcePageHeader } from '@/components/monitoring/resource-page-header';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -30,6 +40,13 @@ type TeamSummary = {
     id: number;
     name: string;
     slug: string;
+    admin_id: number;
+};
+
+type AuthSharedProps = {
+    auth?: {
+        user?: { id: number } | null;
+    };
 };
 
 type TeamProjectOption = {
@@ -59,8 +76,10 @@ function joinedLabel(iso: string | null): string {
 }
 
 export default function TeamIndex() {
+    const page = usePage<PageProps & AuthSharedProps>();
     const { team, members, canManageProjectAssignments, teamProjects } =
-        usePage<PageProps>().props;
+        page.props;
+    const currentUserId = page.props.auth?.user?.id ?? null;
 
     const [assignmentDialog, setAssignmentDialog] = React.useState<{
         member: TeamRosterMember;
@@ -68,6 +87,25 @@ export default function TeamIndex() {
     } | null>(null);
 
     const [assignmentSaving, setAssignmentSaving] = React.useState(false);
+
+    const [memberToRemove, setMemberToRemove] =
+        React.useState<TeamRosterMember | null>(null);
+    const [removing, setRemoving] = React.useState(false);
+
+    const confirmRemoveMember = () => {
+        if (!memberToRemove) {
+            return;
+        }
+
+        router.delete(`/team/members/${memberToRemove.id}`, {
+            preserveScroll: true,
+            onStart: () => setRemoving(true),
+            onFinish: () => {
+                setRemoving(false);
+                setMemberToRemove(null);
+            },
+        });
+    };
 
     const toggleAssignmentProject = (projectId: number) => {
         setAssignmentDialog((d) => {
@@ -109,6 +147,46 @@ export default function TeamIndex() {
     return (
         <>
             <Head title={`Team · ${team.name}`} />
+
+            <AlertDialog
+                open={memberToRemove !== null}
+                onOpenChange={(open) => {
+                    if (!open && !removing) {
+                        setMemberToRemove(null);
+                    }
+                }}
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Remove team member?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This will remove{' '}
+                            <span className="text-foreground font-medium">
+                                {memberToRemove?.user.name}
+                            </span>{' '}
+                            ({memberToRemove?.user.email}) from{' '}
+                            <span className="text-foreground font-medium">
+                                {team.name}
+                            </span>
+                            . They will lose access to the team's projects
+                            immediately. You can re-invite them later.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={removing}>
+                            Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={confirmRemoveMember}
+                            disabled={removing}
+                            className="bg-rose-500 text-white hover:bg-rose-400"
+                        >
+                            {removing ? 'Removing…' : 'Remove'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
             <Dialog
                 open={assignmentDialog !== null}
                 onOpenChange={(open) => {
@@ -212,13 +290,24 @@ export default function TeamIndex() {
                                     <TableHead className="text-right">
                                         Joined
                                     </TableHead>
+                                    {canManageProjectAssignments ? (
+                                        <TableHead className="w-[1%] text-right">
+                                            <span className="sr-only">
+                                                Actions
+                                            </span>
+                                        </TableHead>
+                                    ) : null}
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {members.length === 0 ? (
                                     <TableRow>
                                         <TableCell
-                                            colSpan={6}
+                                            colSpan={
+                                                canManageProjectAssignments
+                                                    ? 7
+                                                    : 6
+                                            }
                                             className="text-muted-foreground py-12 text-center text-sm"
                                         >
                                             No team members yet.
@@ -301,6 +390,29 @@ export default function TeamIndex() {
                                             <TableCell className="text-muted-foreground text-right text-sm">
                                                 {joinedLabel(m.joined_at)}
                                             </TableCell>
+                                            {canManageProjectAssignments ? (
+                                                <TableCell className="text-right">
+                                                    {m.user.id !==
+                                                        team.admin_id &&
+                                                    m.user.id !==
+                                                        currentUserId ? (
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="size-8 shrink-0 text-rose-600 hover:bg-rose-500/10 hover:text-rose-700 dark:text-rose-300 dark:hover:text-rose-200"
+                                                            onClick={() =>
+                                                                setMemberToRemove(
+                                                                    m,
+                                                                )
+                                                            }
+                                                            aria-label={`Remove ${m.user.name} from team`}
+                                                        >
+                                                            <Trash2 className="size-3.5" />
+                                                        </Button>
+                                                    ) : null}
+                                                </TableCell>
+                                            ) : null}
                                         </TableRow>
                                     ))
                                 )}

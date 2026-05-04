@@ -1,4 +1,4 @@
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { InertiaPagination } from '@/components/monitoring/inertia-pagination';
 import { ProjectFilter } from '@/components/monitoring/project-filter';
 import { ResourcePageHeader } from '@/components/monitoring/resource-page-header';
@@ -23,6 +23,7 @@ import {
 import type { HubException, PaginatedResponse } from '@/entities';
 import type { ProjectOption, WithProjectRelation } from '@/types/monitoring';
 import { AssigneeCell } from '@/features/exceptions/components/AssigneeCell';
+import { RecurrenceBadge } from '@/features/exceptions/components/RecurrenceBadge';
 
 type Filters = {
     project_id: number | null;
@@ -131,14 +132,22 @@ export default function ExceptionsIndex() {
                                     exceptions.data.map((row) => (
                                         <TableRow key={row.id}>
                                             <TableCell>
-                                                <div className="max-w-md">
-                                                    <p className="truncate font-mono text-xs">
-                                                        {row.exception_class}
+                                                <Link
+                                                    href={`/exceptions/${row.id}`}
+                                                    className="block max-w-md hover:underline"
+                                                >
+                                                    <p className="flex items-center gap-2 truncate font-mono text-xs font-medium">
+                                                        <span className="truncate">
+                                                            {row.exception_class}
+                                                        </span>
+                                                        {row.is_recurrence ? (
+                                                            <RecurrenceBadge />
+                                                        ) : null}
                                                     </p>
                                                     <p className="text-muted-foreground truncate text-xs">
                                                         {row.message}
                                                     </p>
-                                                </div>
+                                                </Link>
                                             </TableCell>
                                             <TableCell className="text-sm">
                                                 {row.project?.name ?? `#${row.project_id}`}

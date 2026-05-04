@@ -45,6 +45,7 @@ export default function TasksIndex() {
                             kanban ?? {
                                 started: [],
                                 ongoing: [],
+                                review: [],
                                 finished: [],
                             }
                         }

@@ -13,10 +13,10 @@ class ExceptionTaskService
 {
     /**
      * Kanban payload for the developer view: tasks the user owns, grouped by
-     * the three task statuses. Empty groups are still present so the frontend
+     * the four task statuses. Empty groups are still present so the frontend
      * can render the columns without conditional logic.
      *
-     * @return array{started: list<array<string, mixed>>, ongoing: list<array<string, mixed>>, finished: list<array<string, mixed>>}
+     * @return array{started: list<array<string, mixed>>, ongoing: list<array<string, mixed>>, review: list<array<string, mixed>>, finished: list<array<string, mixed>>}
      */
     public function forAssignee(User $user, Team $team): array
     {
@@ -120,7 +120,7 @@ class ExceptionTaskService
 
     /**
      * @param  Collection<int, HubException>  $exceptions
-     * @return array{started: list<array<string, mixed>>, ongoing: list<array<string, mixed>>, finished: list<array<string, mixed>>}
+     * @return array{started: list<array<string, mixed>>, ongoing: list<array<string, mixed>>, review: list<array<string, mixed>>, finished: list<array<string, mixed>>}
      */
     private function groupByStatus(Collection $exceptions): array
     {
@@ -140,13 +140,14 @@ class ExceptionTaskService
     }
 
     /**
-     * @return array{started: list<array<string, mixed>>, ongoing: list<array<string, mixed>>, finished: list<array<string, mixed>>}
+     * @return array{started: list<array<string, mixed>>, ongoing: list<array<string, mixed>>, review: list<array<string, mixed>>, finished: list<array<string, mixed>>}
      */
     private function emptyKanban(): array
     {
         return [
             HubException::TASK_STATUS_STARTED => [],
             HubException::TASK_STATUS_ONGOING => [],
+            HubException::TASK_STATUS_REVIEW => [],
             HubException::TASK_STATUS_FINISHED => [],
         ];
     }
@@ -158,6 +159,7 @@ class ExceptionTaskService
     {
         $payload = [
             'id' => $exception->id,
+            'source_type' => 'exception',
             'exception_class' => (string) $exception->exception_class,
             'message' => (string) $exception->message,
             'severity' => (string) $exception->severity,
@@ -165,6 +167,7 @@ class ExceptionTaskService
             'task_status' => $exception->task_status ?? HubException::TASK_STATUS_STARTED,
             'sent_at' => $exception->sent_at?->toIso8601String(),
             'assigned_at' => $exception->assigned_at?->toIso8601String(),
+            'is_recurrence' => (bool) $exception->is_recurrence,
             'project' => $exception->project
                 ? ['id' => $exception->project->id, 'name' => $exception->project->name]
                 : null,

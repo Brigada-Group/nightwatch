@@ -1,4 +1,4 @@
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { InertiaPagination } from '@/components/monitoring/inertia-pagination';
 import { ProjectFilter } from '@/components/monitoring/project-filter';
 import { ResourcePageHeader } from '@/components/monitoring/resource-page-header';
@@ -142,7 +142,12 @@ export default function HubRequestsIndex() {
                                                 {row.method}
                                             </TableCell>
                                             <TableCell className="max-w-md truncate text-xs">
-                                                {row.uri}
+                                                <Link
+                                                    href={`/hub-requests/${row.id}`}
+                                                    className="text-foreground underline-offset-2 hover:underline"
+                                                >
+                                                    {row.uri}
+                                                </Link>
                                             </TableCell>
                                             <TableCell className="font-mono text-xs">
                                                 {row.status_code}

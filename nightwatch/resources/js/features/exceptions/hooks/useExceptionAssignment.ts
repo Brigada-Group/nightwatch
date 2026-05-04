@@ -6,6 +6,7 @@ import type { ExceptionAssignee } from '@/entities';
 import {
     assignException,
     getAssignableUsers,
+    unassignException,
     type AssignableUser,
 } from '../api/exceptionAssignmentService';
 
@@ -74,6 +75,20 @@ export function useExceptionAssignment({
         [exceptionId],
     );
 
+    const unassign = useCallback(async () => {
+        setSubmitting(true);
+        try {
+            await unassignException(exceptionId);
+            setAssignee(null);
+            toast.success('Assignee cleared.');
+            router.reload({ only: ['exceptions'] });
+        } catch (error) {
+            toast.error(readErrorMessage(error, 'Failed to clear assignee.'));
+        } finally {
+            setSubmitting(false);
+        }
+    }, [exceptionId]);
+
     return {
         assignee,
         users,
@@ -81,5 +96,6 @@ export function useExceptionAssignment({
         submitting,
         loadUsers,
         assign,
+        unassign,
     };
 }

@@ -11,6 +11,7 @@ class HubNotification extends Model
         'project_id',
         'environment',
         'server',
+        'trace_id',
         'notification_class',
         'channel',
         'notifiable_type',

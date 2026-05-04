@@ -20,6 +20,7 @@ final class MailIngestRecorder implements IngestRecorderInterface
             'project_id' => $project->id,
             'environment' => $data['environment'],
             'server' => $data['server'],
+            'trace_id' => $data['trace_id'] ?? null,
             'mailable' => $data['mailable'] ?? null,
             'subject' => $data['subject'] ?? null,
             'to' => $data['to'] ?? null,

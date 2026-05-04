@@ -11,6 +11,7 @@ class HubJob extends Model
         'project_id',
         'environment',
         'server',
+        'trace_id',
         'job_class',
         'queue',
         'connection',

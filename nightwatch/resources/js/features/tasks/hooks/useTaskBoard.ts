@@ -61,7 +61,7 @@ export function useTaskBoard(initial: KanbanColumns) {
             setColumns((prev) => moveCard(prev, task.id, fromStatus, toStatus));
 
             try {
-                await updateTaskStatus(task.id, toStatus);
+                await updateTaskStatus(task.id, toStatus, task.source_type);
                 router.reload({ only: ['kanban'] });
             } catch (error) {
                 setColumns((prev) => moveCard(prev, task.id, toStatus, fromStatus));

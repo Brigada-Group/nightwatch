@@ -20,6 +20,7 @@ final class LogIngestRecorder implements IngestRecorderInterface
             'project_id' => $project->id,
             'environment' => $data['environment'],
             'server' => $data['server'],
+            'trace_id' => $data['trace_id'] ?? null,
             'level' => $data['level'],
             'message' => $data['message'],
             'channel' => $data['channel'] ?? null,

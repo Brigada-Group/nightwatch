@@ -5,9 +5,14 @@ namespace App\Services\Ingest\Recorders;
 use App\Events\HeartbeatReceived;
 use App\Models\Project;
 use App\Services\Ingest\Contracts\IngestRecorderInterface;
+use App\Services\ProjectVerificationService;
 
 final class HeartbeatIngestRecorder implements IngestRecorderInterface
 {
+    public function __construct(
+        private readonly ProjectVerificationService $verification,
+    ) {}
+
     public function record(Project $project, array $data): void
     {
         $project->update([
@@ -17,6 +22,16 @@ final class HeartbeatIngestRecorder implements IngestRecorderInterface
                 'laravel_version' => $data['laravel_version'],
             ],
         ]);
+
+        // If the SDK piggybacked a verification token on this heartbeat,
+        // try to consume it. tryVerify() handles invalid/expired tokens
+        // gracefully and broadcasts ProjectVerified on success.
+        if (! empty($data['verification_token'])) {
+            $this->verification->tryVerify(
+                $project->fresh(),
+                (string) $data['verification_token'],
+            );
+        }
 
         broadcast(new HeartbeatReceived([
             'project_id' => $project->id,

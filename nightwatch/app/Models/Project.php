@@ -22,7 +22,20 @@ class Project extends Model
      */
     protected $appends = [
         'api_token_last_four',
+        'connection_status',
     ];
+
+    /**
+     * Connection status thresholds — drive the live badge on the project
+     * pages. Past CONNECTED_THRESHOLD = stale; past STALE_THRESHOLD = lost.
+     */
+    public const CONNECTED_THRESHOLD_SECONDS = 300;   // 5 minutes
+    public const STALE_THRESHOLD_SECONDS = 3600;      // 1 hour
+
+    public const STATUS_CONNECTED = 'connected';
+    public const STATUS_STALE = 'stale';
+    public const STATUS_LOST = 'lost';
+    public const STATUS_DISCONNECTED = 'disconnected';
 
     protected $fillable = [
         'team_id',
@@ -34,6 +47,9 @@ class Project extends Model
         'status',
         'last_heartbeat_at',
         'metadata',
+        'verified_at',
+        'verify_token',
+        'verify_token_expires_at',
     ];
 
     protected function casts(): array
@@ -41,12 +57,49 @@ class Project extends Model
         return [
             'metadata' => 'array',
             'last_heartbeat_at' => 'datetime',
+            'verified_at' => 'datetime',
+            'verify_token_expires_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Live connection status derived from last_heartbeat_at. Verified-once
+     * is a separate concept (verified_at) — that's a setup confirmation
+     * marker, while this is the moment-to-moment health.
+     */
+    public function connectionStatus(): string
+    {
+        if ($this->last_heartbeat_at === null) {
+            return self::STATUS_DISCONNECTED;
+        }
+
+        $age = $this->last_heartbeat_at->diffInSeconds(now());
+
+        if ($age <= self::CONNECTED_THRESHOLD_SECONDS) {
+            return self::STATUS_CONNECTED;
+        }
+
+        if ($age <= self::STALE_THRESHOLD_SECONDS) {
+            return self::STATUS_STALE;
+        }
+
+        return self::STATUS_LOST;
     }
 
     public function getRouteKeyName(): string
     {
         return 'project_uuid';
+    }
+
+    /**
+     * Old-style accessor so Eloquent resolves `connection_status` from the
+     * $appends list. Can't use the new Attribute::get() pattern here
+     * because the camelCase method name (connectionStatus) is already taken
+     * by the public method that does the actual computation.
+     */
+    public function getConnectionStatusAttribute(): string
+    {
+        return $this->connectionStatus();
     }
 
     protected function apiTokenLastFour(): Attribute

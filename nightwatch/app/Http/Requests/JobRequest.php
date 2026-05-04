@@ -16,6 +16,7 @@ class JobRequest extends FormRequest
         return [
             'environment' => ['required', 'string', 'max:50'],
             'server' => ['required', 'string', 'max:255'],
+            'trace_id' => ['nullable', 'string', 'size:32', 'regex:/^[0-9a-f]{32}$/'],
             'job_class' => ['required', 'string', 'max:255'],
             'queue' => ['nullable', 'string', 'max:255'],
             'connection' => ['nullable', 'string', 'max:255'],

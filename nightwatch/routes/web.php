@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\AiConfigController;
+use App\Http\Controllers\AlertRulesController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\ClientErrorEventsController;
 use App\Http\Controllers\DashboardOverviewController;
@@ -20,12 +22,15 @@ use App\Http\Controllers\HubQueriesController;
 use App\Http\Controllers\HubRequestsController;
 use App\Http\Controllers\HubScheduledTasksController;
 use App\Http\Controllers\InsightsController;
+use App\Http\Controllers\IssueAssignmentsController;
+use App\Http\Controllers\IssuesController;
 use App\Http\Controllers\ProjectAssignmentsController;
 use App\Http\Controllers\ProjectsController;
 use App\Http\Controllers\SuperAdminDashboardController;
 use App\Http\Controllers\TeamInvitationLinksController;
 use App\Http\Controllers\TeamInvitationsController;
 use App\Http\Controllers\TeamJoinController;
+use App\Http\Controllers\TeamMembersController;
 use App\Http\Controllers\TeamPageController;
 use App\Http\Controllers\TasksController;
 use App\Http\Controllers\TeamProjectAssignmentsController;
@@ -105,6 +110,7 @@ Route::middleware(['auth', 'verified', 'super_admin'])->prefix('super-admin')->g
     Route::post('retention-details', [SuperAdminDashboardController::class, 'storeRetention'])->name('super-admin.retention.store');
     Route::patch('retention-details/{retentionDetail}', [SuperAdminDashboardController::class, 'updateRetention'])->name('super-admin.retention.update');
     Route::delete('retention-details/{retentionDetail}', [SuperAdminDashboardController::class, 'destroyRetention'])->name('super-admin.retention.destroy');
+
 });
 
 Route::middleware(['auth', 'verified', 'team'])->group(function () {
@@ -118,6 +124,9 @@ Route::middleware(['auth', 'verified', 'team'])->group(function () {
         Route::post('projects/{project}/assignments', 'store')->name('project.assignments.store');
         Route::delete('projects/{project}/assignments/{user}', 'destroy')->name('project.assignments.destroy');
     });
+
+    Route::get('ai-config', [AiConfigController::class, 'show'])->name('ai-config.show');
+    Route::patch('ai-config/{project}', [AiConfigController::class, 'update'])->name('ai-config.update');
 });
 
 Route::middleware(['auth', 'verified', 'team'])->group(function () {
@@ -149,17 +158,33 @@ Route::middleware(['auth', 'verified', 'team'])->group(function () {
     Route::patch('webhooks/{webhookDestination}', [WebhookDestinationsController::class, 'update'])->name('webhooks.update');
     Route::delete('webhooks/{webhookDestination}', [WebhookDestinationsController::class, 'destroy'])->name('webhooks.destroy');
 
+    Route::controller(AlertRulesController::class)->group(function () {
+        Route::get('alert-rules', 'index')->name('alert-rules.index');
+        Route::post('alert-rules', 'store')->name('alert-rules.store');
+        Route::patch('alert-rules/{alertRule}', 'update')
+            ->whereNumber('alertRule')
+            ->name('alert-rules.update');
+        Route::delete('alert-rules/{alertRule}', 'destroy')
+            ->whereNumber('alertRule')
+            ->name('alert-rules.destroy');
+    });
+
     Route::controller(ProjectsController::class)->prefix('projects')->group(function () {
         Route::get('/', 'index')->name('projects.index');
         Route::post('/', 'store')->name('projects.store');
         Route::get('{project}', 'show')->name('projects.show');
         Route::patch('{project}', 'update')->name('projects.update');
         Route::post('{project}/rotate-token', 'rotateToken')->name('projects.rotate-token');
+        Route::post('{project}/start-verification', 'startVerification')
+            ->name('projects.start-verification');
         Route::delete('{project}', 'destroy')->name('projects.destroy');
     });
 
     Route::controller(ExceptionsController::class)->group(function () {
         Route::get('exceptions', 'index')->name('exceptions.index');
+        Route::get('exceptions/{exception}', 'show')
+            ->whereNumber('exception')
+            ->name('exceptions.show');
     });
 
     Route::controller(TasksController::class)->group(function () {
@@ -167,6 +192,9 @@ Route::middleware(['auth', 'verified', 'team'])->group(function () {
         Route::patch('tasks/{exception}/status', 'updateStatus')
             ->whereNumber('exception')
             ->name('tasks.update-status');
+        Route::patch('tasks/issues/{issue}/status', 'updateIssueStatus')
+            ->whereNumber('issue')
+            ->name('tasks.update-issue-status');
     });
 
     Route::controller(ExceptionAssignmentsController::class)->group(function () {
@@ -176,6 +204,28 @@ Route::middleware(['auth', 'verified', 'team'])->group(function () {
         Route::post('exceptions/{exception}/assign', 'assign')
             ->whereNumber('exception')
             ->name('exceptions.assign');
+        Route::delete('exceptions/{exception}/assign', 'unassign')
+            ->whereNumber('exception')
+            ->name('exceptions.unassign');
+    });
+
+    Route::controller(IssuesController::class)->group(function () {
+        Route::get('issues', 'index')->name('issues.index');
+        Route::get('issues/{issue}', 'show')
+            ->whereNumber('issue')
+            ->name('issues.show');
+    });
+
+    Route::controller(IssueAssignmentsController::class)->group(function () {
+        Route::get('issues/{issue}/assignable-users', 'assignableUsers')
+            ->whereNumber('issue')
+            ->name('issues.assignable-users');
+        Route::post('issues/{issue}/assign', 'assign')
+            ->whereNumber('issue')
+            ->name('issues.assign');
+        Route::delete('issues/{issue}/assign', 'unassign')
+            ->whereNumber('issue')
+            ->name('issues.unassign');
     });
 
     Route::controller(ClientErrorEventsController::class)->group(function () {
@@ -187,6 +237,9 @@ Route::middleware(['auth', 'verified', 'team'])->group(function () {
 
     Route::controller(HubRequestsController::class)->group(function () {
         Route::get('hub-requests', 'index')->name('hub-requests.index');
+        Route::get('hub-requests/{hubRequest}', 'show')
+            ->whereNumber('hubRequest')
+            ->name('hub-requests.show');
     });
 
     Route::controller(HubQueriesController::class)->group(function () {
@@ -247,6 +300,10 @@ Route::middleware(['auth', 'verified', 'team'])->group(function () {
 
     Route::post('team/project-assignments', [TeamProjectAssignmentsController::class, 'sync'])
         ->name('team.project-assignments.sync');
+
+    Route::delete('team/members/{teamMember}', [TeamMembersController::class, 'destroy'])
+        ->whereNumber('teamMember')
+        ->name('team.members.destroy');
 
     Route::delete('team/invitation-links/{teamInvitationLink}', [TeamInvitationLinksController::class, 'destroy'])
         ->name('team.invitation-links.destroy');

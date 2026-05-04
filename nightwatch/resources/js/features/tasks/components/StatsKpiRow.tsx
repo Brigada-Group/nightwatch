@@ -1,4 +1,4 @@
-import { CheckCircle2, Clock3, ListTodo, Sparkles } from 'lucide-react';
+import { CheckCircle2, Clock3, Eye, ListTodo, Sparkles } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type { StatusCounts } from '../types';
@@ -35,7 +35,7 @@ export function StatsKpiRow({ counts }: Props) {
             accentText: 'text-foreground',
         },
         {
-            label: 'Started',
+            label: 'To be Started',
             value: counts.started,
             icon: Sparkles,
             accentBg: 'bg-sky-500/10',
@@ -49,6 +49,13 @@ export function StatsKpiRow({ counts }: Props) {
             accentText: 'text-amber-600 dark:text-amber-400',
         },
         {
+            label: 'Review',
+            value: counts.review,
+            icon: Eye,
+            accentBg: 'bg-violet-500/10',
+            accentText: 'text-violet-600 dark:text-violet-400',
+        },
+        {
             label: 'Finished',
             value: counts.finished,
             icon: CheckCircle2,
@@ -58,7 +65,7 @@ export function StatsKpiRow({ counts }: Props) {
     ];
 
     return (
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
             {cards.map((card) => {
                 const Icon = card.icon;
 

@@ -24,6 +24,7 @@ class ExceptionStatService
      * @return array{
      *     started: int,
      *     ongoing: int,
+     *     review: int,
      *     finished: int,
      *     total: int,
      *     resolution_rate: float
@@ -49,12 +50,14 @@ class ExceptionStatService
 
         $started = (int) ($rows[HubException::TASK_STATUS_STARTED] ?? 0);
         $ongoing = (int) ($rows[HubException::TASK_STATUS_ONGOING] ?? 0);
+        $review = (int) ($rows[HubException::TASK_STATUS_REVIEW] ?? 0);
         $finished = (int) ($rows[HubException::TASK_STATUS_FINISHED] ?? 0);
-        $total = $started + $ongoing + $finished;
+        $total = $started + $ongoing + $review + $finished;
 
         return [
             'started' => $started,
             'ongoing' => $ongoing,
+            'review' => $review,
             'finished' => $finished,
             'total' => $total,
             'resolution_rate' => $total > 0 ? round($finished / $total, 4) : 0.0,
@@ -174,6 +177,7 @@ class ExceptionStatService
      * @return array{
      *     started: int,
      *     ongoing: int,
+     *     review: int,
      *     finished: int,
      *     total: int,
      *     resolution_rate: float
@@ -184,6 +188,7 @@ class ExceptionStatService
         return [
             'started' => 0,
             'ongoing' => 0,
+            'review' => 0,
             'finished' => 0,
             'total' => 0,
             'resolution_rate' => 0.0,

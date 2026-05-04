@@ -20,6 +20,7 @@ final class JobIngestRecorder implements IngestRecorderInterface
             'project_id' => $project->id,
             'environment' => $data['environment'],
             'server' => $data['server'],
+            'trace_id' => $data['trace_id'] ?? null,
             'job_class' => $data['job_class'],
             'queue' => $data['queue'] ?? null,
             'connection' => $data['connection'] ?? null,

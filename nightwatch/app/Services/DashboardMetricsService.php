@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\HubException;
 use App\Models\HubHealthCheck;
 use App\Models\HubJob;
+use App\Models\HubQuery;
 use App\Models\HubRequest;
 use App\Models\Project;
 use Carbon\CarbonImmutable;
@@ -33,6 +34,9 @@ class DashboardMetricsService
      *     throughput_chart: list<array{value: int}>,
      *     bugs_chart: list<array{value: int}>,
      *     running_checks_chart: list<array{value: int}>,
+     *     top_exception_classes: list<array{exception_class: string, total: int}>,
+     *     request_duration_trend: list<array{time: string, avg_ms: int}>,
+     *     slowest_queries: list<array{id: int, sql: string, duration_ms: float, file: string|null, line: int|null, sent_at: string, is_slow: bool, is_n_plus_one: bool}>,
      *     filter_active: bool
      * }
      */
@@ -105,6 +109,9 @@ class DashboardMetricsService
             'throughput_chart' => $throughputChart,
             'bugs_chart' => $bugsChart,
             'running_checks_chart' => $runningChecksChart,
+            'top_exception_classes' => $this->topExceptionClasses($since24h, $scopedIds),
+            'request_duration_trend' => $this->hourlyAvgRequestDurationSeries($since24h, $scopedIds),
+            'slowest_queries' => $this->slowestRecentQueries($since24h, $scopedIds),
             'filter_active' => $filters->isActive(),
         ];
     }
@@ -378,6 +385,91 @@ class DashboardMetricsService
         }
 
         return $out;
+    }
+
+    /**
+     * Top 5 exception classes in the last 24 hours, ranked by occurrence count.
+     * Returns the class name + count so the UI can render a horizontal bar
+     * chart or ranked list directly.
+     *
+     * @param  list<int>|null  $scopedIds
+     * @return list<array{exception_class: string, total: int}>
+     */
+    private function topExceptionClasses(CarbonImmutable $since24h, ?array $scopedIds): array
+    {
+        $rows = $this->scopeByProject(HubException::query(), $scopedIds)
+            ->where('sent_at', '>=', $since24h)
+            ->selectRaw('exception_class, COUNT(*) as total')
+            ->groupBy('exception_class')
+            ->orderByDesc('total')
+            ->limit(5)
+            ->get();
+
+        return $rows->map(static fn ($row): array => [
+            'exception_class' => (string) $row->exception_class,
+            'total' => (int) $row->total,
+        ])->all();
+    }
+
+    /**
+     * Average request duration (ms) per hour over the last 24 hours. Useful
+     * for spotting latency regressions at a glance.
+     *
+     * @param  list<int>|null  $scopedIds
+     * @return list<array{time: string, avg_ms: int}>
+     */
+    private function hourlyAvgRequestDurationSeries(CarbonImmutable $since24h, ?array $scopedIds): array
+    {
+        $start = CarbonImmutable::now()->subHours(23)->startOfHour();
+
+        $rows = $this->scopeByProject(HubRequest::query(), $scopedIds)
+            ->where('sent_at', '>=', $since24h)
+            ->selectRaw($this->hourlyBucketExpression('sent_at').' as bucket, AVG(duration_ms) as avg_duration')
+            ->groupBy('bucket')
+            ->pluck('avg_duration', 'bucket');
+
+        $out = [];
+        for ($i = 0; $i < 24; $i++) {
+            $bucketStart = $start->addHours($i);
+            $key = $bucketStart->format('Y-m-d H');
+            $out[] = [
+                'time' => $bucketStart->format('H:00'),
+                'avg_ms' => (int) round((float) ($rows[$key] ?? 0)),
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
+     * Top 10 slowest queries in the last 24 hours. Returns enough context
+     * (truncated SQL, file/line, when) for the UI to show a ranked list and
+     * still keep payload size sane.
+     *
+     * @param  list<int>|null  $scopedIds
+     * @return list<array{id: int, sql: string, duration_ms: float, file: string|null, line: int|null, sent_at: string, is_slow: bool, is_n_plus_one: bool}>
+     */
+    private function slowestRecentQueries(CarbonImmutable $since24h, ?array $scopedIds): array
+    {
+        $rows = $this->scopeByProject(HubQuery::query(), $scopedIds)
+            ->where('sent_at', '>=', $since24h)
+            ->orderByDesc('duration_ms')
+            ->limit(10)
+            ->get(['id', 'sql', 'duration_ms', 'file', 'line', 'sent_at', 'is_slow', 'is_n_plus_one']);
+
+        return $rows->map(static function ($row): array {
+            $sql = (string) $row->sql;
+            return [
+                'id' => (int) $row->id,
+                'sql' => mb_strlen($sql) > 200 ? mb_substr($sql, 0, 199).'…' : $sql,
+                'duration_ms' => (float) $row->duration_ms,
+                'file' => $row->file !== null ? (string) $row->file : null,
+                'line' => $row->line !== null ? (int) $row->line : null,
+                'sent_at' => $row->sent_at?->toIso8601String() ?? '',
+                'is_slow' => (bool) $row->is_slow,
+                'is_n_plus_one' => (bool) $row->is_n_plus_one,
+            ];
+        })->all();
     }
 
     private function hourlyBucketExpression(string $column): string

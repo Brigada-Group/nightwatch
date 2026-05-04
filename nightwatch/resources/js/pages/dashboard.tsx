@@ -15,7 +15,10 @@ import { ActiveProjectsCard } from '@/features/dashboard/components/ActiveProjec
 import { DashboardToolbar } from '@/features/dashboard/components/DashboardToolbar';
 import { ErrorTrendChart } from '@/features/dashboard/components/ErrorTrendChart';
 import { FilteredProjectsGrid } from '@/features/dashboard/components/FilteredProjectsGrid';
+import { RequestDurationTrendChart } from '@/features/dashboard/components/RequestDurationTrendChart';
 import { SeverityBreakdownChart } from '@/features/dashboard/components/SeverityBreakdownChart';
+import { SlowestQueriesList } from '@/features/dashboard/components/SlowestQueriesList';
+import { TopExceptionClassesChart } from '@/features/dashboard/components/TopExceptionClassesChart';
 import { StatCard } from '@/features/dashboard/components/StatCard';
 import { useDashboardOverview } from '@/features/dashboard/hooks/useDashboardOverview';
 import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue';
@@ -143,6 +146,22 @@ export default function Dashboard(raw: DashboardPageProps) {
                                 timePeriod="24H"
                             />
                         </div>
+
+                        <div className="grid gap-6 lg:grid-cols-2">
+                            <RequestDurationTrendChart
+                                data={view.request_duration_trend}
+                                timePeriod="24H"
+                            />
+                            <TopExceptionClassesChart
+                                data={view.top_exception_classes}
+                                timePeriod="24H"
+                            />
+                        </div>
+
+                        <SlowestQueriesList
+                            rows={view.slowest_queries}
+                            timePeriod="24H"
+                        />
                     </>
                 )}
             </div>
