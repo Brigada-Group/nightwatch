@@ -1,4 +1,4 @@
-import { Head, Link, router, useForm } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import { Github } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -104,12 +104,16 @@ function InstallButton({ installUrl }: { installUrl: string | null }) {
         );
     }
 
+    // Plain anchor (not Inertia <Link>) so the browser does a full-page
+    // navigation. The /install route 302s to github.com — Inertia would
+    // try to follow the redirect via XHR and the cross-origin response
+    // is blocked by CORS.
     return (
         <Button asChild>
-            <Link href="/integrations/github/install">
+            <a href="/integrations/github/install">
                 <Github className="size-4" />
                 Install on GitHub
-            </Link>
+            </a>
         </Button>
     );
 }
