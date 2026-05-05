@@ -3,6 +3,8 @@
 use App\Http\Controllers\AiConfigController;
 use App\Http\Controllers\AlertRulesController;
 use App\Http\Controllers\BillingController;
+use App\Http\Controllers\Integrations\GithubController as IntegrationsGithubController;
+use App\Http\Controllers\Webhooks\GithubWebhookController;
 use App\Http\Controllers\ClientErrorEventsController;
 use App\Http\Controllers\DashboardOverviewController;
 use App\Http\Controllers\EmailReportsController;
@@ -127,7 +129,27 @@ Route::middleware(['auth', 'verified', 'team'])->group(function () {
 
     Route::get('ai-config', [AiConfigController::class, 'show'])->name('ai-config.show');
     Route::patch('ai-config/{project}', [AiConfigController::class, 'update'])->name('ai-config.update');
+
+    Route::controller(IntegrationsGithubController::class)
+        ->prefix('integrations/github')
+        ->name('integrations.github.')
+        ->group(function () {
+            Route::get('/', 'show')->name('show');
+            Route::get('install', 'install')->name('install');
+            Route::get('setup', 'setup')->name('setup');
+            Route::post('disconnect', 'disconnect')->name('disconnect');
+            Route::post('repositories/{repository}/link', 'linkRepository')
+                ->whereNumber('repository')
+                ->name('repositories.link');
+        });
+
+    Route::get('auth/github/callback', [IntegrationsGithubController::class, 'oauthCallback'])
+        ->name('integrations.github.oauth-callback');
 });
+
+Route::post('webhooks/github', [GithubWebhookController::class, 'handle'])
+    ->middleware('github.webhook')
+    ->name('webhooks.github');
 
 Route::middleware(['auth', 'verified', 'team'])->group(function () {
     Route::get('api/project-ids', function () {
