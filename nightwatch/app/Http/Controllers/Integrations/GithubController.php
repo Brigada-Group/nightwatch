@@ -97,39 +97,57 @@ class GithubController extends Controller
      */
     public function setup(Request $request): RedirectResponse
     {
+        return $this->finishInstall($request);
+    }
+
+    /**
+     * GitHub's user-OAuth callback. When "Request user authorization during
+     * install" is enabled on the App, GitHub redirects here (not the Setup
+     * URL) after a new install with both `code` and `installation_id`. We
+     * persist the installation just like setup() does so the same code path
+     * works whether OAuth-during-install is on or off.
+     */
+    public function oauthCallback(Request $request): RedirectResponse
+    {
+        return $this->finishInstall($request);
+    }
+
+    private function finishInstall(Request $request): RedirectResponse
+    {
         $team = $this->teamForActor($request);
 
         $installationId = (int) $request->query('installation_id', 0);
         $action = (string) $request->query('setup_action', 'install');
 
-        if ($installationId === 0) {
-            Inertia::flash('toast', ['type' => 'error', 'message' => __('GitHub did not return an installation id.')]);
-
-            return to_route('integrations.github.show');
-        }
-
         if ($action === 'cancel') {
             return to_route('integrations.github.show');
         }
 
-        $this->installationService->syncFromInstallationId($installationId, $team, $request->user());
+        if ($installationId === 0) {
+            // Pure OAuth-only callback (no install attached) is fine — we
+            // don't need anything from it for Phase 1, so just bounce back.
+            return to_route('integrations.github.show');
+        }
+
+        try {
+            $this->installationService->syncFromInstallationId($installationId, $team, $request->user());
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('GitHub install sync failed', [
+                'installation_id' => $installationId,
+                'team_id' => $team->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            Inertia::flash('toast', [
+                'type' => 'error',
+                'message' => __('Could not sync the GitHub installation. Check the server logs.'),
+            ]);
+
+            return to_route('integrations.github.show');
+        }
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('GitHub connected.')]);
 
-        return to_route('integrations.github.show');
-    }
-
-    /**
-     * GitHub's identifying-users-via-OAuth flow lands here. We only need the
-     * email mapping eventually; for the initial round trip we just confirm
-     * the auth completed and bounce back to the integration page.
-     */
-    public function oauthCallback(Request $request): RedirectResponse
-    {
-        $this->teamForActor($request);
-
-        // The "code" can be exchanged for a user token later when we wire the
-        // team-member-to-GitHub-account mapping. For now, just acknowledge.
         return to_route('integrations.github.show');
     }
 
