@@ -42,4 +42,14 @@ return [
         'cancel_url' => env('PADDLE_CANCEL_URL', rtrim(env('APP_URL', 'http://localhost'), '/').'/#pricing'),
     ],
 
+    'github' => [
+        'app_id' => env('GITHUB_APP_ID'),
+        'app_slug' => env('GITHUB_APP_SLUG'),
+        'client_id' => env('GITHUB_APP_CLIENT_ID'),
+        'client_secret' => env('GITHUB_APP_CLIENT_SECRET'),
+        'webhook_secret' => env('GITHUB_APP_WEBHOOK_SECRET'),
+        'private_key' => env('GITHUB_APP_PRIVATE_KEY'),
+        'api_base' => env('GITHUB_API_BASE', 'https://api.github.com'),
+    ],
+
 ];
