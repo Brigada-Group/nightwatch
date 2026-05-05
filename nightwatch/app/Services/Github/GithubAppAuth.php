@@ -23,7 +23,7 @@ class GithubAppAuth
     public function appJwt(): string
     {
         $appId = config('services.github.app_id');
-        $privateKey = $this->normalizePrivateKey((string) config('services.github.private_key', ''));
+        $privateKey = $this->loadPrivateKey();
 
         if (! $appId || $privateKey === '') {
             throw new RuntimeException('GitHub App credentials are not configured.');
@@ -100,6 +100,38 @@ class GithubAppAuth
 
         return $installation->access_token_expires_at->getTimestamp()
             > time() + self::INSTALLATION_TOKEN_REFRESH_BUFFER;
+    }
+
+    /**
+     * Resolve the App's private key from either the inline env value
+     * (GITHUB_PRIVATE_KEY) or a file path (GITHUB_PRIVATE_KEY_PATH). The
+     * inline form wins when both are set, but the path form is what we
+     * recommend for production — fewer chances for shell quoting to break
+     * the PEM.
+     */
+    private function loadPrivateKey(): string
+    {
+        $inline = (string) config('services.github.private_key', '');
+
+        if ($inline !== '') {
+            return $this->normalizePrivateKey($inline);
+        }
+
+        $path = (string) config('services.github.private_key_path', '');
+
+        if ($path === '') {
+            return '';
+        }
+
+        if (! str_starts_with($path, '/')) {
+            $path = base_path($path);
+        }
+
+        if (! is_readable($path)) {
+            throw new RuntimeException('GitHub private key file is not readable at '.$path);
+        }
+
+        return (string) file_get_contents($path);
     }
 
     private function normalizePrivateKey(string $key): string
