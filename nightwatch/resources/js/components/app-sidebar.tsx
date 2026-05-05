@@ -5,6 +5,7 @@ import {
     Bot,
     Bug,
     Building2,
+    Github,
     CheckCircle2,
     Clock,
     Database,
@@ -128,6 +129,14 @@ const aiConfigItems: NavItem[] = [
         title: 'AI Config',
         href: '/ai-config',
         icon: Bot,
+    },
+];
+
+const integrationItems: NavItem[] = [
+    {
+        title: 'GitHub',
+        href: '/integrations/github',
+        icon: Github,
     },
 ];
 
@@ -266,6 +275,12 @@ export function AppSidebar() {
                         <NavMain items={systemItems} label="System" />
                         {canManageTeamInvitations ? (
                             <NavMain items={aiConfigItems} label="AI Config" />
+                        ) : null}
+                        {canManageTeamInvitations ? (
+                            <NavMain
+                                items={integrationItems}
+                                label="Integrations"
+                            />
                         ) : null}
                     </>
                 )}
