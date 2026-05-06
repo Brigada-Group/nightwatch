@@ -59,7 +59,7 @@ function SummaryPanel() {
                     One view to cut waste and stop renewal surprises.
                 </h3>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-400">
-                    Nightwatch combines usage activity, renewal dates, and spend patterns so your team sees exactly
+                    Guardian combines usage activity, renewal dates, and spend patterns so your team sees exactly
                     what to keep, downgrade, or cancel.
                 </p>
             </div>

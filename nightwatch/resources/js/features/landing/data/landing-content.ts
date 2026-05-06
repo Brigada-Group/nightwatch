@@ -70,7 +70,7 @@ export type SetupTimelineRow = {
 
 export const setupSectionContent = {
     title: 'Set it up in 60 seconds.',
-    description: 'No manual data entry. Just connect once, and Nightwatch starts mapping hidden spend automatically.',
+    description: 'No manual data entry. Just connect once, and Guardian starts mapping hidden spend automatically.',
 };
 
 export const setupTimelineRows: SetupTimelineRow[] = [
@@ -125,7 +125,7 @@ export const testimonialsSectionContent = {
 
 export const testimonialCards: TestimonialCard[] = [
     {
-        quote: 'I did not realize we were paying for idle tools every month until Nightwatch flagged it. The one-click cleanup paid for itself in a week.',
+        quote: 'I did not realize we were paying for idle tools every month until Guardian flagged it. The one-click cleanup paid for itself in a week.',
         author: 'Spencer L.',
         role: 'Engineering Manager',
     },
@@ -223,7 +223,7 @@ export const faqItems = [
     {
         question: 'Is it secure to link my bank account?',
         answer:
-            'Yes. Connections are read-only and encrypted in transit and at rest. Nightwatch never gets permission to move or modify funds.',
+            'Yes. Connections are read-only and encrypted in transit and at rest. Guardian never gets permission to move or modify funds.',
     },
     {
         question: 'How does the “Risk Score” actually work?',
@@ -261,7 +261,7 @@ export type HowItWorksStep = {
 
 export const howItWorksSectionContent = {
     badge: 'How it works',
-    title: 'Set up Nightwatch in minutes.',
+    title: 'Set up Guardian in minutes.',
     description: 'From package install to live monitoring with just a few guided steps.',
 };
 
@@ -273,8 +273,8 @@ export const howItWorksSteps: HowItWorksStep[] = [
     },
     {
         id: 2,
-        title: 'Open Nightwatch',
-        description: 'Head to the Nightwatch dashboard and sign in or create your account.',
+        title: 'Open Guardian',
+        description: 'Head to the Guardian dashboard and sign in or create your account.',
     },
     {
         id: 3,
@@ -303,7 +303,7 @@ export const envCommandBlock = {
     lines: [
         'GUARDIAN_ENABLED=true',
         'GUARDIAN_PROJECT_ID=your-project-id',
-        'GUARDIAN_API_URL=https://nightwatch.your-domain.com/api/ingest',
+        'GUARDIAN_API_URL=https://guardian.your-domain.com/api/ingest',
         'GUARDIAN_API_TOKEN=your-project-api-token',
     ],
 };

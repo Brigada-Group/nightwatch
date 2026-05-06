@@ -36,7 +36,7 @@ final class IngestRecordingCoordinator
             ],
             'data' => $data,
             'occurred_at' => now()->toIso8601String(),
-            'nightwatch_url' => config('app.url'),
+            'guardian_url' => config('app.url'),
         ];
 
         $this->webhooks->dispatchToTeam($project->team_id, $eventType, $payload);

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Schema;
 
 class RunRetentionCleanup extends Command
 {
-    protected $signature = 'nightwatch:retention:cleanup';
+    protected $signature = 'guardian:retention:cleanup';
 
     protected $description = 'Cleans telemetry tables using database-driven retention settings';
 

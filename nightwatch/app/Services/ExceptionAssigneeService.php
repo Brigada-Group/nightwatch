@@ -7,12 +7,17 @@ use App\Models\HubException;
 use App\Models\Team;
 use App\Models\TeamMember;
 use App\Models\User;
+use App\Services\Ai\SelfHealDispatcher;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
 class ExceptionAssigneeService
 {
+    public function __construct(
+        private readonly SelfHealDispatcher $selfHeal,
+    ) {}
+
     /**
      * Resolve the users that may be assigned to a given exception within a team.
      *
@@ -89,7 +94,16 @@ class ExceptionAssigneeService
             ])->save();
         });
 
-        $this->notify($exception->fresh(['project', 'assignee', 'assignedBy']), $assignee, $actor, $team);
+        $exception = $exception->fresh(['project', 'assignee', 'assignedBy']);
+
+        $this->notify($exception, $assignee, $actor, $team);
+
+        // Self-heal trigger: if the project has both `use_ai` and
+        // `self_heal` enabled in AI Config, kick off the auto-pipeline
+        // (suspect files → fix → commit → PR). The dispatcher is a no-op
+        // when the flags are off or when an attempt already exists, so
+        // it's safe to call unconditionally here.
+        $this->selfHeal->dispatchForException($exception);
 
         return $exception->refresh();
     }

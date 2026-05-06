@@ -65,7 +65,7 @@ export default function ProjectsIndex() {
             <div className="flex h-full flex-1 flex-col gap-6 p-4 md:p-6">
                 <ResourcePageHeader
                     title="Projects"
-                    description="Connected applications reporting telemetry to Nightwatch. Open a row for a full telemetry dossier."
+                    description="Connected applications reporting telemetry to Guardian. Open a row for a full telemetry dossier."
                     toolbar={
                         <div className="flex items-center gap-2">
                             {canInviteMembers ? (

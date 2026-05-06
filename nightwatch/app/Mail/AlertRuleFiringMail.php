@@ -29,7 +29,7 @@ class AlertRuleFiringMail extends Mailable
 
     public function envelope(): Envelope
     {
-        $appName = (string) config('app.name', 'Nightwatch');
+        $appName = (string) config('app.name', 'Guardian');
         $severityTag = strtoupper((string) $this->rule->severity);
 
         return new Envelope(
@@ -45,7 +45,7 @@ class AlertRuleFiringMail extends Mailable
         return new Content(
             markdown: 'mail.alert-rule-firing',
             with: [
-                'appName' => (string) config('app.name', 'Nightwatch'),
+                'appName' => (string) config('app.name', 'Guardian'),
                 'ruleName' => $this->rule->name,
                 'severity' => $this->rule->severity,
                 'firedAt' => $this->firing->fired_at?->toDayDateTimeString() ?? '',

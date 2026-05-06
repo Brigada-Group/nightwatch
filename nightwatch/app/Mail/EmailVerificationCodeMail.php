@@ -23,7 +23,7 @@ class EmailVerificationCodeMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: (string) config('app.name', 'Nightwatch').' — Your verification code',
+            subject: (string) config('app.name', 'Guardian').' — Your verification code',
         );
     }
 

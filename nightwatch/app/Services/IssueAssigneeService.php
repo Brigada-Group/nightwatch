@@ -8,6 +8,7 @@ use App\Models\HubIssue;
 use App\Models\Team;
 use App\Models\TeamMember;
 use App\Models\User;
+use App\Services\Ai\SelfHealDispatcher;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -18,6 +19,10 @@ use Illuminate\Support\Facades\Mail;
  */
 class IssueAssigneeService
 {
+    public function __construct(
+        private readonly SelfHealDispatcher $selfHeal,
+    ) {}
+
     /**
      * @return Collection<int, User>
      */
@@ -83,7 +88,14 @@ class IssueAssigneeService
             ])->save();
         });
 
-        $this->notify($issue->fresh(['project', 'assignee', 'assignedBy']), $assignee, $actor, $team);
+        $issue = $issue->fresh(['project', 'assignee', 'assignedBy']);
+
+        $this->notify($issue, $assignee, $actor, $team);
+
+        // Self-heal trigger — see ExceptionAssigneeService::assign for the
+        // rationale. No-op when the project's AI config doesn't have both
+        // use_ai and self_heal enabled.
+        $this->selfHeal->dispatchForIssue($issue);
 
         return $issue->refresh();
     }

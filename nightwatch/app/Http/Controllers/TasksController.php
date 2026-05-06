@@ -3,13 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\HubException;
+use App\Models\HubIssue;
+use App\Models\Project;
 use App\Models\Team;
+use App\Services\Ai\AiFixDispatcher;
+use App\Services\AiConfigService;
 use App\Services\CurrentTeam;
 use App\Services\ExceptionResolutionService;
 use App\Services\ExceptionStatService;
 use App\Services\ExceptionTaskService;
 use App\Services\IssueTaskService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -23,6 +28,8 @@ class TasksController extends Controller
         private readonly IssueTaskService $issueTasks,
         private readonly ExceptionResolutionService $resolutions,
         private readonly ExceptionStatService $stats,
+        private readonly AiConfigService $aiConfig,
+        private readonly AiFixDispatcher $aiFixDispatcher,
     ) {}
 
     public function index(Request $request): Response
@@ -52,7 +59,28 @@ class TasksController extends Controller
                 )
                 : null,
             'stats' => $isManager ? $this->managerStatsFor($team) : null,
+            // Map of `projectId => { use_ai }` so the kanban can decide
+            // whether to show the "Fix with AI" button on each card without
+            // duplicating the flag onto every task object.
+            'project_ai_configs' => $isManager
+                ? null
+                : $this->projectAiConfigsFor($team),
         ]);
+    }
+
+    /**
+     * @return array<int, array{use_ai: bool}>
+     */
+    private function projectAiConfigsFor(Team $team): array
+    {
+        return $team->projects()
+            ->get()
+            ->mapWithKeys(fn (Project $project) => [
+                $project->id => [
+                    'use_ai' => $this->aiConfig->forProject($project)->use_ai,
+                ],
+            ])
+            ->all();
     }
 
     /**
@@ -143,7 +171,7 @@ class TasksController extends Controller
         ]);
     }
 
-    public function updateIssueStatus(Request $request, \App\Models\HubIssue $issue): JsonResponse
+    public function updateIssueStatus(Request $request, HubIssue $issue): JsonResponse
     {
         $user = $request->user();
         $team = $this->currentTeam->for($user);
@@ -156,7 +184,7 @@ class TasksController extends Controller
         );
 
         $data = $request->validate([
-            'status' => ['required', 'string', Rule::in(\App\Models\HubIssue::TASK_STATUSES)],
+            'status' => ['required', 'string', Rule::in(HubIssue::TASK_STATUSES)],
         ]);
 
         $updated = $this->issueTasks->updateStatus($issue, $user, $data['status']);
@@ -167,5 +195,49 @@ class TasksController extends Controller
                 'task_status' => $updated->task_status,
             ],
         ]);
+    }
+
+    public function fixExceptionWithAi(Request $request, HubException $exception): RedirectResponse
+    {
+        $user = $request->user();
+        $team = $this->currentTeam->for($user);
+        abort_unless($team !== null, 403);
+
+        $exception->loadMissing('project:id,team_id');
+        abort_unless(
+            $exception->project !== null && $exception->project->team_id === $team->id,
+            404,
+        );
+
+        $this->aiFixDispatcher->dispatchForException($exception, $user);
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => __('Sent to AI. The fix attempt will appear on the card shortly.'),
+        ]);
+
+        return back();
+    }
+
+    public function fixIssueWithAi(Request $request, HubIssue $issue): RedirectResponse
+    {
+        $user = $request->user();
+        $team = $this->currentTeam->for($user);
+        abort_unless($team !== null, 403);
+
+        $issue->loadMissing('project:id,team_id');
+        abort_unless(
+            $issue->project !== null && $issue->project->team_id === $team->id,
+            404,
+        );
+
+        $this->aiFixDispatcher->dispatchForIssue($issue, $user);
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => __('Sent to AI. The fix attempt will appear on the card shortly.'),
+        ]);
+
+        return back();
     }
 }

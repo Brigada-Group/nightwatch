@@ -18,7 +18,7 @@ type PaddleInstance = {
 declare global {
     interface Window {
         Paddle?: PaddleInstance;
-        __nightwatchPaddleInitialized?: boolean;
+        __guardianPaddleInitialized?: boolean;
     }
 }
 
@@ -58,13 +58,13 @@ export function PaddleTransactionCheckout() {
         }
 
         try {
-            if (!window.__nightwatchPaddleInitialized) {
+            if (!window.__guardianPaddleInitialized) {
                 if (paddleEnvironment === 'sandbox' && paddle.Environment?.set) {
                     paddle.Environment.set('sandbox');
                 }
 
                 paddle.Initialize({ token: clientToken });
-                window.__nightwatchPaddleInitialized = true;
+                window.__guardianPaddleInitialized = true;
             }
 
             hasOpenedCheckout.current = true;

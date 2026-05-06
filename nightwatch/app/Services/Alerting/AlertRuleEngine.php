@@ -254,7 +254,7 @@ class AlertRuleEngine
                 'firing_id' => $firing->id,
             ], $result->context),
             'occurred_at' => $occurredAt,
-            'nightwatch_url' => config('app.url'),
+            'guardian_url' => config('app.url'),
         ];
     }
 

@@ -31,7 +31,7 @@ class SimulateEvents extends Command
         'npm-audit',
     ];
 
-    protected $signature = 'nightwatch:simulate
+    protected $signature = 'guardian:simulate
                             {--type=all : Event type (all, exception, request, log, job, heartbeat, query, health, cache, mail, notification, outgoing-http, command, scheduled-task, composer-audit, npm-audit)}
                             {--count=3 : Number of simulation rounds}
                             {--interval=1 : Seconds between rounds}';
@@ -127,7 +127,7 @@ class SimulateEvents extends Command
         if ($admin === null) {
             $admin = User::query()->create([
                 'name' => 'Demo User',
-                'email' => 'demo+'.Str::lower(Str::random(8)).'@nightwatch.local',
+                'email' => 'demo+'.Str::lower(Str::random(8)).'@guardian.local',
                 'password' => Hash::make(Str::random(40)),
             ]);
         }
@@ -135,7 +135,7 @@ class SimulateEvents extends Command
         return Team::query()->create([
             'name' => 'Demo Team',
             'slug' => 'demo-team-'.Str::lower(Str::random(6)),
-            'description' => 'Auto-created for nightwatch:simulate',
+            'description' => 'Auto-created for guardian:simulate',
             'admin_id' => $admin->id,
         ]);
     }
@@ -372,7 +372,7 @@ class SimulateEvents extends Command
         $commands = [
             'php artisan queue:work --once',
             'php artisan schedule:run',
-            'php artisan nightwatch:simulate --type=all --count=1',
+            'php artisan guardian:simulate --type=all --count=1',
             'php artisan migrate --force',
             'php artisan config:cache',
         ];

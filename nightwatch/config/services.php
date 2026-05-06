@@ -57,4 +57,14 @@ return [
         'api_base' => env('GITHUB_API_BASE', 'https://api.github.com'),
     ],
 
+    // Pipeline budgets for the AI fix flow. Provider/model/key/timeout are
+    // managed by config/ai.php (laravel/ai SDK); the knobs below are about
+    // how much of the linked GitHub repo we're willing to ship to whichever
+    // provider the SDK happens to route to.
+    'ai_fix' => [
+        'max_repo_paths' => (int) env('AI_FIX_MAX_REPO_PATHS', 600),
+        'max_file_bytes' => (int) env('AI_FIX_MAX_FILE_BYTES', 60000),
+        'max_suspect_files' => (int) env('AI_FIX_MAX_SUSPECT_FILES', 5),
+    ],
+
 ];

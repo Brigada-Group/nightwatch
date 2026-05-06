@@ -148,7 +148,7 @@ function WebhookSubscribedEventsPreview({ events, catalog }: WebhookSubscribedEv
                     <p className="font-medium text-sm">Subscribed events</p>
                     <p className="text-muted-foreground text-xs leading-relaxed">
                         {catalog.length > 0 && allTypes ? (
-                            <>This destination receives every Nightwatch event type ({catalog.length} total).</>
+                            <>This destination receives every Guardian event type ({catalog.length} total).</>
                         ) : catalog.length > 0 ? (
                             <>
                                 Showing {count} of {catalog.length} available types. Expand details for the full list.
@@ -377,7 +377,7 @@ export default function WebhooksIndex() {
                             {editing ? 'Edit webhook destination' : 'Create webhook destination'}
                         </DialogTitle>
                         <DialogDescription>
-                            Pick which Nightwatch events send payloads to this URL. Use the dropdown to browse every
+                            Pick which Guardian events send payloads to this URL. Use the dropdown to browse every
                             event—nothing is clipped at the bottom.
                         </DialogDescription>
                     </DialogHeader>

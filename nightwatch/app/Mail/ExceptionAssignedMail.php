@@ -27,7 +27,7 @@ class ExceptionAssignedMail extends Mailable
 
     public function envelope(): Envelope
     {
-        $appName = (string) config('app.name', 'Nightwatch');
+        $appName = (string) config('app.name', 'Guardian');
 
         return new Envelope(
             subject: "{$appName} — {$this->assignedBy->name} assigned an exception to you in {$this->team->name}",
@@ -39,7 +39,7 @@ class ExceptionAssignedMail extends Mailable
         return new Content(
             markdown: 'mail.exception-assigned',
             with: [
-                'appName' => (string) config('app.name', 'Nightwatch'),
+                'appName' => (string) config('app.name', 'Guardian'),
                 'assigneeName' => $this->assignee->name,
                 'assignedByName' => $this->assignedBy->name,
                 'teamName' => $this->team->name,

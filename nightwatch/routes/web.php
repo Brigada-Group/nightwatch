@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AiConfigController;
+use App\Http\Controllers\AiFixController;
 use App\Http\Controllers\AlertRulesController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\Integrations\GithubController as IntegrationsGithubController;
@@ -217,7 +218,17 @@ Route::middleware(['auth', 'verified', 'team'])->group(function () {
         Route::patch('tasks/issues/{issue}/status', 'updateIssueStatus')
             ->whereNumber('issue')
             ->name('tasks.update-issue-status');
+        Route::post('tasks/{exception}/fix-with-ai', 'fixExceptionWithAi')
+            ->whereNumber('exception')
+            ->name('tasks.fix-with-ai');
+        Route::post('tasks/issues/{issue}/fix-with-ai', 'fixIssueWithAi')
+            ->whereNumber('issue')
+            ->name('tasks.fix-issue-with-ai');
     });
+
+    Route::post('ai-fix-attempts/{aiFixAttempt}/apply', [AiFixController::class, 'apply'])
+        ->whereNumber('aiFixAttempt')
+        ->name('ai-fix-attempts.apply');
 
     Route::controller(ExceptionAssignmentsController::class)->group(function () {
         Route::get('exceptions/{exception}/assignable-users', 'assignableUsers')

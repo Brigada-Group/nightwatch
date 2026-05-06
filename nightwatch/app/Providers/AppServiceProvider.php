@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 use App\Listeners\SendEmailVerificationCodeOnLogin;
+use App\Services\Ai\AiFixService;
+use App\Services\Ai\OpenAiFixService;
+use App\Services\Ai\PlaceholderAiFixService;
 use App\Models\HubCache;
 use App\Models\HubCommand;
 use App\Models\HubException;
@@ -52,7 +55,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Use the real AI pipeline when the configured default provider has a
+        // key set in config/ai.php; fall back to the placeholder so local dev
+        // (and CI) still exercises the full end-to-end flow without needing
+        // credentials. Whichever provider you put in `ai.default` (openai,
+        // anthropic, gemini, etc.) is what gets used — provider switch is a
+        // config change, not a code change.
+        $this->app->bind(AiFixService::class, function ($app) {
+            $defaultProvider = (string) config('ai.default', 'openai');
+            $hasKey = (string) config('ai.providers.'.$defaultProvider.'.key', '') !== '';
+
+            return $hasKey
+                ? $app->make(OpenAiFixService::class)
+                : $app->make(PlaceholderAiFixService::class);
+        });
     }
 
     /**

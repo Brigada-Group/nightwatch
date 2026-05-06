@@ -27,7 +27,7 @@ class RecurrenceAssignedMail extends Mailable
 
     public function envelope(): Envelope
     {
-        $appName = (string) config('app.name', 'Nightwatch');
+        $appName = (string) config('app.name', 'Guardian');
 
         return new Envelope(
             subject: "{$appName} — A previously resolved exception has come back in {$this->project->name}",
@@ -43,7 +43,7 @@ class RecurrenceAssignedMail extends Mailable
         return new Content(
             markdown: 'mail.recurrence-assigned',
             with: [
-                'appName' => (string) config('app.name', 'Nightwatch'),
+                'appName' => (string) config('app.name', 'Guardian'),
                 'assigneeName' => $this->assignee->name,
                 'teamName' => $this->team->name,
                 'projectName' => $this->project->name,
