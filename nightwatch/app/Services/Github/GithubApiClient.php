@@ -37,7 +37,7 @@ class GithubApiClient
             ->withHeaders([
                 'Accept' => 'application/vnd.github+json',
                 'X-GitHub-Api-Version' => '2022-11-28',
-                'User-Agent' => 'Nightwatch-GitHub-App',
+                'User-Agent' => 'Guardian-GitHub-App',
             ]);
     }
 }
