@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class HubIssue extends Model
 {
@@ -75,5 +77,15 @@ class HubIssue extends Model
     public function originalIssue(): BelongsTo
     {
         return $this->belongsTo(HubIssue::class, 'original_issue_id');
+    }
+
+    public function aiFixAttempts(): MorphMany
+    {
+        return $this->morphMany(AiFixAttempt::class, 'task');
+    }
+
+    public function latestAiFixAttempt(): MorphOne
+    {
+        return $this->morphOne(AiFixAttempt::class, 'task')->latestOfMany();
     }
 }

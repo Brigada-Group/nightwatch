@@ -2,7 +2,12 @@ import { Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { TaskCard } from './TaskCard';
-import { TASK_STATUS_LABELS, type DeveloperTask, type TaskStatus } from '../types';
+import {
+    TASK_STATUS_LABELS,
+    type DeveloperTask,
+    type ProjectAiConfigMap,
+    type TaskStatus,
+} from '../types';
 
 type Props = {
     status: TaskStatus;
@@ -10,6 +15,7 @@ type Props = {
     accentClass: string;
     draggingId: number | null;
     cleared: boolean;
+    projectAiConfigs: ProjectAiConfigMap;
     onCardDragStart: (task: DeveloperTask) => void;
     onCardDragEnd: () => void;
     onDrop: (status: TaskStatus) => void;
@@ -22,6 +28,7 @@ export function TaskColumn({
     accentClass,
     draggingId,
     cleared,
+    projectAiConfigs,
     onCardDragStart,
     onCardDragEnd,
     onDrop,
@@ -109,6 +116,11 @@ export function TaskColumn({
                             key={task.id}
                             task={task}
                             isDragging={draggingId === task.id}
+                            aiEnabled={
+                                task.project !== null &&
+                                projectAiConfigs[task.project.id]?.use_ai ===
+                                    true
+                            }
                             onDragStart={onCardDragStart}
                             onDragEnd={onCardDragEnd}
                         />

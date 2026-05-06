@@ -33,6 +33,7 @@ class ExceptionTaskService
             ->with([
                 'project:id,name',
                 'assignedBy:id,name,email',
+                'latestAiFixAttempt',
             ])
             ->whereIn('project_id', $teamProjectIds)
             ->where('assigned_to', $user->id)
@@ -170,6 +171,20 @@ class ExceptionTaskService
             'is_recurrence' => (bool) $exception->is_recurrence,
             'project' => $exception->project
                 ? ['id' => $exception->project->id, 'name' => $exception->project->name]
+                : null,
+            'latest_ai_fix_attempt' => $exception->latestAiFixAttempt
+                ? [
+                    'id' => $exception->latestAiFixAttempt->id,
+                    'status' => $exception->latestAiFixAttempt->status,
+                    'created_at' => $exception->latestAiFixAttempt->created_at?->toIso8601String(),
+                    'error' => $exception->latestAiFixAttempt->error,
+                    'result' => $exception->latestAiFixAttempt->result,
+                    'applied_at' => $exception->latestAiFixAttempt->applied_at?->toIso8601String(),
+                    'apply_pr_url' => $exception->latestAiFixAttempt->apply_pr_url,
+                    'apply_pr_number' => $exception->latestAiFixAttempt->apply_pr_number,
+                    'apply_branch_name' => $exception->latestAiFixAttempt->apply_branch_name,
+                    'apply_error' => $exception->latestAiFixAttempt->apply_error,
+                ]
                 : null,
         ];
 

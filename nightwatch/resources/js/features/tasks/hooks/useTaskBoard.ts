@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react';
 import type { AxiosError } from 'axios';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { updateTaskStatus } from '../api/tasksService';
 import type { DeveloperTask, KanbanColumns, TaskStatus } from '../types';
@@ -47,9 +47,20 @@ function moveCard(
  * the visible UI snappy while the server response settles, and re-fetches the
  * canonical board via Inertia partial reload afterwards so other props stay
  * in sync.
+ *
+ * Sync rule: whenever the parent passes a fresh `initial` (which Inertia does
+ * after every partial reload — drag confirmations, real-time events, fallback
+ * polls), we replace local state with it. The optimistic move from `moveTask`
+ * still wins until the await completes, because the reload that produces the
+ * new `initial` only fires *after* the server confirms the move; by the time
+ * this effect runs, the server-side payload already reflects it.
  */
 export function useTaskBoard(initial: KanbanColumns) {
     const [columns, setColumns] = useState<KanbanColumns>(initial);
+
+    useEffect(() => {
+        setColumns(initial);
+    }, [initial]);
 
     const moveTask = useCallback(
         async (task: DeveloperTask, toStatus: TaskStatus) => {

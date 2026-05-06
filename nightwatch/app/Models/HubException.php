@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class HubException extends Model
 {
@@ -72,8 +74,18 @@ class HubException extends Model
         return $this->belongsTo(User::class, 'assigned_by');
     }
 
-    public function originalException(): BelongsTo 
+    public function originalException(): BelongsTo
     {
         return $this->belongsTo(HubException::class,'original_exception_id');
+    }
+
+    public function aiFixAttempts(): MorphMany
+    {
+        return $this->morphMany(AiFixAttempt::class, 'task');
+    }
+
+    public function latestAiFixAttempt(): MorphOne
+    {
+        return $this->morphOne(AiFixAttempt::class, 'task')->latestOfMany();
     }
 }

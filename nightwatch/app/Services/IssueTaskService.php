@@ -33,6 +33,7 @@ class IssueTaskService
             ->with([
                 'project:id,name',
                 'assignedBy:id,name,email',
+                'latestAiFixAttempt',
             ])
             ->whereIn('project_id', $teamProjectIds)
             ->where('assigned_to', $user->id)
@@ -162,6 +163,20 @@ class IssueTaskService
             'is_recurrence' => (bool) $issue->is_recurrence,
             'project' => $issue->project
                 ? ['id' => $issue->project->id, 'name' => $issue->project->name]
+                : null,
+            'latest_ai_fix_attempt' => $issue->latestAiFixAttempt
+                ? [
+                    'id' => $issue->latestAiFixAttempt->id,
+                    'status' => $issue->latestAiFixAttempt->status,
+                    'created_at' => $issue->latestAiFixAttempt->created_at?->toIso8601String(),
+                    'error' => $issue->latestAiFixAttempt->error,
+                    'result' => $issue->latestAiFixAttempt->result,
+                    'applied_at' => $issue->latestAiFixAttempt->applied_at?->toIso8601String(),
+                    'apply_pr_url' => $issue->latestAiFixAttempt->apply_pr_url,
+                    'apply_pr_number' => $issue->latestAiFixAttempt->apply_pr_number,
+                    'apply_branch_name' => $issue->latestAiFixAttempt->apply_branch_name,
+                    'apply_error' => $issue->latestAiFixAttempt->apply_error,
+                ]
                 : null,
         ];
 

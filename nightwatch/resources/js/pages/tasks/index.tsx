@@ -7,6 +7,7 @@ import type {
     KanbanColumns,
     ManagerStats,
     ManagerTask,
+    ProjectAiConfigMap,
 } from '@/features/tasks/types';
 
 type PageProps = {
@@ -15,11 +16,15 @@ type PageProps = {
     kanban: KanbanColumns | null;
     assigned: ManagerTask[] | null;
     stats: ManagerStats | null;
+    project_ai_configs: ProjectAiConfigMap | null;
+    auth?: { user?: { id?: number } | null } | null;
 };
 
 export default function TasksIndex() {
-    const { view, kanban, assigned, stats } = usePage<PageProps>().props;
+    const { view, kanban, assigned, stats, project_ai_configs, auth } =
+        usePage<PageProps>().props;
     const isManager = view === 'manager';
+    const currentUserId = auth?.user?.id ?? null;
 
     return (
         <>
@@ -49,6 +54,8 @@ export default function TasksIndex() {
                                 finished: [],
                             }
                         }
+                        projectAiConfigs={project_ai_configs ?? {}}
+                        currentUserId={currentUserId}
                     />
                 )}
             </div>
