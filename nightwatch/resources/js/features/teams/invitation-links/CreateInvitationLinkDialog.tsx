@@ -119,7 +119,7 @@ export function CreateInvitationLinkDialog(props: Props) {
             };
         });
 
-        form.post('/team/invitation-links', {
+        form.post(window.location.pathname, {
             preserveScroll: true,
             onSuccess: () => {
                 setOpen(false);
