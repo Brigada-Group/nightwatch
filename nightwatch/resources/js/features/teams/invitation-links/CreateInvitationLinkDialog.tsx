@@ -74,7 +74,7 @@ export function CreateInvitationLinkDialog(props: Props) {
 
     const form = useForm<CreateInvitationLinkFormFields>({
         role_slug: 'developer',
-        expires_in_days: 7,
+        expires_in_days: '7',
         max_uses: '',
         notify_emails: [],
     });
@@ -95,11 +95,15 @@ export function CreateInvitationLinkDialog(props: Props) {
         emailTagsRef.current?.flushPendingInput();
 
         form.transform((data) => {
+            const rawExpires = data.expires_in_days.trim();
             const rawUses = data.max_uses.trim();
 
             return {
                 role_slug: data.role_slug,
-                expires_in_days: data.expires_in_days,
+                expires_in_days:
+                    rawExpires === ''
+                        ? null
+                        : Number.parseInt(rawExpires, 10),
                 max_uses:
                     rawUses === ''
                         ? null
@@ -193,11 +197,11 @@ export function CreateInvitationLinkDialog(props: Props) {
                                 min={1}
                                 max={30}
                                 value={form.data.expires_in_days}
+                                onFocus={(event) => event.currentTarget.select()}
                                 onChange={(event) =>
                                     form.setData(
                                         'expires_in_days',
-                                        Number.parseInt(event.target.value, 10) ||
-                                            1,
+                                        event.target.value,
                                     )
                                 }
                             />
@@ -221,6 +225,7 @@ export function CreateInvitationLinkDialog(props: Props) {
                                 max={10000}
                                 placeholder="Unlimited"
                                 value={form.data.max_uses}
+                                onFocus={(event) => event.currentTarget.select()}
                                 onChange={(event) =>
                                     form.setData('max_uses', event.target.value)
                                 }

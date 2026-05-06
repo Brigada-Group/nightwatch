@@ -20,7 +20,7 @@ export type TeamInvitationLinksPageProps = {
 
 export type CreateInvitationLinkFormFields = {
     role_slug: string;
-    expires_in_days: number;
+    expires_in_days: string;
     max_uses: string;
     notify_emails: string[];
 };
