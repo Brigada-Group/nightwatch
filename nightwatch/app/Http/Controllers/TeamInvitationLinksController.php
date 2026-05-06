@@ -7,12 +7,15 @@ use App\Mail\TeamInvitationJoinLinkMail;
 use App\Models\TeamInvitationLink;
 use App\Services\CurrentTeam;
 use App\Services\TeamInvitationLinkService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class TeamInvitationLinksController extends Controller
 {
@@ -49,24 +52,32 @@ class TeamInvitationLinksController extends Controller
 
         $data = $request->validated();
 
-        $result = $this->invitationLinks->createForTeam(
-            $team,
-            $data['role_slug'],
-            (int) $data['expires_in_days'],
-            isset($data['max_uses']) ? (int) $data['max_uses'] : null,
-            $data['project_ids'] ?? null,
-            $user,
-        );
+        try {
+            $result = $this->invitationLinks->createForTeam(
+                $team,
+                $data['role_slug'],
+                (int) $data['expires_in_days'],
+                isset($data['max_uses']) ? (int) $data['max_uses'] : null,
+                $data['project_ids'] ?? null,
+                $user,
+            );
 
-        $result['link']->load('role:id,slug,name');
+            $result['link']->load('role:id,slug,name');
 
-        $projectNames = [];
-        if (is_array($result['link']->project_ids) && $result['link']->project_ids !== []) {
-            $projectNames = $team->projects()
-                ->whereIn('id', $result['link']->project_ids)
-                ->orderBy('name')
-                ->pluck('name')
-                ->all();
+            $projectNames = [];
+            if (is_array($result['link']->project_ids) && $result['link']->project_ids !== []) {
+                $projectNames = $team->projects()
+                    ->whereIn('id', $result['link']->project_ids)
+                    ->orderBy('name')
+                    ->pluck('name')
+                    ->all();
+            }
+        } catch (ModelNotFoundException|NotFoundHttpException $exception) {
+            report($exception);
+
+            throw ValidationException::withMessages([
+                'role_slug' => __('Could not create invitation link because related team data is missing. Please refresh and try again.'),
+            ]);
         }
 
         $emailSent = false;

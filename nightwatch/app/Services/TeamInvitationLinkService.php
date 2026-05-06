@@ -9,6 +9,7 @@ use App\Models\TeamMember;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class TeamInvitationLinkService
 {
@@ -35,7 +36,13 @@ class TeamInvitationLinkService
         ?User $createdBy = null,
     ): array {
         $expiresInDays = max(1, min($expiresInDays, self::MAX_EXPIRES_DAYS));
-        $role = Role::query()->where('slug', $roleSlug)->firstOrFail();
+        $role = Role::query()->where('slug', $roleSlug)->first();
+
+        if ($role === null) {
+            throw ValidationException::withMessages([
+                'role_slug' => __('The selected role is invalid.'),
+            ]);
+        }
 
         $normalizedProjectIds = $this->normalizeInvitationProjectIds($team, $projectIds);
 
