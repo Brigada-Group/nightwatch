@@ -129,7 +129,7 @@ function downloadCredentialsJson(
         issued_at: new Date().toISOString(),
     };
 
-    const fileName = `nightwatch-guardian-${credentials.project_uuid}.json`;
+    const fileName = `guardian-guardian-${credentials.project_uuid}.json`;
     const blob = new Blob([JSON.stringify(payload, null, 2)], {
         type: 'application/json',
     });

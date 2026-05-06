@@ -130,16 +130,16 @@ class WebhookDispatcherService
     ): array {
         $headers = [
             'Content-Type' => 'application/json',
-            'User-Agent' => 'Nightwatch-Webhooks/1.0',
-            'X-Nightwatch-Event' => $eventType,
-            'X-Nightwatch-Event-Id' => $eventId,
-            'X-Nightwatch-Timestamp' => (string) Carbon::now()->timestamp,
+            'User-Agent' => 'Guardian-Webhooks/1.0',
+            'X-Guardian-Event' => $eventType,
+            'X-Guardian-Event-Id' => $eventId,
+            'X-Guardian-Timestamp' => (string) Carbon::now()->timestamp,
         ];
 
         if ($destination->secret) {
             $json = (string) json_encode($payload, JSON_UNESCAPED_SLASHES);
             $signature = hash_hmac('sha256', $json, $destination->secret);
-            $headers['X-Nightwatch-Signature'] = 'sha256='.$signature;
+            $headers['X-Guardian-Signature'] = 'sha256='.$signature;
         }
 
         return $headers;

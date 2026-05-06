@@ -25,7 +25,7 @@ class TeamInvitationJoinLinkMail extends Mailable
 
     public function envelope(): Envelope
     {
-        $appName = (string) config('app.name', 'Nightwatch');
+        $appName = (string) config('app.name', 'Guardian');
 
         return new Envelope(
             subject: "{$appName} — {$this->inviter->name} is inviting you to join {$this->team->name}",
@@ -42,7 +42,7 @@ class TeamInvitationJoinLinkMail extends Mailable
                 'roleName' => $this->roleName,
                 'joinUrl' => $this->joinUrl,
                 'projectNames' => $this->projectNames,
-                'appName' => (string) config('app.name', 'Nightwatch'),
+                'appName' => (string) config('app.name', 'Guardian'),
             ],
         );
     }

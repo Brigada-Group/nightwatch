@@ -25,7 +25,7 @@ class EmailReportMail extends Mailable
     public function envelope(): Envelope
     {
         $label = ucfirst($this->config->frequency);
-        $appName = (string) config('app.name', 'Nightwatch');
+        $appName = (string) config('app.name', 'Guardian');
 
         return new Envelope(
             subject: "{$appName} · {$label} monitoring report",
@@ -39,7 +39,7 @@ class EmailReportMail extends Mailable
             with: [
                 'config' => $this->config,
                 'report' => $this->report,
-                'appName' => (string) config('app.name', 'Nightwatch'),
+                'appName' => (string) config('app.name', 'Guardian'),
                 'dashboardUrl' => rtrim((string) config('app.url', ''), '/').'/dashboard',
             ],
         );

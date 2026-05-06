@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 
 class DispatchDueEmailReports extends Command
 {
-    protected $signature = 'nightwatch:email-reports:dispatch';
+    protected $signature = 'guardian:email-reports:dispatch';
 
     protected $description = 'Dispatches queued email reports whose next_run_at is due';
 

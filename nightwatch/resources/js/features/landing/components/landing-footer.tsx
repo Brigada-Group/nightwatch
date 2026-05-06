@@ -66,7 +66,7 @@ export function LandingFooter() {
                     <div>
                         <div className="flex items-center gap-2">
                             <span className="h-2.5 w-2.5 rounded-full bg-violet-400 shadow-[0_0_20px_rgba(167,139,250,0.7)]" />
-                            <span className="text-sm font-semibold tracking-wide text-zinc-100">NIGHTWATCH</span>
+                            <span className="text-sm font-semibold tracking-wide text-zinc-100">GUARDIAN</span>
                         </div>
 
                         <div className="mt-4 flex flex-wrap items-center gap-2 text-zinc-500">
@@ -98,7 +98,7 @@ export function LandingFooter() {
                 </div>
 
                 <div className="mt-8 border-t border-zinc-900 pt-4 text-center text-[10px] text-zinc-600">
-                    © 2026 NIGHTWATCH. All rights reserved.
+                    © 2026 GUARDIAN. All rights reserved.
                 </div>
             </div>
         </footer>

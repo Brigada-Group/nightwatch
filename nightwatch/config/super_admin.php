@@ -5,7 +5,7 @@
  */
 return [
     /** Used to locate the existing super-admin row before renaming (typically the old default). */
-    'match_email' => env('SUPER_ADMIN_MATCH_EMAIL', 'superadmin@nightwatch.test'),
+    'match_email' => env('SUPER_ADMIN_MATCH_EMAIL', 'superadmin@guardian.test'),
     /** New login email after SuperAdminUserSeeder runs. */
     'email' => env('SUPER_ADMIN_EMAIL', 'superadmin@gmail.com'),
     'name' => env('SUPER_ADMIN_NAME', 'Super Admin'),

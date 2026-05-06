@@ -66,7 +66,7 @@ export default function GithubIntegrationPage({
                             </h1>
                             <p className="text-muted-foreground mt-1 text-sm">
                                 Connect a GitHub organization or account so
-                                Nightwatch can read your repositories and (in
+                                Guardian can read your repositories and (in
                                 a later step) propose AI-driven commits and
                                 pull requests scoped to a project.
                             </p>
@@ -127,7 +127,7 @@ function DisconnectButton() {
             onClick={() => {
                 if (
                     !window.confirm(
-                        'Disconnect GitHub from Nightwatch? You will also need to uninstall the App from GitHub to fully revoke access.',
+                        'Disconnect GitHub from Guardian? You will also need to uninstall the App from GitHub to fully revoke access.',
                     )
                 ) {
                     return;
@@ -189,7 +189,7 @@ function EmptyState({ installUrl }: { installUrl: string | null }) {
                 No GitHub installation yet
             </p>
             <p className="text-muted-foreground mx-auto mt-1 max-w-md text-xs">
-                Install the Nightwatch GitHub App on your organization or
+                Install the Guardian GitHub App on your organization or
                 personal account. After authorizing, GitHub will redirect
                 you back here and your repositories will appear below.
             </p>

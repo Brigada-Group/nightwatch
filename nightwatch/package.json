@@ -1,5 +1,6 @@
 {
     "$schema": "https://www.schemastore.org/package.json",
+    "name": "guardian",
     "private": true,
     "type": "module",
     "packageManager": "npm@11.8.0",

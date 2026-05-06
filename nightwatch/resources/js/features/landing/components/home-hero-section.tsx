@@ -43,7 +43,7 @@ export function HomeHeroSection({ authenticated, canRegister }: HomeHeroSectionP
                         </span>
                     </h1>
                     <p className="mx-auto mt-5 max-w-2xl text-sm leading-6 text-zinc-400 sm:text-base">
-                        Nightwatch tracks failed requests, queue retries, exceptions, and service health in one
+                        Guardian tracks failed requests, queue retries, exceptions, and service health in one
                         collaborative control center so your team reacts faster.
                     </p>
 

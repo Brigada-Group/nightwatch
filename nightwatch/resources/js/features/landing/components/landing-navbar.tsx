@@ -12,7 +12,7 @@ export function LandingNavbar({ authenticated, canRegister }: LandingNavbarProps
         <header className="mx-auto flex w-full max-w-5xl items-center justify-between rounded-full border border-violet-300/20 bg-black/65 px-6 py-3 backdrop-blur-xl">
             <div className="flex items-center gap-2">
                 <span className="h-2.5 w-2.5 rounded-full bg-violet-400 shadow-[0_0_24px_2px_rgba(167,139,250,0.75)]" />
-                <span className="text-sm font-semibold tracking-wide text-white">NIGHTWATCH</span>
+                <span className="text-sm font-semibold tracking-wide text-white">GUARDIAN</span>
             </div>
 
             <nav className="hidden items-center gap-6 md:flex">

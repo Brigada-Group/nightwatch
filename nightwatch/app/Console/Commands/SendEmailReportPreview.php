@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Mail;
 
 class SendEmailReportPreview extends Command
 {
-    protected $signature = 'nightwatch:email-reports:send
+    protected $signature = 'guardian:email-reports:send
                             {--email= : Destination email (ignored when --id is used)}
                             {--id= : Send an existing EmailReport by id}
                             {--frequency=daily : daily|weekly|monthly window of data to include}
@@ -20,7 +20,7 @@ class SendEmailReportPreview extends Command
                             {--projects=* : Project ids to include when --scope=selected}
                             {--preview : Write the rendered HTML to storage/app/email-report-preview.html and skip sending}';
 
-    protected $description = 'Send (or preview) a single Nightwatch email report using current monitoring data';
+    protected $description = 'Send (or preview) a single Guardian email report using current monitoring data';
 
     public function handle(EmailReportDataCollector $collector): int
     {

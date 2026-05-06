@@ -88,7 +88,7 @@ class ClientErrorIngestService
                     'user_payload' => $event->user_payload,
                     'occurred_at' => optional($event->occurred_at)?->toIso8601String(),
                 ],
-                'nightwatch_url' => config('app.url'),
+                'guardian_url' => config('app.url'),
             ]
         );
 

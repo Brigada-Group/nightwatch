@@ -3,4 +3,4 @@
  * (from `config('app.name')`) so the shell matches `.env` without a Vite rebuild.
  */
 export const appDisplayName: string =
-    (import.meta.env.VITE_APP_NAME as string | undefined) || 'Nightwatch';
+    (import.meta.env.VITE_APP_NAME as string | undefined) || 'Guardian';

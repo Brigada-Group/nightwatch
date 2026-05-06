@@ -162,7 +162,7 @@ class GithubController extends Controller
 
         Inertia::flash('toast', [
             'type' => 'success',
-            'message' => __('GitHub disconnected from Nightwatch. Uninstall the App on GitHub to revoke its access there.'),
+            'message' => __('GitHub disconnected from Guardian. Uninstall the App on GitHub to revoke its access there.'),
         ]);
 
         return to_route('integrations.github.show');

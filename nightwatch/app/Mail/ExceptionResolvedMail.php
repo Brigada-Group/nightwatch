@@ -27,7 +27,7 @@ class ExceptionResolvedMail extends Mailable
 
     public function envelope(): Envelope
     {
-        $appName = (string) config('app.name', 'Nightwatch');
+        $appName = (string) config('app.name', 'Guardian');
 
         return new Envelope(
             subject: "{$appName} — {$this->resolver->name} resolved an exception in {$this->team->name}",
@@ -39,7 +39,7 @@ class ExceptionResolvedMail extends Mailable
         return new Content(
             markdown: 'mail.exception-resolved',
             with: [
-                'appName' => (string) config('app.name', 'Nightwatch'),
+                'appName' => (string) config('app.name', 'Guardian'),
                 'recipientName' => $this->recipient->name,
                 'resolverName' => $this->resolver->name,
                 'teamName' => $this->team->name,

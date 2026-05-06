@@ -7,7 +7,7 @@ use Illuminate\Console\Command;
 
 class RecordPlatformMetrics extends Command
 {
-    protected $signature = 'nightwatch:platform:record-metrics';
+    protected $signature = 'guardian:platform:record-metrics';
 
     protected $description = 'Record daily platform metric snapshots (for super-admin growth charts)';
 

@@ -88,7 +88,7 @@ export function FreeTrialTrapSection() {
                         Trap Is Real.
                     </h2>
                     <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-zinc-400">
-                        Teams sign up for tools fast and forget renewals even faster. Nightwatch makes hidden risk
+                        Teams sign up for tools fast and forget renewals even faster. Guardian makes hidden risk
                         visible before it starts draining your budget.
                     </p>
                 </div>
